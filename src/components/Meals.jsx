@@ -1,29 +1,89 @@
-import React, { useState } from 'react';
-import '../styles/RecipeExplorer.css';
+import React, { useEffect, useState } from 'react';
+import '../styles/Meals.css';
 
-export default function RecipeExplorer({ recipes }) {
+const COUNTRIES = ['All', 'India', 'Italy', 'Mexico', 'Japan', 'Thailand', 'Mediterranean', 'USA', 'China'];
+const MEAL_ORDER = ['breakfast', 'lunch', 'dinner', 'snack'];
+const MEAL_ICONS = { breakfast: '🍳', lunch: '🥗', dinner: '🍽️', snack: '🍡' };
+
+export default function Meals({ recipes, userId }) {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
-  const [filter, setFilter] = useState('All');
+  const [categoryFilter, setCategoryFilter] = useState('All');
+  const [countryFilter, setCountryFilter] = useState('All');
+  const [dailyPlan, setDailyPlan] = useState(null);
 
   const categories = ['All', 'High Protein', 'Vegetarian', 'Quick Breakfast', 'Low Calorie'];
 
-  const filteredRecipes = filter === 'All'
-    ? recipes
-    : recipes.filter(r => r.cuisine_type === filter);
+  useEffect(() => {
+    fetchDailyPlan();
+  }, [countryFilter]);
+
+  const fetchDailyPlan = async () => {
+    try {
+      const response = await fetch(`/api/daily-plan/${userId}?country=${countryFilter}`);
+      const data = await response.json();
+      setDailyPlan(data.plan);
+    } catch (error) {
+      console.error('Failed to fetch daily plan:', error);
+    }
+  };
+
+  const filteredRecipes = recipes.filter(r => {
+    const matchesCategory = categoryFilter === 'All' || r.cuisine_type === categoryFilter;
+    const matchesCountry = countryFilter === 'All' || r.country === countryFilter;
+    return matchesCategory && matchesCountry;
+  });
 
   return (
-    <div className="recipe-explorer">
+    <div className="meals-page">
       <div className="explorer-header">
-        <h1>Indian Healthy Recipes</h1>
-        <p className="explorer-subtitle">Discover nutritious traditional and fusion recipes</p>
+        <h1>Universal Meal Plans</h1>
+        <p className="explorer-subtitle">Healthy recipes from India and around the world</p>
+      </div>
+
+      <section className="daily-plan-section">
+        <h2>Today's Plan</h2>
+        <div className="daily-plan-grid">
+          {MEAL_ORDER.map(meal => {
+            const recipe = dailyPlan?.[meal];
+            return (
+              <div
+                key={meal}
+                className={`daily-plan-card ${recipe ? 'clickable' : ''}`}
+                onClick={() => recipe && setSelectedRecipe(recipe)}
+              >
+                <div className="daily-plan-meal">{MEAL_ICONS[meal]} {meal[0].toUpperCase() + meal.slice(1)}</div>
+                {recipe ? (
+                  <>
+                    <h3>{recipe.name}</h3>
+                    <p className="daily-plan-meta">{recipe.country} &middot; {recipe.calories} cal</p>
+                  </>
+                ) : (
+                  <p className="daily-plan-empty">No recipe available for this filter</p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
+
+      <div className="filter-bar country-bar">
+        {COUNTRIES.map(country => (
+          <button
+            key={country}
+            className={`filter-btn ${countryFilter === country ? 'active' : ''}`}
+            onClick={() => setCountryFilter(country)}
+          >
+            {country}
+          </button>
+        ))}
       </div>
 
       <div className="filter-bar">
         {categories.map(cat => (
           <button
             key={cat}
-            className={`filter-btn ${filter === cat ? 'active' : ''}`}
-            onClick={() => setFilter(cat)}
+            className={`filter-btn secondary ${categoryFilter === cat ? 'active' : ''}`}
+            onClick={() => setCategoryFilter(cat)}
           >
             {cat}
           </button>
@@ -42,7 +102,10 @@ export default function RecipeExplorer({ recipes }) {
                 🍛
               </div>
               <div className="recipe-info">
-                <h3>{recipe.name}</h3>
+                <div className="recipe-info-header">
+                  <h3>{recipe.name}</h3>
+                  <span className="country-tag">{recipe.country}</span>
+                </div>
                 <p className="recipe-cuisine">{recipe.cuisine}</p>
 
                 <div className="recipe-stats">
@@ -66,6 +129,14 @@ export default function RecipeExplorer({ recipes }) {
           ))}
         </div>
 
+        {filteredRecipes.length === 0 && (
+          <div className="empty-state">
+            <div className="empty-icon">🍽️</div>
+            <h3>No recipes match these filters</h3>
+            <p>Try a different country or category.</p>
+          </div>
+        )}
+
         {selectedRecipe && (
           <div className="recipe-modal-overlay" onClick={() => setSelectedRecipe(null)}>
             <div className="recipe-modal" onClick={(e) => e.stopPropagation()}>
@@ -73,7 +144,7 @@ export default function RecipeExplorer({ recipes }) {
 
               <div className="modal-content">
                 <h2>{selectedRecipe.name}</h2>
-                <p className="modal-cuisine">{selectedRecipe.cuisine}</p>
+                <p className="modal-cuisine">{selectedRecipe.cuisine} &middot; {selectedRecipe.country}</p>
 
                 <div className="modal-stats-grid">
                   <div className="modal-stat">
@@ -122,11 +193,6 @@ export default function RecipeExplorer({ recipes }) {
                       <li key={i}>{instr}</li>
                     ))}
                   </ol>
-                </div>
-
-                <div className="modal-actions">
-                  <button className="btn btn-primary">Add to Meal Plan</button>
-                  <button className="btn btn-secondary">Save Recipe</button>
                 </div>
               </div>
             </div>

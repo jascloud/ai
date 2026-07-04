@@ -1,7 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/Dashboard.css';
 
-export default function Dashboard({ recipes, workouts }) {
+const PLAN_LABELS = { free: 'Free', basic: 'Basic', pro: 'Pro', premium: 'Premium' };
+
+export default function Dashboard({ recipes, workouts, user, onNavigate }) {
   const [todayStats, setTodayStats] = useState({
     caloriesBurned: 0,
     workoutCount: 0,
@@ -29,6 +31,14 @@ export default function Dashboard({ recipes, workouts }) {
       <section className="welcome-section">
         <h1>Welcome to FitCook India</h1>
         <p className="subtitle">Your personalized fitness and nutrition guide</p>
+        <div className="plan-status">
+          <span className="plan-badge">{PLAN_LABELS[user?.plan || 'free']} Plan</span>
+          {(!user?.plan || user.plan === 'free') && (
+            <button className="btn btn-secondary plan-cta" onClick={() => onNavigate?.('plans')}>
+              Upgrade from ₹99/month
+            </button>
+          )}
+        </div>
       </section>
 
       <section className="stats-grid">

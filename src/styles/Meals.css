@@ -1,4 +1,4 @@
-.recipe-explorer {
+.meals-page {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2xl);
@@ -23,6 +23,63 @@
   opacity: 0.95;
 }
 
+.daily-plan-section {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.daily-plan-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.daily-plan-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.daily-plan-card.clickable {
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.daily-plan-card.clickable:hover {
+  border-color: var(--color-saffron);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 140, 66, 0.15);
+}
+
+.daily-plan-meal {
+  font-size: 0.8rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--color-saffron);
+}
+
+.daily-plan-card h3 {
+  margin: 0;
+}
+
+.daily-plan-meta {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.daily-plan-empty {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
 .filter-bar {
   display: flex;
   gap: var(--spacing-md);
@@ -41,6 +98,11 @@
   font-size: 0.95rem;
   cursor: pointer;
   transition: all 0.2s ease;
+}
+
+.filter-btn.secondary {
+  padding: var(--spacing-xs) var(--spacing-md);
+  font-size: 0.85rem;
 }
 
 .filter-btn:hover {
@@ -95,9 +157,30 @@
   flex: 1;
 }
 
-.recipe-info h3 {
+.recipe-info-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--spacing-sm);
+}
+
+.recipe-info-header h3 {
   margin: 0;
   color: var(--color-text);
+}
+
+.country-tag {
+  display: inline-block;
+  background-color: var(--color-bg);
+  border: 1px solid var(--color-border);
+  color: var(--color-muted);
+  padding: 2px var(--spacing-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  white-space: nowrap;
 }
 
 .recipe-cuisine {
@@ -125,6 +208,29 @@
 
 .btn-full {
   width: 100%;
+}
+
+.empty-state {
+  text-align: center;
+  padding: var(--spacing-2xl) var(--spacing-xl);
+  background-color: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: var(--radius-lg);
+  color: var(--color-muted);
+}
+
+.empty-icon {
+  font-size: 3rem;
+  margin-bottom: var(--spacing-md);
+}
+
+.empty-state h3 {
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+}
+
+.empty-state p {
+  margin: 0;
 }
 
 /* Modal */
@@ -245,16 +351,6 @@
   color: var(--color-muted);
 }
 
-.modal-actions {
-  display: flex;
-  gap: var(--spacing-md);
-  margin-top: var(--spacing-xl);
-}
-
-.modal-actions .btn {
-  flex: 1;
-}
-
 @media (max-width: 768px) {
   .explorer-header h1 {
     font-size: 1.75rem;
@@ -270,9 +366,5 @@
 
   .modal-stats-grid {
     grid-template-columns: repeat(2, 1fr);
-  }
-
-  .modal-actions {
-    flex-direction: column;
   }
 }

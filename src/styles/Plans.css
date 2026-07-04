@@ -1,0 +1,221 @@
+.plans-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-xl);
+}
+
+.plans-header {
+  text-align: center;
+}
+
+.plans-subtitle {
+  color: var(--color-muted);
+  font-size: 1.1rem;
+  margin-top: var(--spacing-sm);
+}
+
+.billing-toggle {
+  display: inline-flex;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xs);
+  gap: var(--spacing-xs);
+}
+
+.toggle-btn {
+  background: none;
+  border: none;
+  padding: var(--spacing-sm) var(--spacing-lg);
+  border-radius: var(--radius-md);
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.95rem;
+  color: var(--color-muted);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-sm);
+}
+
+.toggle-btn.active {
+  background-color: var(--color-saffron);
+  color: white;
+}
+
+.save-badge {
+  background-color: var(--color-sage);
+  color: white;
+  font-size: 0.7rem;
+  padding: 2px 8px;
+  border-radius: var(--radius-sm);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.coupon-bar {
+  display: flex;
+  gap: var(--spacing-sm);
+  width: 100%;
+  max-width: 420px;
+}
+
+.coupon-bar input {
+  flex: 1;
+}
+
+.coupon-message {
+  font-size: 0.9rem;
+  margin-top: calc(-1 * var(--spacing-sm));
+}
+
+.coupon-message.success {
+  color: var(--color-sage);
+}
+
+.coupon-message.error {
+  color: #D64545;
+}
+
+.plans-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: var(--spacing-lg);
+  width: 100%;
+}
+
+.plan-card {
+  position: relative;
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  transition: all 0.3s ease;
+}
+
+.plan-card.featured {
+  border-color: var(--color-saffron);
+  box-shadow: 0 8px 32px rgba(255, 140, 66, 0.18);
+  transform: scale(1.02);
+}
+
+.featured-badge {
+  position: absolute;
+  top: -12px;
+  left: 50%;
+  transform: translateX(-50%);
+  background-color: var(--color-saffron);
+  color: white;
+  font-size: 0.75rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: var(--spacing-xs) var(--spacing-md);
+  border-radius: var(--radius-md);
+  white-space: nowrap;
+}
+
+.plan-tagline {
+  color: var(--color-muted);
+  font-size: 0.9rem;
+  margin: 0;
+}
+
+.plan-price {
+  display: flex;
+  align-items: baseline;
+  gap: 2px;
+  margin: var(--spacing-sm) 0;
+}
+
+.currency {
+  font-family: var(--font-mono);
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--color-saffron);
+}
+
+.amount {
+  font-family: var(--font-mono);
+  font-size: 2.5rem;
+  font-weight: 700;
+  color: var(--color-saffron);
+  line-height: 1;
+}
+
+.period {
+  color: var(--color-muted);
+  font-size: 0.95rem;
+  margin-left: var(--spacing-xs);
+}
+
+.price-note {
+  font-size: 0.8rem;
+  color: var(--color-muted);
+  margin: calc(-1 * var(--spacing-sm)) 0 0;
+}
+
+.plan-features {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+  flex: 1;
+}
+
+.plan-features li {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--spacing-sm);
+  color: var(--color-text);
+  font-size: 0.95rem;
+}
+
+.check {
+  color: var(--color-sage);
+  font-weight: 700;
+}
+
+.btn-full {
+  width: 100%;
+}
+
+.btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none !important;
+}
+
+.current-plan-banner {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-sage);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md) var(--spacing-lg);
+  color: var(--color-text);
+  text-align: center;
+}
+
+.current-plan-banner strong {
+  color: var(--color-sage);
+  text-transform: capitalize;
+}
+
+@media (max-width: 768px) {
+  .plans-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .plan-card.featured {
+    transform: none;
+  }
+
+  .coupon-bar {
+    flex-direction: column;
+    max-width: 100%;
+  }
+}
