@@ -79,6 +79,20 @@ html, body {
 
 .logo-icon {
   font-size: 1.5rem;
+  display: inline-block;
+  animation: flame-pulse 2.4s ease-in-out infinite;
+  transform-origin: center bottom;
+}
+
+@keyframes flame-pulse {
+  0%, 100% { transform: scale(1); }
+  50% { transform: scale(1.12); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-icon {
+    animation: none;
+  }
 }
 
 .logo-text {

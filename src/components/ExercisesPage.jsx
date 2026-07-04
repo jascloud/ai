@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import '../styles/Exercises.css';
 
 const CATEGORIES = ['All', 'Strength', 'Cardio', 'Yoga', 'Core', 'Flexibility', 'HIIT'];
@@ -10,20 +10,30 @@ const CATEGORY_ICONS = {
   Flexibility: '🤸',
   HIIT: '⚡'
 };
+const PAGE_SIZE = 24;
 
 export default function ExercisesPage({ exercises, onLogExercise }) {
   const [selectedExercise, setSelectedExercise] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [difficultyFilter, setDifficultyFilter] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
   const [loggedId, setLoggedId] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
   const difficulties = ['All', 'Beginner', 'Intermediate', 'Advanced'];
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [categoryFilter, difficultyFilter, searchTerm]);
 
   const filteredExercises = exercises.filter(ex => {
     const matchesCategory = categoryFilter === 'All' || ex.category === categoryFilter;
     const matchesDifficulty = difficultyFilter === 'All' || ex.difficulty === difficultyFilter;
-    return matchesCategory && matchesDifficulty;
+    const matchesSearch = !searchTerm || ex.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCategory && matchesDifficulty && matchesSearch;
   });
+
+  const visibleExercises = filteredExercises.slice(0, visibleCount);
 
   const handleLog = async (exercise) => {
     await onLogExercise(exercise);
@@ -36,6 +46,15 @@ export default function ExercisesPage({ exercises, onLogExercise }) {
       <div className="exercises-header">
         <h1>Exercise Library</h1>
         <p className="exercises-subtitle">Strength, cardio, yoga and more — build your own routine</p>
+      </div>
+
+      <div className="exercises-search">
+        <input
+          type="search"
+          placeholder={`Search ${exercises.length.toLocaleString()} exercises by name...`}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
       </div>
 
       <div className="filter-bar">
@@ -62,8 +81,10 @@ export default function ExercisesPage({ exercises, onLogExercise }) {
         ))}
       </div>
 
+      <p className="results-count">{filteredExercises.length.toLocaleString()} exercises match your filters</p>
+
       <div className="exercise-grid">
-        {filteredExercises.map(exercise => (
+        {visibleExercises.map(exercise => (
           <div key={exercise.id} className="exercise-card">
             <div className="exercise-card-header">
               <span className="exercise-icon">{CATEGORY_ICONS[exercise.category]}</span>
@@ -100,8 +121,14 @@ export default function ExercisesPage({ exercises, onLogExercise }) {
         <div className="empty-state">
           <div className="empty-icon">🏋️</div>
           <h3>No exercises match these filters</h3>
-          <p>Try a different category or difficulty.</p>
+          <p>Try a different category, difficulty, or search term.</p>
         </div>
+      )}
+
+      {visibleCount < filteredExercises.length && (
+        <button className="btn btn-secondary load-more" onClick={() => setVisibleCount(v => v + PAGE_SIZE)}>
+          Load More Exercises ({filteredExercises.length - visibleCount} more)
+        </button>
       )}
 
       {selectedExercise && (

@@ -12,7 +12,9 @@ const STATS = [
 const SOCIAL_LINKS = [
   { name: 'Instagram', icon: '📷', handle: '@ojas.fit' },
   { name: 'TikTok', icon: '🎵', handle: '@ojas.fit' },
-  { name: 'YouTube', icon: '▶️', handle: 'OJAS Fit' }
+  { name: 'YouTube', icon: '▶️', handle: 'OJAS Fit' },
+  { name: 'Telegram', icon: '✈️', handle: 'Daily Tips Channel' },
+  { name: 'WhatsApp', icon: '💬', handle: 'Motivation Group' }
 ];
 
 export default function Footer() {
@@ -39,6 +41,7 @@ export default function Footer() {
         </div>
 
         <div className="footer-bottom">
+          <p className="footer-social-label">Follow &amp; stay in the loop</p>
           <div className="footer-social">
             {SOCIAL_LINKS.map((social, i) => (
               <span key={i} className="social-pill" title={`${social.name}: ${social.handle}`}>

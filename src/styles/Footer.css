@@ -66,6 +66,14 @@
   gap: var(--spacing-md);
 }
 
+.footer-social-label {
+  color: var(--color-muted);
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0;
+}
+
 .footer-social {
   display: flex;
   gap: var(--spacing-md);

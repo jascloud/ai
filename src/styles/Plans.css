@@ -104,6 +104,11 @@
   transform: scale(1.02);
 }
 
+.plan-card.elite {
+  border-color: var(--color-gold);
+  box-shadow: 0 8px 32px rgba(245, 184, 65, 0.16);
+}
+
 .featured-badge {
   position: absolute;
   top: -12px;
@@ -118,6 +123,11 @@
   padding: var(--spacing-xs) var(--spacing-md);
   border-radius: var(--radius-md);
   white-space: nowrap;
+}
+
+.elite-badge {
+  background-color: var(--color-gold);
+  color: var(--color-bg);
 }
 
 .plan-tagline {
@@ -205,6 +215,79 @@
   text-transform: capitalize;
 }
 
+.coaches-preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  width: 100%;
+  margin-top: var(--spacing-lg);
+}
+
+.coaches-header {
+  text-align: center;
+}
+
+.coaches-subtitle {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  margin-top: var(--spacing-xs);
+}
+
+.coaches-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.coach-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  text-align: center;
+  transition: all 0.3s ease;
+}
+
+.coach-card:hover {
+  border-color: var(--color-gold);
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(245, 184, 65, 0.15);
+}
+
+.coach-avatar {
+  font-size: 2.5rem;
+  background-color: var(--color-surface-alt);
+  border-radius: 50%;
+  width: 72px;
+  height: 72px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto var(--spacing-md);
+}
+
+.coach-name {
+  font-weight: 700;
+  color: var(--color-text);
+  font-size: 1rem;
+}
+
+.coach-specialty {
+  color: var(--color-gold);
+  font-size: 0.78rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  margin: var(--spacing-xs) 0 var(--spacing-sm);
+}
+
+.coach-bio {
+  color: var(--color-muted);
+  font-size: 0.88rem;
+  line-height: 1.5;
+  margin: 0;
+}
+
 @media (max-width: 768px) {
   .plans-grid {
     grid-template-columns: 1fr;
@@ -217,5 +300,9 @@
   .coupon-bar {
     flex-direction: column;
     max-width: 100%;
+  }
+
+  .coaches-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import '../styles/Plans.css';
+import CoachesPreview from './CoachesPreview';
 
 const PLANS = [
   {
@@ -9,9 +10,10 @@ const PLANS = [
     tagline: 'Get moving',
     features: [
       'Daily meal suggestions',
-      'Full exercise library access',
+      'Full exercise library access (1,000+ exercises)',
       'Unlimited workout logging',
-      'Indian recipe collection'
+      '1,000+ recipe collection',
+      'Community Telegram tips channel'
     ]
   },
   {
@@ -24,7 +26,8 @@ const PLANS = [
       'Everything in Basic',
       'Personalized daily meal plans',
       'All international cuisines unlocked',
-      'Progress tracking & analytics'
+      'Progress tracking & analytics',
+      'WhatsApp motivation group access'
     ]
   },
   {
@@ -36,7 +39,22 @@ const PLANS = [
       'Everything in Pro',
       'Custom workout routines',
       'Downloadable meal plans',
-      'Early access to new recipes'
+      'Early access to new recipes',
+      'Priority WhatsApp support'
+    ]
+  },
+  {
+    id: 'elite',
+    name: 'Elite',
+    price: 999,
+    tagline: '1:1 coaching',
+    elite: true,
+    features: [
+      'Everything in Premium',
+      'Matched with a certified personal coach',
+      'Weekly video check-ins',
+      'Custom weekly plan revisions',
+      'Direct WhatsApp line to your coach'
     ]
   }
 ];
@@ -126,8 +144,9 @@ export default function PlansPage({ user, onSubscribe }) {
           const period = billingCycle === 'annual' ? '/year' : '/month';
 
           return (
-            <div key={plan.id} className={`plan-card ${plan.featured ? 'featured' : ''}`}>
+            <div key={plan.id} className={`plan-card ${plan.featured ? 'featured' : ''} ${plan.elite ? 'elite' : ''}`}>
               {plan.featured && <div className="featured-badge">Most Popular</div>}
+              {plan.elite && <div className="featured-badge elite-badge">1:1 Coaching</div>}
               <h3>{plan.name}</h3>
               <p className="plan-tagline">{plan.tagline}</p>
 
@@ -165,6 +184,8 @@ export default function PlansPage({ user, onSubscribe }) {
           You're on the <strong>{user.plan}</strong> plan ({user.billing_cycle}), renews {user.plan_expiry}.
         </div>
       )}
+
+      <CoachesPreview />
     </div>
   );
 }

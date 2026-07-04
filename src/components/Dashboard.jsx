@@ -2,7 +2,7 @@ import React, { useEffect, useState } from 'react';
 import '../styles/Dashboard.css';
 import FeaturedVoices from './FeaturedVoices';
 
-const PLAN_LABELS = { free: 'Free', basic: 'Basic', pro: 'Pro', premium: 'Premium' };
+const PLAN_LABELS = { free: 'Free', basic: 'Basic', pro: 'Pro', premium: 'Premium', elite: 'Elite' };
 
 export default function Dashboard({ recipes, workouts, user, onNavigate }) {
   const [todayStats, setTodayStats] = useState({

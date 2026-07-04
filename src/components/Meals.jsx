@@ -5,17 +5,25 @@ const COUNTRIES = ['All', 'India', 'Italy', 'Mexico', 'Japan', 'Thailand', 'Medi
 const MEAL_ORDER = ['breakfast', 'lunch', 'dinner', 'snack'];
 const MEAL_ICONS = { breakfast: '🍳', lunch: '🥗', dinner: '🍽️', snack: '🍡' };
 
+const PAGE_SIZE = 24;
+
 export default function Meals({ recipes, userId }) {
   const [selectedRecipe, setSelectedRecipe] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState('All');
   const [countryFilter, setCountryFilter] = useState('All');
+  const [searchTerm, setSearchTerm] = useState('');
   const [dailyPlan, setDailyPlan] = useState(null);
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
 
-  const categories = ['All', 'High Protein', 'Vegetarian', 'Quick Breakfast', 'Low Calorie'];
+  const categories = ['All', 'High Protein', 'Vegetarian', 'Quick Breakfast', 'Low Calorie', 'Balanced'];
 
   useEffect(() => {
     fetchDailyPlan();
   }, [countryFilter]);
+
+  useEffect(() => {
+    setVisibleCount(PAGE_SIZE);
+  }, [categoryFilter, countryFilter, searchTerm]);
 
   const fetchDailyPlan = async () => {
     try {
@@ -30,8 +38,11 @@ export default function Meals({ recipes, userId }) {
   const filteredRecipes = recipes.filter(r => {
     const matchesCategory = categoryFilter === 'All' || r.cuisine_type === categoryFilter;
     const matchesCountry = countryFilter === 'All' || r.country === countryFilter;
-    return matchesCategory && matchesCountry;
+    const matchesSearch = !searchTerm || r.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return matchesCategory && matchesCountry && matchesSearch;
   });
+
+  const visibleRecipes = filteredRecipes.slice(0, visibleCount);
 
   return (
     <div className="meals-page">
@@ -66,6 +77,15 @@ export default function Meals({ recipes, userId }) {
         </div>
       </section>
 
+      <div className="meals-search">
+        <input
+          type="search"
+          placeholder={`Search ${recipes.length.toLocaleString()} recipes by name...`}
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
       <div className="filter-bar country-bar">
         {COUNTRIES.map(country => (
           <button
@@ -90,9 +110,11 @@ export default function Meals({ recipes, userId }) {
         ))}
       </div>
 
+      <p className="results-count">{filteredRecipes.length.toLocaleString()} recipes match your filters</p>
+
       <div className="explorer-content">
         <div className="recipe-grid">
-          {filteredRecipes.map(recipe => (
+          {visibleRecipes.map(recipe => (
             <div
               key={recipe.id}
               className="recipe-card"
@@ -133,8 +155,14 @@ export default function Meals({ recipes, userId }) {
           <div className="empty-state">
             <div className="empty-icon">🍽️</div>
             <h3>No recipes match these filters</h3>
-            <p>Try a different country or category.</p>
+            <p>Try a different country, category, or search term.</p>
           </div>
+        )}
+
+        {visibleCount < filteredRecipes.length && (
+          <button className="btn btn-secondary load-more" onClick={() => setVisibleCount(v => v + PAGE_SIZE)}>
+            Load More Recipes ({filteredRecipes.length - visibleCount} more)
+          </button>
         )}
 
         {selectedRecipe && (

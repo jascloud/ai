@@ -23,6 +23,31 @@
   opacity: 0.95;
 }
 
+.exercises-search {
+  display: flex;
+  justify-content: center;
+}
+
+.exercises-search input {
+  width: 100%;
+  max-width: 480px;
+  text-align: center;
+}
+
+.results-count {
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  margin: calc(-1 * var(--spacing-sm)) 0 0;
+}
+
+.load-more {
+  display: block;
+  margin: 0 auto;
+  padding-left: var(--spacing-2xl);
+  padding-right: var(--spacing-2xl);
+}
+
 .filter-bar {
   display: flex;
   gap: var(--spacing-md);

@@ -1,24 +1,27 @@
 # OJAS — Train. Nourish. Rise.
 
-A global, dark-themed fitness and nutrition platform: personalized subscription plans, a daily meal plan drawing from cuisines across the world, a guided exercise library, workout tracking, and hundreds of member reviews.
+A global, dark-themed fitness and nutrition platform: personalized subscription plans (including 1:1 coaching), a daily meal plan drawing from 1,000 recipes across the world, a 1,000-exercise library, workout tracking, and 1,000 member reviews.
 
 > **Note:** OJAS is a demo/portfolio brand built for this project. The founding story, member counts, and testimonial personas in the app are fictional flavor text, not real company history or endorsements.
 
 ## Features
 
 ### 💳 Subscription Plans
-- Basic (₹99), Pro (₹199), and Premium (₹299) monthly tiers
+- Basic (₹99), Pro (₹199), Premium (₹299), and Elite (₹999, 1:1 coach matching) monthly tiers
 - Monthly/annual billing toggle with a 20% annual discount
 - Discount code support (`FIT10`, `WELCOME20`)
+- Community Telegram/WhatsApp channel access baked into plan features (see Footer for placeholder handles)
+- "Meet Your Coaches" preview section with fictional coach personas (illustrated avatars, not real photos)
 
 ### 🌍 Universal Meals
-- 33 recipes across 8 countries: India, Italy, Mexico, Japan, Thailand, Mediterranean, USA, China
+- 1,000 recipes across 8 countries: India, Italy, Mexico, Japan, Thailand, Mediterranean, USA, China (33 hand-written signature dishes + procedurally generated variations)
 - Auto-generated daily breakfast/lunch/dinner/snack plan, filterable by country
-- Category filters (High Protein, Vegetarian, Quick Breakfast, Low Calorie)
+- Search + category filters (High Protein, Vegetarian, Quick Breakfast, Low Calorie, Balanced), with load-more pagination
 
 ### 🏋️ Exercise Library
-- 24 exercises across Strength, Cardio, Yoga, Core, Flexibility, and HIIT
+- 1,000 exercises across Strength, Cardio, Yoga, Core, Flexibility, and HIIT (24 hand-written signature exercises + procedurally generated variations)
 - Instructions, difficulty, equipment, and coaching tips for each
+- Search + filters with load-more pagination
 - "Log It" sends the exercise straight into the workout tracker
 
 ### 📈 Workout Tracker
@@ -26,7 +29,7 @@ A global, dark-themed fitness and nutrition platform: personalized subscription 
 - History grouped by day
 
 ### ⭐ Reviews
-- ~260 generated member reviews with a rating distribution and star filters
+- 1,000 generated member reviews with a rating distribution and star filters
 - Paginated, load-more browsing
 
 ### 📊 Dashboard

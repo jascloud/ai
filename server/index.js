@@ -123,16 +123,17 @@ db.serialize(() => {
     [DEMO_USER_ID, 'Demo User', 'demo@ojas.fit', 'free']
   );
 
-  seedRecipes();
-  seedExercises();
-  seedReviews();
+  // Chained so each seed's transaction fully completes before the next begins
+  // (they share one connection, so overlapping BEGIN/COMMIT would conflict).
+  seedRecipes(() => seedExercises(() => seedReviews()));
 });
 
 // ---------------------------------------------------------------------------
 // Seed data
 // ---------------------------------------------------------------------------
 
-function seedRecipes() {
+function seedRecipes(done) {
+  done = done || (() => {});
   const recipes = [
     // India
     { id: 'india-breakfast-masala-oats', name: 'Masala Oats', category: 'Breakfast', cuisine: 'Indian Fusion', country: 'India', prep_time: 5, cook_time: 5, servings: 1, calories: 180, cuisine_type: 'Quick Breakfast',
@@ -250,18 +251,90 @@ function seedRecipes() {
       instructions: ['Mash edamame with ginger and sesame oil', 'Fill and fold the wrappers', 'Steam for 10 minutes'] }
   ];
 
+  const allRecipes = recipes.concat(generateBulkRecipes(1000 - recipes.length));
+
   db.get('SELECT COUNT(*) AS count FROM recipes', (err, row) => {
-    if (err || (row && row.count > 0)) return;
-    recipes.forEach(recipe => {
+    if (err || (row && row.count > 0)) return done();
+    db.run('BEGIN TRANSACTION');
+    allRecipes.forEach(recipe => {
       db.run(
         'INSERT OR IGNORE INTO recipes (id, name, category, cuisine, country, prep_time, cook_time, servings, calories, ingredients, instructions, cuisine_type) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [recipe.id, recipe.name, recipe.category, recipe.cuisine, recipe.country, recipe.prep_time, recipe.cook_time, recipe.servings, recipe.calories, JSON.stringify(recipe.ingredients), JSON.stringify(recipe.instructions), recipe.cuisine_type]
       );
     });
+    db.run('COMMIT', done);
   });
 }
 
-function seedExercises() {
+function capitalize(s) {
+  return s.charAt(0).toUpperCase() + s.slice(1);
+}
+
+// Procedurally generate additional recipes to reach catalog scale, on top of the
+// hand-written signature dishes above. Combinatorial templates, not hand-authored.
+function generateBulkRecipes(count) {
+  const countryMeta = {
+    India: { cuisine: 'Indian', flavors: ['turmeric', 'cumin', 'garam masala', 'coriander'] },
+    Italy: { cuisine: 'Italian', flavors: ['basil', 'oregano', 'parmesan', 'garlic'] },
+    Mexico: { cuisine: 'Mexican', flavors: ['lime', 'cilantro', 'chili', 'cumin'] },
+    Japan: { cuisine: 'Japanese', flavors: ['soy sauce', 'miso', 'sesame', 'ginger'] },
+    Thailand: { cuisine: 'Thai', flavors: ['lemongrass', 'chili', 'fish sauce', 'basil'] },
+    Mediterranean: { cuisine: 'Greek', flavors: ['olive oil', 'oregano', 'feta', 'lemon'] },
+    USA: { cuisine: 'American', flavors: ['smoked paprika', 'black pepper', 'maple', 'rosemary'] },
+    China: { cuisine: 'Chinese', flavors: ['ginger', 'scallion', 'soy sauce', 'five spice'] }
+  };
+  const countries = Object.keys(countryMeta);
+  const categories = ['Breakfast', 'Lunch', 'Dinner', 'Snack'];
+  const proteins = ['chicken', 'paneer', 'tofu', 'salmon', 'lentils', 'eggs', 'shrimp', 'turkey', 'chickpeas', 'mushroom', 'black beans', 'cottage cheese'];
+  const methods = ['Grilled', 'Roasted', 'Steamed', 'Stir-Fried', 'Baked', 'Sauteed', 'Slow-Cooked', 'Pan-Seared', 'Poached', 'Charred'];
+  const sides = ['brown rice', 'quinoa', 'whole wheat roti', 'rice noodles', 'couscous', 'sweet potato mash', 'buckwheat', 'barley', 'cauliflower rice', 'soba noodles'];
+  const dietTags = ['High Protein', 'Vegetarian', 'Quick Breakfast', 'Low Calorie', 'Balanced'];
+  const calorieBase = { Breakfast: 260, Lunch: 380, Dinner: 430, Snack: 150 };
+
+  const rng = makeRng(2024);
+  const recipes = [];
+
+  for (let i = 0; i < count; i++) {
+    const country = pick(rng, countries);
+    const meta = countryMeta[country];
+    const category = pick(rng, categories);
+    const protein = pick(rng, proteins);
+    const method = pick(rng, methods);
+    const side = pick(rng, sides);
+    const flavor1 = pick(rng, meta.flavors);
+    const flavor2 = pick(rng, meta.flavors);
+    const dietTag = pick(rng, dietTags);
+
+    const calories = Math.round(calorieBase[category] + (rng() - 0.5) * 120);
+    const prepTime = 5 + Math.floor(rng() * 15);
+    const cookTime = 10 + Math.floor(rng() * 25);
+    const servings = 1 + Math.floor(rng() * 4);
+
+    recipes.push({
+      id: `gen-recipe-${i}`,
+      name: `${method} ${capitalize(protein)} with ${capitalize(side)}`,
+      category,
+      cuisine: meta.cuisine,
+      country,
+      prep_time: prepTime,
+      cook_time: cookTime,
+      servings,
+      calories,
+      cuisine_type: dietTag,
+      ingredients: [capitalize(protein), capitalize(side), capitalize(flavor1), capitalize(flavor2), 'Salt to taste'],
+      instructions: [
+        `Prepare the ${side}`,
+        `${method} the ${protein} with ${flavor1} and ${flavor2}`,
+        'Combine and serve warm'
+      ]
+    });
+  }
+
+  return recipes;
+}
+
+function seedExercises(done) {
+  done = done || (() => {});
   const exercises = [
     // Strength
     { id: 'ex-pushups', name: 'Push-ups', category: 'Strength', muscle_group: 'Chest, Triceps, Shoulders', difficulty: 'Beginner', equipment: 'None', duration_min: 10, calories_per_min: 8,
@@ -324,15 +397,78 @@ function seedExercises() {
       instructions: ['Stand facing a sturdy box', 'Swing arms and jump onto the box, landing softly', 'Step back down and reset', 'Repeat for 5 sets of 8'], tips: 'Choose a box height you can land on safely with soft knees.' }
   ];
 
+  const allExercises = exercises.concat(generateBulkExercises(1000 - exercises.length));
+
   db.get('SELECT COUNT(*) AS count FROM exercises', (err, row) => {
-    if (err || (row && row.count > 0)) return;
-    exercises.forEach(ex => {
+    if (err || (row && row.count > 0)) return done();
+    db.run('BEGIN TRANSACTION');
+    allExercises.forEach(ex => {
       db.run(
         'INSERT OR IGNORE INTO exercises (id, name, category, muscle_group, difficulty, equipment, duration_min, calories_per_min, instructions, tips) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [ex.id, ex.name, ex.category, ex.muscle_group, ex.difficulty, ex.equipment, ex.duration_min, ex.calories_per_min, JSON.stringify(ex.instructions), ex.tips]
       );
     });
+    db.run('COMMIT', done);
   });
+}
+
+// Procedurally generate additional exercises to reach library scale, on top of the
+// hand-written signature exercises above. Combinatorial templates, not hand-authored.
+function generateBulkExercises(count) {
+  const categoryMeta = {
+    Strength: { muscleGroups: ['Chest', 'Back', 'Legs', 'Shoulders', 'Arms', 'Glutes'], equipment: ['Dumbbells', 'Barbell', 'Resistance Band', 'Kettlebell', 'Bodyweight'], baseCal: 8 },
+    Cardio: { muscleGroups: ['Full Body', 'Legs', 'Cardiovascular'], equipment: ['None', 'Jump Rope', 'Treadmill', 'Bike'], baseCal: 11 },
+    Yoga: { muscleGroups: ['Full Body', 'Hips', 'Shoulders', 'Spine'], equipment: ['Mat', 'Block', 'Strap'], baseCal: 4 },
+    Core: { muscleGroups: ['Abs', 'Obliques', 'Lower Back'], equipment: ['None', 'Mat', 'Stability Ball'], baseCal: 7 },
+    Flexibility: { muscleGroups: ['Hamstrings', 'Hips', 'Shoulders', 'Full Body'], equipment: ['Mat', 'Strap', 'None'], baseCal: 3 },
+    HIIT: { muscleGroups: ['Full Body', 'Legs', 'Core'], equipment: ['None', 'Kettlebell', 'Box or Step', 'Dumbbells'], baseCal: 13 }
+  };
+  const categories = Object.keys(categoryMeta);
+  const baseMovements = {
+    Strength: ['Press', 'Row', 'Squat', 'Lunge', 'Curl', 'Raise', 'Pull-Up', 'Dip', 'Deadlift', 'Press-Up'],
+    Cardio: ['Sprint', 'Jog', 'Jump', 'Climb', 'Cycle', 'Shuffle', 'Skip', 'Step-Up'],
+    Yoga: ['Flow', 'Salutation', 'Pose Sequence', 'Balance Pose', 'Twist', 'Backbend'],
+    Core: ['Crunch', 'Plank', 'Twist', 'Raise', 'Hold', 'Rollout'],
+    Flexibility: ['Stretch', 'Mobility Drill', 'Release', 'Opener'],
+    HIIT: ['Circuit', 'Tabata', 'Burpee Set', 'Sprint Interval', 'Complex']
+  };
+  const variations = ['Incline', 'Decline', 'Single-Leg', 'Banded', 'Tempo', 'Pulse', 'Weighted', 'Bodyweight', 'Explosive', 'Isometric'];
+  const difficulties = ['Beginner', 'Intermediate', 'Advanced'];
+
+  const rng = makeRng(7331);
+  const exercises = [];
+
+  for (let i = 0; i < count; i++) {
+    const category = pick(rng, categories);
+    const meta = categoryMeta[category];
+    const movement = pick(rng, baseMovements[category]);
+    const variation = pick(rng, variations);
+    const muscleGroup = pick(rng, meta.muscleGroups);
+    const equipment = pick(rng, meta.equipment);
+    const difficulty = pick(rng, difficulties);
+
+    const duration = 8 + Math.floor(rng() * 15);
+    const caloriesPerMin = Math.max(2, Math.round(meta.baseCal + (rng() - 0.5) * 4));
+
+    exercises.push({
+      id: `gen-exercise-${i}`,
+      name: `${variation} ${movement}`,
+      category,
+      muscle_group: muscleGroup,
+      difficulty,
+      equipment,
+      duration_min: duration,
+      calories_per_min: caloriesPerMin,
+      instructions: [
+        `Set up for a ${variation.toLowerCase()} ${movement.toLowerCase()}, using ${equipment === 'None' ? 'just your bodyweight' : equipment.toLowerCase()}`,
+        `Perform the movement with controlled form, focusing on the ${muscleGroup.toLowerCase()}`,
+        `Complete 3-4 sets, resting 30-60 seconds between sets`
+      ],
+      tips: `Keep form strict before adding intensity — the ${variation.toLowerCase()} variation raises difficulty on its own.`
+    });
+  }
+
+  return exercises;
 }
 
 // Deterministic PRNG (mulberry32) so the generated review set is stable across restarts
@@ -350,7 +486,8 @@ function pick(rng, arr) {
   return arr[Math.floor(rng() * arr.length)];
 }
 
-function seedReviews(targetCount = 260) {
+function seedReviews(targetCount = 1000, done) {
+  done = done || (() => {});
   const firstNames = [
     'Priya', 'Rohan', 'Ananya', 'Vikram', 'Sneha', 'Arjun', 'Kavya', 'Aditya', 'Meera', 'Karan',
     'Isha', 'Rahul', 'Divya', 'Nikhil', 'Pooja', 'Sameer', 'Tanvi', 'Aman', 'Riya', 'Yash',
@@ -467,13 +604,15 @@ function seedReviews(targetCount = 260) {
   }
 
   db.get('SELECT COUNT(*) AS count FROM reviews', (err, row) => {
-    if (err || (row && row.count > 0)) return;
+    if (err || (row && row.count > 0)) return done();
+    db.run('BEGIN TRANSACTION');
     reviews.forEach(rev => {
       db.run(
         'INSERT OR IGNORE INTO reviews (id, name, location, rating, title, body, plan, verified, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
         [rev.id, rev.name, rev.location, rev.rating, rev.title, rev.body, rev.plan, rev.verified, rev.created_at]
       );
     });
+    db.run('COMMIT', done);
   });
 }
 
@@ -677,7 +816,8 @@ app.get('/api/users/:id', (req, res) => {
 const PLAN_PRICING = {
   basic: 99,
   pro: 199,
-  premium: 299
+  premium: 299,
+  elite: 999
 };
 
 app.post('/api/subscribe', (req, res) => {
