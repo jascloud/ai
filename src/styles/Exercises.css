@@ -7,7 +7,7 @@
 .exercises-header {
   text-align: center;
   padding: var(--spacing-xl) var(--spacing-lg);
-  background: linear-gradient(135deg, var(--color-primary-dark) 0%, var(--color-saffron) 100%);
+  background: linear-gradient(135deg, var(--color-garnet) 0%, var(--color-primary) 100%);
   border-radius: var(--radius-xl);
   color: white;
 }
@@ -49,13 +49,13 @@
 }
 
 .filter-btn:hover {
-  border-color: var(--color-saffron);
-  color: var(--color-saffron);
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .filter-btn.active {
-  background-color: var(--color-saffron);
-  border-color: var(--color-saffron);
+  background-color: var(--color-primary);
+  border-color: var(--color-primary);
   color: white;
 }
 
@@ -77,9 +77,9 @@
 }
 
 .exercise-card:hover {
-  border-color: var(--color-saffron);
+  border-color: var(--color-primary);
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(255, 140, 66, 0.15);
+  box-shadow: 0 8px 24px rgba(255, 68, 56, 0.15);
 }
 
 .exercise-card-header {
@@ -102,18 +102,18 @@
 }
 
 .difficulty-beginner {
-  background-color: rgba(107, 168, 135, 0.15);
-  color: var(--color-sage);
+  background-color: rgba(61, 220, 132, 0.15);
+  color: var(--color-success);
 }
 
 .difficulty-intermediate {
-  background-color: rgba(212, 165, 116, 0.2);
-  color: var(--color-turmeric);
+  background-color: rgba(245, 184, 65, 0.2);
+  color: var(--color-gold);
 }
 
 .difficulty-advanced {
-  background-color: rgba(255, 140, 66, 0.15);
-  color: var(--color-saffron);
+  background-color: rgba(255, 68, 56, 0.15);
+  color: var(--color-primary);
 }
 
 .exercise-card h3 {
@@ -270,7 +270,7 @@
   font-family: var(--font-mono);
   font-size: 1.5rem;
   font-weight: 700;
-  color: var(--color-saffron);
+  color: var(--color-primary);
 }
 
 .modal-stat-text {
@@ -299,7 +299,7 @@
 
 .tip-box {
   background-color: var(--color-bg);
-  border-left: 3px solid var(--color-saffron);
+  border-left: 3px solid var(--color-primary);
   padding: var(--spacing-md) var(--spacing-lg);
   border-radius: var(--radius-sm);
 }

@@ -1,7 +1,7 @@
 {
-  "name": "fitness-cookbook-india",
-  "version": "1.0.0",
-  "description": "Fitness app with Indian cookbook for health-conscious Indians",
+  "name": "ojas-fit",
+  "version": "2.0.0",
+  "description": "OJAS — a global fitness and nutrition platform: personalized training, meals from every corner of the world, and a guided exercise library",
   "type": "module",
   "main": "server/index.js",
   "scripts": {

@@ -1,0 +1,94 @@
+.featured-voices {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.voices-header {
+  text-align: center;
+}
+
+.voices-subtitle {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  margin-top: var(--spacing-xs);
+}
+
+.voices-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: var(--spacing-lg);
+}
+
+.voice-card {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl) var(--spacing-lg) var(--spacing-lg);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+  position: relative;
+  transition: all 0.3s ease;
+}
+
+.voice-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 24px rgba(255, 68, 56, 0.12);
+}
+
+.voice-quote-mark {
+  position: absolute;
+  top: 0;
+  left: var(--spacing-lg);
+  font-family: Georgia, serif;
+  font-size: 4rem;
+  line-height: 1;
+  color: var(--color-primary);
+  opacity: 0.35;
+}
+
+.voice-card blockquote {
+  margin: 0;
+  color: var(--color-text);
+  font-size: 1rem;
+  line-height: 1.6;
+  font-style: italic;
+}
+
+.voice-card figcaption {
+  display: flex;
+  align-items: center;
+  gap: var(--spacing-md);
+  margin-top: auto;
+}
+
+.voice-avatar {
+  font-size: 1.75rem;
+  background-color: var(--color-surface-alt);
+  border-radius: 50%;
+  width: 44px;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.voice-name {
+  font-weight: 700;
+  color: var(--color-text);
+  font-size: 0.9rem;
+}
+
+.voice-role {
+  color: var(--color-muted);
+  font-size: 0.78rem;
+}
+
+@media (max-width: 768px) {
+  .voices-grid {
+    grid-template-columns: 1fr;
+  }
+}

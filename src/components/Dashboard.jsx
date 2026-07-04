@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import '../styles/Dashboard.css';
+import FeaturedVoices from './FeaturedVoices';
 
 const PLAN_LABELS = { free: 'Free', basic: 'Basic', pro: 'Pro', premium: 'Premium' };
 
@@ -29,8 +30,9 @@ export default function Dashboard({ recipes, workouts, user, onNavigate }) {
   return (
     <div className="dashboard">
       <section className="welcome-section">
-        <h1>Welcome to FitCook India</h1>
-        <p className="subtitle">Your personalized fitness and nutrition guide</p>
+        <p className="eyebrow">Train. Nourish. Rise.</p>
+        <h1>Welcome to OJAS</h1>
+        <p className="subtitle">Your vital energy, trained daily. Personalized fitness and nutrition for every body, everywhere.</p>
         <div className="plan-status">
           <span className="plan-badge">{PLAN_LABELS[user?.plan || 'free']} Plan</span>
           {(!user?.plan || user.plan === 'free') && (
@@ -67,6 +69,8 @@ export default function Dashboard({ recipes, workouts, user, onNavigate }) {
         </div>
       </section>
 
+      <FeaturedVoices />
+
       <section className="featured-section">
         <h2>Featured Healthy Recipes</h2>
         <div className="recipe-preview-grid">
@@ -101,7 +105,7 @@ export default function Dashboard({ recipes, workouts, user, onNavigate }) {
       </section>
 
       <section className="tips-section">
-        <h2>Wellness Tips for Indian Fitness</h2>
+        <h2>Wellness Wisdom</h2>
         <div className="tips-grid">
           <div className="tip-card">
             <div className="tip-icon">🧘</div>

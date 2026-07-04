@@ -5,13 +5,16 @@ import PlansPage from './components/PlansPage';
 import Meals from './components/Meals';
 import ExercisesPage from './components/ExercisesPage';
 import WorkoutTracker from './components/WorkoutTracker';
+import ReviewsPage from './components/ReviewsPage';
+import Footer from './components/Footer';
 
 const NAV_ITEMS = [
   { id: 'dashboard', label: 'Dashboard' },
   { id: 'plans', label: 'Plans' },
   { id: 'meals', label: 'Meals' },
   { id: 'exercises', label: 'Exercises' },
-  { id: 'workouts', label: 'Workouts' }
+  { id: 'workouts', label: 'Workouts' },
+  { id: 'reviews', label: 'Reviews' }
 ];
 
 export default function App() {
@@ -112,8 +115,9 @@ export default function App() {
       <header className="app-header">
         <div className="header-content">
           <div className="logo">
-            <span className="logo-icon">💪</span>
-            <span className="logo-text">FitCook India</span>
+            <span className="logo-icon">🔥</span>
+            <span className="logo-text">OJAS</span>
+            <span className="logo-tagline">Train. Nourish. Rise.</span>
           </div>
           <nav className="nav-tabs">
             {NAV_ITEMS.map(item => (
@@ -137,7 +141,10 @@ export default function App() {
         {activeTab === 'meals' && <Meals recipes={recipes} userId={userId} />}
         {activeTab === 'exercises' && <ExercisesPage exercises={exercises} onLogExercise={handleLogExercise} />}
         {activeTab === 'workouts' && <WorkoutTracker workouts={workouts} onAddWorkout={handleAddWorkout} />}
+        {activeTab === 'reviews' && <ReviewsPage />}
       </main>
+
+      <Footer />
     </div>
   );
 }

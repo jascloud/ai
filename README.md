@@ -1,35 +1,43 @@
-# FitCook India - Fitness App & Healthy Recipes
+# OJAS — Train. Nourish. Rise.
 
-A modern, India-focused fitness and recipe application combining personalized workout tracking with a curated collection of healthy Indian and fusion recipes.
+A global, dark-themed fitness and nutrition platform: personalized subscription plans, a daily meal plan drawing from cuisines across the world, a guided exercise library, workout tracking, and hundreds of member reviews.
+
+> **Note:** OJAS is a demo/portfolio brand built for this project. The founding story, member counts, and testimonial personas in the app are fictional flavor text, not real company history or endorsements.
 
 ## Features
 
-### 🏋️ Fitness Tracking
-- Log workouts with multiple exercise types (Yoga, Running, Cycling, Strength Training, Swimming, Walking, Pilates, Zumba)
-- Automatic calorie calculation based on workout duration
-- Track total calories burned, workouts completed, and time invested
-- View workout history organized by date
+### 💳 Subscription Plans
+- Basic (₹99), Pro (₹199), and Premium (₹299) monthly tiers
+- Monthly/annual billing toggle with a 20% annual discount
+- Discount code support (`FIT10`, `WELCOME20`)
 
-### 🍛 Recipe Explorer
-- Browse curated healthy Indian recipes
-- Filter by category (High Protein, Vegetarian, Quick Breakfast, Low Calorie)
-- Detailed recipe information with ingredients and instructions
-- Calorie tracking and nutrition information
-- Add recipes to meal plans
+### 🌍 Universal Meals
+- 33 recipes across 8 countries: India, Italy, Mexico, Japan, Thailand, Mediterranean, USA, China
+- Auto-generated daily breakfast/lunch/dinner/snack plan, filterable by country
+- Category filters (High Protein, Vegetarian, Quick Breakfast, Low Calorie)
+
+### 🏋️ Exercise Library
+- 24 exercises across Strength, Cardio, Yoga, Core, Flexibility, and HIIT
+- Instructions, difficulty, equipment, and coaching tips for each
+- "Log It" sends the exercise straight into the workout tracker
+
+### 📈 Workout Tracker
+- Log workouts and see totals for calories, sessions, and minutes
+- History grouped by day
+
+### ⭐ Reviews
+- ~260 generated member reviews with a rating distribution and star filters
+- Paginated, load-more browsing
 
 ### 📊 Dashboard
-- Quick statistics on today's activity
-- Featured healthy recipes
-- Wellness tips tailored to Indian fitness culture
-- Personalized greeting and health summary
+- Today's stats, featured recipes, "Voices of OJAS" testimonials, and current plan status
 
 ## Tech Stack
 
 - **Frontend**: React + Vite
-- **Styling**: Modern CSS with CSS custom properties (design tokens)
+- **Styling**: Dark-themed CSS with custom-property design tokens, Bebas Neue display type
 - **Backend**: Express.js
-- **Database**: SQLite
-- **Package Manager**: npm
+- **Database**: SQLite (auto-seeds recipes, exercises, and reviews on first run)
 
 ## Getting Started
 
@@ -39,32 +47,22 @@ A modern, India-focused fitness and recipe application combining personalized wo
 
 ### Installation
 
-1. Clone the repository
 ```bash
 git clone https://github.com/jascloud/ai.git
 cd ai
-```
-
-2. Install dependencies
-```bash
 npm install
-```
-
-3. Seed sample data (optional)
-```bash
-curl -X POST http://localhost:3001/api/seed-recipes
 ```
 
 ### Development
 
-Run both frontend and backend concurrently:
 ```bash
 npm run dev
 ```
 
-The app will be available at:
 - Frontend: http://localhost:3000
 - Backend API: http://localhost:3001
+
+The database seeds itself automatically on first run — no manual setup needed.
 
 ### Production Build
 
@@ -79,17 +77,22 @@ npm start
 ├── src/
 │   ├── components/
 │   │   ├── Dashboard.jsx
-│   │   ├── RecipeExplorer.jsx
-│   │   └── WorkoutTracker.jsx
+│   │   ├── PlansPage.jsx
+│   │   ├── Meals.jsx
+│   │   ├── ExercisesPage.jsx
+│   │   ├── WorkoutTracker.jsx
+│   │   ├── ReviewsPage.jsx
+│   │   ├── FeaturedVoices.jsx
+│   │   └── Footer.jsx
 │   ├── styles/
-│   │   ├── Dashboard.css
-│   │   ├── RecipeExplorer.css
-│   │   └── WorkoutTracker.css
 │   ├── App.jsx
 │   ├── App.css
 │   └── main.jsx
 ├── server/
 │   └── index.js
+├── docs/
+│   ├── marketing-campaigns.md
+│   └── social-media-content-calendar.md
 ├── index.html
 ├── vite.config.js
 ├── package.json
@@ -99,55 +102,50 @@ npm start
 ## Design System
 
 ### Color Palette
-- **Saffron** (#FF8C42) - Primary action, energy
-- **Deep Blue** (#1F3A5F) - Trust, health
-- **Turmeric Gold** (#D4A574) - Secondary accent
-- **Sage Green** (#6BA887) - Growth, wellness
-- **Warm Off-white** (#FBF8F3) / **Deep Charcoal** (#1A1A1A) - Backgrounds
+- **Primary (Crimson)** `#FF4438` — energy, action
+- **Garnet** `#3D0F16` — deep gradient accent
+- **Gold** `#F5B841` — premium secondary accent
+- **Success** `#3DDC84` — positive states
+- **Near-black** `#0B0B0E` / **Surface** `#17171C` — dark ground
 
 ### Typography
-- **Display**: Inter Bold for headings
-- **Body**: Inter Regular for content
-- **Mono**: IBM Plex Mono for data and numbers
+- **Display**: Bebas Neue (uppercase, condensed) for headings
+- **Body**: Inter for content
+- **Mono**: IBM Plex Mono for stats and numbers
 
 ## API Endpoints
 
-### Recipes
-- `GET /api/recipes` - Get all recipes
-- `GET /api/recipes/:id` - Get single recipe
+### Recipes / Meals
+- `GET /api/recipes` — all recipes
+- `GET /api/recipes/:id` — single recipe
+- `GET /api/daily-plan/:userId?country=` — generated daily meal plan
+
+### Exercises
+- `GET /api/exercises` — all exercises
+
+### Reviews
+- `GET /api/reviews?page=&limit=&rating=` — paginated reviews with rating distribution
 
 ### Workouts
-- `GET /api/workouts/:userId` - Get user's workouts
-- `POST /api/workouts` - Add new workout
+- `GET /api/workouts/:userId`
+- `POST /api/workouts`
 
-### Users
-- `GET /api/users/:id` - Get user profile
+### Users / Subscriptions
+- `GET /api/users/:id`
+- `POST /api/subscribe` — `{ userId, planId, billingCycle }`
 
-### Admin
-- `POST /api/seed-recipes` - Seed sample recipes
+## Marketing Collateral
 
-## India Market Features
-
-- Workouts include traditional Indian practices (Yoga)
-- Recipes feature authentic Indian ingredients and fusion options
-- Cultural wellness tips (Ayurvedic eating, yoga benefits)
-- Support for Indian health practices and measurements
-- Warmth and celebration of Indian food culture
+See `docs/marketing-campaigns.md` for campaign concepts and `docs/social-media-content-calendar.md` for ready-to-post Instagram/TikTok content — written for you to use on real accounts you create yourself.
 
 ## Future Enhancements
 
-- User authentication and personalization
-- Integration with Indian payment gateways (Razorpay)
+- Real user authentication
+- Real payment gateway integration
 - AI-powered personalized meal plans
-- Social features and community challenges
-- Mobile app version
-- Integration with wearables and fitness trackers
-- Multi-language support (Hindi, regional languages)
+- Wearables integration
+- Multi-language support
 - Offline mode
-
-## Contributing
-
-Contributions are welcome! Please feel free to submit a Pull Request.
 
 ## License
 

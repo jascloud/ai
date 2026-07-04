@@ -103,14 +103,29 @@ db.serialize(() => {
     )
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS reviews (
+      id TEXT PRIMARY KEY,
+      name TEXT,
+      location TEXT,
+      rating INTEGER,
+      title TEXT,
+      body TEXT,
+      plan TEXT,
+      verified INTEGER,
+      created_at DATE
+    )
+  `);
+
   // Demo user so the app works out of the box
   db.run(
     `INSERT OR IGNORE INTO users (id, name, email, plan) VALUES (?, ?, ?, ?)`,
-    [DEMO_USER_ID, 'Demo User', 'demo@fitcookindia.app', 'free']
+    [DEMO_USER_ID, 'Demo User', 'demo@ojas.fit', 'free']
   );
 
   seedRecipes();
   seedExercises();
+  seedReviews();
 });
 
 // ---------------------------------------------------------------------------
@@ -320,6 +335,148 @@ function seedExercises() {
   });
 }
 
+// Deterministic PRNG (mulberry32) so the generated review set is stable across restarts
+function makeRng(seed) {
+  let a = seed;
+  return function () {
+    a |= 0; a = (a + 0x6D2B79F5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function pick(rng, arr) {
+  return arr[Math.floor(rng() * arr.length)];
+}
+
+function seedReviews(targetCount = 260) {
+  const firstNames = [
+    'Priya', 'Rohan', 'Ananya', 'Vikram', 'Sneha', 'Arjun', 'Kavya', 'Aditya', 'Meera', 'Karan',
+    'Isha', 'Rahul', 'Divya', 'Nikhil', 'Pooja', 'Sameer', 'Tanvi', 'Aman', 'Riya', 'Yash',
+    'Sofia', 'Liam', 'Emma', 'Noah', 'Olivia', 'Mateo', 'Chloe', 'Lucas', 'Amara', 'Hiroshi',
+    'Yuki', 'Wei', 'Ling', 'Carlos', 'Valentina', 'Giulia', 'Marco', 'Fatima', 'Omar', 'Layla',
+    'Ethan', 'Grace', 'Diego', 'Camila', 'Jonas', 'Elena', 'Ravi', 'Anjali', 'Suresh', 'Lakshmi'
+  ];
+  const lastNames = [
+    'Sharma', 'Verma', 'Iyer', 'Nair', 'Gupta', 'Reddy', 'Singh', 'Kapoor', 'Mehta', 'Joshi',
+    'Rao', 'Bose', 'Chatterjee', 'Patel', 'Desai', 'Rossi', 'Romano', 'Silva', 'Garcia', 'Muller',
+    'Tanaka', 'Kim', 'Chen', 'Wang', 'Santos', 'Costa', 'Al-Farsi', 'Novak', 'Dubois', 'Andersson'
+  ];
+  const locations = [
+    'Mumbai, India', 'Bengaluru, India', 'Delhi, India', 'Pune, India', 'Chennai, India',
+    'Hyderabad, India', 'Kolkata, India', 'Jaipur, India', 'Ahmedabad, India', 'Kochi, India',
+    'Milan, Italy', 'Rome, Italy', 'Mexico City, Mexico', 'Guadalajara, Mexico', 'Tokyo, Japan',
+    'Osaka, Japan', 'Bangkok, Thailand', 'Chiang Mai, Thailand', 'Athens, Greece', 'Barcelona, Spain',
+    'New York, USA', 'Los Angeles, USA', 'Austin, USA', 'Shanghai, China', 'Beijing, China',
+    'Toronto, Canada', 'London, UK', 'Dubai, UAE', 'Singapore', 'Sydney, Australia'
+  ];
+  const plans = ['Basic', 'Pro', 'Premium'];
+  const features = [
+    'the daily meal plan', 'the exercise library', 'the workout tracker', 'the international recipes',
+    'the yoga routines', 'the HIIT circuits', 'the calorie tracking', 'the meal variety', 'the subscription value'
+  ];
+  const results = [
+    'dropped 6 kilos', 'finally stuck to a routine', 'built real strength', 'felt more energetic every morning',
+    'stopped getting bored with the same meals', 'hit a new personal best on my run', 'improved my flexibility',
+    'started sleeping better', 'noticed real muscle gain', 'kept up a streak for the first time'
+  ];
+  const timeframes = ['in 6 weeks', 'in two months', 'over the last quarter', 'in just 30 days', 'within a season', 'after three months'];
+
+  const titles5 = [
+    'Exactly what I needed', 'Worth every rupee', 'Best fitness decision this year', 'Finally a plan that sticks',
+    'Genuinely life-changing', 'My trainer friends are jealous', 'Can\'t imagine training without it', 'This app gets it'
+  ];
+  const titles4 = [
+    'Really solid, small nitpicks', 'Great value overall', 'Does what it promises', 'Happy with the results',
+    'Would recommend to a friend', 'Good plan, minor rough edges'
+  ];
+  const titles3 = [
+    'Decent, but room to grow', 'It\'s okay for the price', 'Some parts better than others', 'Mixed feelings'
+  ];
+  const titles2 = ['Not quite there yet', 'Expected a bit more'];
+  const titles1 = ['Did not work for me'];
+
+  function bodyFor(rating, feature, result, timeframe, plan) {
+    if (rating === 5) {
+      return pick(rngBody, [
+        `Switched to the ${plan} plan and ${result} ${timeframe}. ${feature[0].toUpperCase()}${feature.slice(1)} is the reason I actually stayed consistent.`,
+        `I've tried a lot of fitness apps and this is the one that stuck. ${feature[0].toUpperCase()}${feature.slice(1)} kept things interesting, and I ${result} ${timeframe}.`,
+        `Honestly did not expect to enjoy meal planning this much. Between ${feature} and steady logging, I ${result} ${timeframe}.`,
+        `This replaced two separate apps for me. ${feature[0].toUpperCase()}${feature.slice(1)} alone was worth upgrading, and I ${result} ${timeframe}.`
+      ]);
+    }
+    if (rating === 4) {
+      return pick(rngBody, [
+        `${feature[0].toUpperCase()}${feature.slice(1)} is genuinely good and I ${result} ${timeframe}. Wish there were a couple more filter options, but no complaints beyond that.`,
+        `Solid experience overall — I ${result} ${timeframe} using the ${plan} plan. A few screens feel a little busy but nothing that gets in the way.`,
+        `Really happy with ${feature}. Took a couple of weeks to find my rhythm, then I ${result} ${timeframe}.`
+      ]);
+    }
+    if (rating === 3) {
+      return pick(rngBody, [
+        `${feature[0].toUpperCase()}${feature.slice(1)} is fine, though I expected a bit more personalization at the ${plan} tier. Still, I ${result} ${timeframe}.`,
+        `Mixed experience — some weeks the plan clicked, other weeks it felt generic. Did eventually see progress and ${result} ${timeframe}.`
+      ]);
+    }
+    if (rating === 2) {
+      return pick(rngBody, [
+        `${feature[0].toUpperCase()}${feature.slice(1)} needs work — recommendations repeated too often for my taste. Saw only minor change ${timeframe}.`
+      ]);
+    }
+    return pick(rngBody, [
+      `Didn't click for me. ${feature[0].toUpperCase()}${feature.slice(1)} felt generic and I didn't see much change ${timeframe}.`
+    ]);
+  }
+
+  const rng = makeRng(42);
+  const rngBody = makeRng(1337);
+  const reviews = [];
+
+  for (let i = 0; i < targetCount; i++) {
+    const r = rng();
+    let rating;
+    if (r < 0.55) rating = 5;
+    else if (r < 0.85) rating = 4;
+    else if (r < 0.95) rating = 3;
+    else if (r < 0.99) rating = 2;
+    else rating = 1;
+
+    const name = `${pick(rng, firstNames)} ${pick(rng, lastNames)}`;
+    const location = pick(rng, locations);
+    const plan = pick(rng, plans);
+    const feature = pick(rng, features);
+    const result = pick(rng, results);
+    const timeframe = pick(rng, timeframes);
+    const titlePool = { 5: titles5, 4: titles4, 3: titles3, 2: titles2, 1: titles1 }[rating];
+    const title = pick(rng, titlePool);
+    const body = bodyFor(rating, feature, result, timeframe, plan);
+    const verified = rng() < 0.82;
+
+    const daysAgo = Math.floor(rng() * 730);
+    const date = new Date();
+    date.setDate(date.getDate() - daysAgo);
+    const createdAt = date.toISOString().split('T')[0];
+
+    reviews.push({
+      id: `review-${i}`,
+      name, location, rating, title, body, plan,
+      verified: verified ? 1 : 0,
+      created_at: createdAt
+    });
+  }
+
+  db.get('SELECT COUNT(*) AS count FROM reviews', (err, row) => {
+    if (err || (row && row.count > 0)) return;
+    reviews.forEach(rev => {
+      db.run(
+        'INSERT OR IGNORE INTO reviews (id, name, location, rating, title, body, plan, verified, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [rev.id, rev.name, rev.location, rev.rating, rev.title, rev.body, rev.plan, rev.verified, rev.created_at]
+      );
+    });
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Recipes / Meals
 // ---------------------------------------------------------------------------
@@ -418,6 +575,55 @@ app.get('/api/exercises', (req, res) => {
         instructions: JSON.parse(row.instructions)
       })));
     }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Reviews
+// ---------------------------------------------------------------------------
+
+app.get('/api/reviews', (req, res) => {
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 12, 1), 50);
+  const ratingFilter = req.query.rating ? parseInt(req.query.rating, 10) : null;
+  const offset = (page - 1) * limit;
+
+  const whereClause = ratingFilter ? 'WHERE rating = ?' : '';
+  const params = ratingFilter ? [ratingFilter] : [];
+
+  db.get(`SELECT COUNT(*) AS count FROM reviews ${whereClause}`, params, (countErr, countRow) => {
+    if (countErr) return res.status(500).json({ error: countErr.message });
+
+    db.all(
+      `SELECT * FROM reviews ${whereClause} ORDER BY created_at DESC LIMIT ? OFFSET ?`,
+      [...params, limit, offset],
+      (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+
+        db.all('SELECT rating, COUNT(*) AS count FROM reviews GROUP BY rating', (distErr, distRows) => {
+          if (distErr) return res.status(500).json({ error: distErr.message });
+
+          const distribution = { 5: 0, 4: 0, 3: 0, 2: 0, 1: 0 };
+          let total = 0;
+          let sum = 0;
+          distRows.forEach(d => {
+            distribution[d.rating] = d.count;
+            total += d.count;
+            sum += d.rating * d.count;
+          });
+
+          res.json({
+            reviews: rows,
+            page,
+            limit,
+            total: countRow.count,
+            totalAll: total,
+            average: total > 0 ? Math.round((sum / total) * 10) / 10 : 0,
+            distribution
+          });
+        });
+      }
+    );
   });
 });
 

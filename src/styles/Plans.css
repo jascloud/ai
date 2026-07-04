@@ -41,12 +41,12 @@
 }
 
 .toggle-btn.active {
-  background-color: var(--color-saffron);
+  background-color: var(--color-primary);
   color: white;
 }
 
 .save-badge {
-  background-color: var(--color-sage);
+  background-color: var(--color-success);
   color: white;
   font-size: 0.7rem;
   padding: 2px 8px;
@@ -72,7 +72,7 @@
 }
 
 .coupon-message.success {
-  color: var(--color-sage);
+  color: var(--color-success);
 }
 
 .coupon-message.error {
@@ -99,8 +99,8 @@
 }
 
 .plan-card.featured {
-  border-color: var(--color-saffron);
-  box-shadow: 0 8px 32px rgba(255, 140, 66, 0.18);
+  border-color: var(--color-primary);
+  box-shadow: 0 8px 32px rgba(255, 68, 56, 0.18);
   transform: scale(1.02);
 }
 
@@ -109,7 +109,7 @@
   top: -12px;
   left: 50%;
   transform: translateX(-50%);
-  background-color: var(--color-saffron);
+  background-color: var(--color-primary);
   color: white;
   font-size: 0.75rem;
   font-weight: 700;
@@ -137,14 +137,14 @@
   font-family: var(--font-mono);
   font-size: 1.25rem;
   font-weight: 700;
-  color: var(--color-saffron);
+  color: var(--color-primary);
 }
 
 .amount {
   font-family: var(--font-mono);
   font-size: 2.5rem;
   font-weight: 700;
-  color: var(--color-saffron);
+  color: var(--color-primary);
   line-height: 1;
 }
 
@@ -177,7 +177,7 @@
 }
 
 .check {
-  color: var(--color-sage);
+  color: var(--color-success);
   font-weight: 700;
 }
 
@@ -193,7 +193,7 @@
 
 .current-plan-banner {
   background-color: var(--color-surface);
-  border: 1px solid var(--color-sage);
+  border: 1px solid var(--color-success);
   border-radius: var(--radius-md);
   padding: var(--spacing-md) var(--spacing-lg);
   color: var(--color-text);
@@ -201,7 +201,7 @@
 }
 
 .current-plan-banner strong {
-  color: var(--color-sage);
+  color: var(--color-success);
   text-transform: capitalize;
 }
 
