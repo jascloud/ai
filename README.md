@@ -35,6 +35,16 @@ A global, dark-themed fitness and nutrition platform: personalized subscription 
 ### 📊 Dashboard
 - Today's stats, featured recipes, "Voices of OJAS" testimonials, and current plan status
 
+### 🛍️ Shop
+- 10 OJAS-branded merch items (apparel, gear, accessories) with illustrated gradient product cards
+- Mock cart + checkout flow (no real payment gateway wired up)
+
+### 📰 Blog (The OJAS Journal)
+- 8 original articles on training, nutrition, recovery, and lifestyle, filterable by category
+
+### ℹ️ About
+- Expanded founding timeline (1994–2026), mission/values, illustrative leadership profiles, and a "Press" section using invented publication names (not real news coverage)
+
 ## Tech Stack
 
 - **Frontend**: React + Vite
@@ -74,6 +84,8 @@ npm run build
 npm start
 ```
 
+See `docs/deployment.md` for platform-specific deployment notes (env vars, persistent storage, Docker).
+
 ## Project Structure
 
 ```
@@ -81,10 +93,14 @@ npm start
 │   ├── components/
 │   │   ├── Dashboard.jsx
 │   │   ├── PlansPage.jsx
+│   │   ├── CoachesPreview.jsx
 │   │   ├── Meals.jsx
 │   │   ├── ExercisesPage.jsx
 │   │   ├── WorkoutTracker.jsx
+│   │   ├── ShopPage.jsx
+│   │   ├── BlogPage.jsx
 │   │   ├── ReviewsPage.jsx
+│   │   ├── AboutPage.jsx
 │   │   ├── FeaturedVoices.jsx
 │   │   └── Footer.jsx
 │   ├── styles/
@@ -94,6 +110,7 @@ npm start
 ├── server/
 │   └── index.js
 ├── docs/
+│   ├── deployment.md
 │   ├── marketing-campaigns.md
 │   └── social-media-content-calendar.md
 ├── index.html

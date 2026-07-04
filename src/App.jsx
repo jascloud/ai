@@ -6,6 +6,9 @@ import Meals from './components/Meals';
 import ExercisesPage from './components/ExercisesPage';
 import WorkoutTracker from './components/WorkoutTracker';
 import ReviewsPage from './components/ReviewsPage';
+import ShopPage from './components/ShopPage';
+import BlogPage from './components/BlogPage';
+import AboutPage from './components/AboutPage';
 import Footer from './components/Footer';
 
 const NAV_ITEMS = [
@@ -14,7 +17,10 @@ const NAV_ITEMS = [
   { id: 'meals', label: 'Meals' },
   { id: 'exercises', label: 'Exercises' },
   { id: 'workouts', label: 'Workouts' },
-  { id: 'reviews', label: 'Reviews' }
+  { id: 'shop', label: 'Shop' },
+  { id: 'blog', label: 'Blog' },
+  { id: 'reviews', label: 'Reviews' },
+  { id: 'about', label: 'About' }
 ];
 
 export default function App() {
@@ -141,7 +147,10 @@ export default function App() {
         {activeTab === 'meals' && <Meals recipes={recipes} userId={userId} />}
         {activeTab === 'exercises' && <ExercisesPage exercises={exercises} onLogExercise={handleLogExercise} />}
         {activeTab === 'workouts' && <WorkoutTracker workouts={workouts} onAddWorkout={handleAddWorkout} />}
+        {activeTab === 'shop' && <ShopPage />}
+        {activeTab === 'blog' && <BlogPage />}
         {activeTab === 'reviews' && <ReviewsPage />}
+        {activeTab === 'about' && <AboutPage />}
       </main>
 
       <Footer />

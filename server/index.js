@@ -2,20 +2,24 @@ import express from 'express';
 import sqlite3 from 'sqlite3';
 import { fileURLToPath } from 'url';
 import { dirname, join } from 'path';
+import { mkdirSync } from 'fs';
 import { v4 as uuidv4 } from 'uuid';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const app = express();
-const PORT = 3001;
+const PORT = process.env.PORT || 3001;
 
 // Middleware
 app.use(express.json());
 app.use(express.static(join(__dirname, '../dist')));
 
 // Initialize SQLite database
-const db = new sqlite3.Database(join(__dirname, '../data/fitness.db'));
+const dataDir = join(__dirname, '../data');
+mkdirSync(dataDir, { recursive: true });
+const dbPath = process.env.DB_PATH || join(dataDir, 'fitness.db');
+const db = new sqlite3.Database(dbPath);
 
 const DEMO_USER_ID = 'demo-user-1';
 

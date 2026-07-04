@@ -4,6 +4,9 @@
   "description": "OJAS — a global fitness and nutrition platform: personalized training, meals from every corner of the world, and a guided exercise library",
   "type": "module",
   "main": "server/index.js",
+  "engines": {
+    "node": ">=18"
+  },
   "scripts": {
     "dev": "concurrently \"npm run dev:server\" \"npm run dev:client\"",
     "dev:server": "node --watch server/index.js",
