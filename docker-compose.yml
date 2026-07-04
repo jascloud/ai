@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  ojas-app:
+    build: .
+    container_name: ojas-fitness-app
+    ports:
+      - "3001:3001"
+    environment:
+      - NODE_ENV=production
+      - PORT=3001
+      - DB_PATH=/app/data/fitness.db
+    volumes:
+      - ojas-data:/app/data
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "require('http').get('http://localhost:3001/api/exercises', (r) => {if (r.statusCode !== 200) throw new Error(r.statusCode)})"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+volumes:
+  ojas-data:
+    driver: local
