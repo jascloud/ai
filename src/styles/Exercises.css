@@ -104,7 +104,7 @@
 .exercise-card:hover {
   border-color: var(--color-primary);
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(255, 68, 56, 0.15);
+  box-shadow: 0 8px 24px rgba(79, 140, 255, 0.15);
 }
 
 .exercise-card-header {
@@ -132,12 +132,12 @@
 }
 
 .difficulty-intermediate {
-  background-color: rgba(245, 184, 65, 0.2);
+  background-color: rgba(34, 211, 238, 0.2);
   color: var(--color-gold);
 }
 
 .difficulty-advanced {
-  background-color: rgba(255, 68, 56, 0.15);
+  background-color: rgba(79, 140, 255, 0.15);
   color: var(--color-primary);
 }
 

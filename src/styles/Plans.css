@@ -100,13 +100,13 @@
 
 .plan-card.featured {
   border-color: var(--color-primary);
-  box-shadow: 0 8px 32px rgba(255, 68, 56, 0.18);
+  box-shadow: 0 8px 32px rgba(79, 140, 255, 0.18);
   transform: scale(1.02);
 }
 
 .plan-card.elite {
   border-color: var(--color-gold);
-  box-shadow: 0 8px 32px rgba(245, 184, 65, 0.16);
+  box-shadow: 0 8px 32px rgba(34, 211, 238, 0.16);
 }
 
 .featured-badge {
@@ -251,7 +251,7 @@
 .coach-card:hover {
   border-color: var(--color-gold);
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(245, 184, 65, 0.15);
+  box-shadow: 0 8px 24px rgba(34, 211, 238, 0.15);
 }
 
 .coach-avatar {

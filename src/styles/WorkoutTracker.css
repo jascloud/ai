@@ -118,7 +118,7 @@
 .workout-option input:checked + .workout-option-content {
   border-color: var(--color-primary);
   background-color: var(--color-bg);
-  box-shadow: 0 0 0 3px rgba(255, 68, 56, 0.1);
+  box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.1);
 }
 
 .workout-option-icon {
@@ -202,7 +202,7 @@
 
 .workout-item:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 4px 12px rgba(255, 68, 56, 0.1);
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.1);
 }
 
 .workout-icon {

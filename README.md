@@ -2,7 +2,7 @@
 
 A global, dark-themed fitness and nutrition platform: personalized subscription plans (including 1:1 coaching), a daily meal plan drawing from 1,000 recipes across the world, a 1,000-exercise library, workout tracking, and 1,000 member reviews.
 
-> **Note:** OJAS is a demo/portfolio brand built for this project, founded (in the fictional brand story) by Jas Singh in 1994. Member counts and testimonial personas in the app are fictional flavor text, not real company history or endorsements. The Health section is general education only — see its disclaimer for details.
+> **Note:** OJAS is a demo/portfolio brand built for this project. The founding story (1994), member counts, and testimonial personas in the app are fictional flavor text, not real company history or endorsements. The Health section is general education only — see its disclaimer for details.
 
 ## Features
 
@@ -127,15 +127,18 @@ See `docs/deployment.md` for platform-specific deployment notes (env vars, persi
 
 ## Design System
 
+A futuristic, agentic visual identity: a custom hexagonal node mark (no fire/flame imagery), an electric blue/cyan palette, and a geometric display face.
+
 ### Color Palette
-- **Primary (Crimson)** `#FF4438` — energy, action
-- **Garnet** `#3D0F16` — deep gradient accent
-- **Gold** `#F5B841` — premium secondary accent
+- **Primary (Electric Blue)** `#4F8CFF` — energy, action
+- **Garnet (deep accent)** `#12142B` — deep gradient accent
+- **Cyan (secondary accent)** `#22D3EE` — premium secondary accent
+- **Info (violet)** `#8B7CF6` — clinical/informational accent (Health section)
 - **Success** `#3DDC84` — positive states
-- **Near-black** `#0B0B0E` / **Surface** `#17171C` — dark ground
+- **Near-black** `#0A0B10` / **Surface** `#14151F` — dark ground
 
 ### Typography
-- **Display**: Bebas Neue (uppercase, condensed) for headings
+- **Display**: Orbitron (geometric, futuristic) for headings
 - **Body**: Inter for content
 - **Mono**: IBM Plex Mono for stats and numbers
 
@@ -163,6 +166,11 @@ See `docs/deployment.md` for platform-specific deployment notes (env vars, persi
 ## Marketing Collateral
 
 See `docs/marketing-campaigns.md` for campaign concepts and `docs/social-media-content-calendar.md` for ready-to-post Instagram/TikTok content — written for you to use on real accounts you create yourself.
+
+## Automation
+
+- `docs/automation-plan.md` — an honest map of what can run itself (CI/CD, backups, content reseeding) vs. what needs a real account/credential set up once (billing, social posting) vs. what needs an accountable human on an ongoing basis (support judgment calls, legal/financial ownership)
+- `docs/social-automation-buffer-plan.md` + `scripts/schedule-social-posts.js` — how to actually automate Instagram/TikTok posting via Buffer once you've connected real accounts; the script refuses to run without real credentials
 
 ## Future Enhancements
 

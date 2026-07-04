@@ -74,7 +74,7 @@
 .article-card:hover {
   border-color: var(--color-primary);
   transform: translateY(-6px);
-  box-shadow: 0 12px 32px rgba(255, 68, 56, 0.2);
+  box-shadow: 0 12px 32px rgba(79, 140, 255, 0.2);
 }
 
 .article-image {

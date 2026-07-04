@@ -35,7 +35,7 @@
 
 .voice-card:hover {
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(255, 68, 56, 0.12);
+  box-shadow: 0 8px 24px rgba(79, 140, 255, 0.12);
 }
 
 .voice-quote-mark {

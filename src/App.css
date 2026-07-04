@@ -1,22 +1,22 @@
-@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Orbitron:wght@500;700;800&family=Inter:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@500;700&display=swap');
 
 :root {
-  --color-primary: #FF4438;
-  --color-primary-hover: #E63324;
-  --color-garnet: #3D0F16;
-  --color-gold: #F5B841;
+  --color-primary: #4F8CFF;
+  --color-primary-hover: #3A73E6;
+  --color-garnet: #12142B;
+  --color-gold: #22D3EE;
   --color-success: #3DDC84;
   --color-error: #FF5C5C;
-  --color-info: #4A9EFF;
+  --color-info: #8B7CF6;
 
-  --color-bg: #0B0B0E;
-  --color-surface: #17171C;
-  --color-surface-alt: #1F1F26;
-  --color-text: #F5F4F2;
-  --color-border: #2A2A32;
-  --color-muted: #9A98A3;
+  --color-bg: #0A0B10;
+  --color-surface: #14151F;
+  --color-surface-alt: #1C1E2B;
+  --color-text: #F1F3FA;
+  --color-border: #262838;
+  --color-muted: #8D91A8;
 
-  --font-display: 'Bebas Neue', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  --font-display: 'Orbitron', 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-body: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
   --font-mono: 'IBM Plex Mono', monospace;
 
@@ -80,17 +80,21 @@ html, body {
 
 .logo-icon {
   display: inline-block;
-  animation: flame-pulse 2.4s ease-in-out infinite;
-  transform-origin: center center;
 }
 
-@keyframes flame-pulse {
-  0%, 100% { transform: scale(1); }
-  50% { transform: scale(1.12); }
+.logo-icon .agent-ring {
+  transform-box: view-box;
+  transform-origin: 20px 20px;
+  animation: agent-spin 5s linear infinite;
+}
+
+@keyframes agent-spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .logo-icon {
+  .logo-icon .agent-ring {
     animation: none;
   }
 }
@@ -165,7 +169,7 @@ html, body {
 
 .card:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 4px 12px rgba(255, 68, 56, 0.15);
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.15);
 }
 
 /* Headings */
@@ -223,7 +227,7 @@ h3 {
 .btn-primary:hover {
   background-color: var(--color-primary-hover);
   transform: translateY(-2px);
-  box-shadow: 0 4px 16px rgba(255, 68, 56, 0.35);
+  box-shadow: 0 4px 16px rgba(79, 140, 255, 0.35);
 }
 
 .btn-secondary {
@@ -251,7 +255,7 @@ input, textarea, select {
 input:focus, textarea:focus, select:focus {
   outline: none;
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgba(255, 68, 56, 0.15);
+  box-shadow: 0 0 0 3px rgba(79, 140, 255, 0.15);
 }
 
 /* Grid layouts */

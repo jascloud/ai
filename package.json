@@ -2,7 +2,6 @@
   "name": "ojas-fit",
   "version": "2.0.0",
   "description": "OJAS — a global fitness and nutrition platform: personalized training, meals from every corner of the world, and a guided exercise library",
-  "author": "Jas Singh",
   "type": "module",
   "main": "server/index.js",
   "engines": {

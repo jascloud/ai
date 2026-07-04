@@ -1,0 +1,37 @@
+[
+  {
+    "day": 1,
+    "platform": "both",
+    "caption": "Something's training. 🔥 Follow for the launch. #OJASFit #TrainNourishRise #FitnessLaunch",
+    "hashtags": ["#OJASFit", "#FitnessMotivation", "#GlobalFitness", "#NutritionApp", "#TrainNourishRise"],
+    "notes": "Launch teaser reel — logo animation, quick cuts of cooking/yoga/logging a workout"
+  },
+  {
+    "day": 2,
+    "platform": "instagram",
+    "caption": "One plan. Every country's comfort food. Swipe to see today's menu around the world. 🌍 Which one are you making tonight? #OJASFit #WorldOnAPlate",
+    "hashtags": ["#HealthyRecipes", "#MealPrep", "#GlobalCuisine", "#OJASFit", "#NutritionCoach"],
+    "notes": "6-slide carousel, one slide per country"
+  },
+  {
+    "day": 3,
+    "platform": "both",
+    "caption": "Strength, cardio, yoga, core, flexibility, HIIT — pick your level, not just your workout. #OJASFit #ExerciseLibrary",
+    "hashtags": ["#WorkoutMotivation", "#HomeWorkout", "#StrengthTraining", "#OJASFit", "#FitTok"],
+    "notes": "20-sec demo, split-screen Beginner vs Advanced variation of the same move"
+  },
+  {
+    "day": 4,
+    "platform": "both",
+    "caption": "Why we built the Meals tab this way. #OJASFit #BehindTheApp",
+    "hashtags": ["#FitnessApp", "#NutritionTech", "#OJASFit", "#StartupStory"],
+    "notes": "Voiceover over screen recording of the country filter on the Meals tab"
+  },
+  {
+    "day": 5,
+    "platform": "instagram",
+    "caption": "This is why we build the way we do. 💬 Real feedback from real members. #OJASFit #MemberLove",
+    "hashtags": ["#Testimonial", "#FitnessCommunity", "#OJASFit", "#RealResults"],
+    "notes": "Styled quote card using a review pulled from the in-app Reviews page — first name + city only"
+  }
+]

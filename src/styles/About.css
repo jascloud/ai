@@ -23,45 +23,6 @@
   opacity: 0.95;
 }
 
-.founder-note {
-  background-color: var(--color-surface);
-  border: 1px solid var(--color-border);
-  border-radius: var(--radius-lg);
-  padding: var(--spacing-2xl);
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  gap: var(--spacing-md);
-  max-width: 720px;
-  margin: 0 auto;
-}
-
-.founder-avatar {
-  font-size: 2.5rem;
-  background-color: var(--color-surface-alt);
-  border-radius: 50%;
-  width: 72px;
-  height: 72px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
-.founder-note blockquote {
-  margin: 0;
-  color: var(--color-text);
-  font-size: 1.15rem;
-  line-height: 1.7;
-  font-style: italic;
-}
-
-.founder-signature {
-  color: var(--color-gold);
-  font-weight: 700;
-  font-size: 0.9rem;
-}
-
 .timeline-section,
 .values-section,
 .team-section,
@@ -141,7 +102,7 @@
 
 .value-card:hover {
   border-color: var(--color-primary);
-  box-shadow: 0 4px 12px rgba(255, 68, 56, 0.1);
+  box-shadow: 0 4px 12px rgba(79, 140, 255, 0.1);
 }
 
 .value-icon {

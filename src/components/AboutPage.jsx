@@ -4,7 +4,7 @@ import '../styles/About.css';
 // All history, team, and press content below is fictional brand narrative
 // written for this demo — OJAS is not a real registered company.
 const TIMELINE = [
-  { year: '1994', title: 'A single studio', text: 'Jas Singh opens the first OJAS training studio, built on a simple idea: consistency beats intensity.' },
+  { year: '1994', title: 'A single studio', text: 'OJAS opens as one training studio, built on a simple idea: consistency beats intensity.' },
   { year: '2001', title: 'Nutrition joins training', text: 'The first structured nutrition program launches alongside in-studio coaching.' },
   { year: '2008', title: 'Going digital', text: 'Paper logbooks give way to digital workout tracking for studio members.' },
   { year: '2013', title: 'The world enters the menu', text: 'International recipes — starting with Italian and Japanese — join the meal library.' },
@@ -22,9 +22,9 @@ const VALUES = [
 
 // Leadership team for this demo brand.
 const TEAM = [
-  { name: 'Jas Singh', role: 'Founder & CEO', avatar: '👤' },
   { name: 'Marcus Webb', role: 'Head of Training', avatar: '👤' },
-  { name: 'Farah Haddad', role: 'Head of Nutrition', avatar: '👤' }
+  { name: 'Farah Haddad', role: 'Head of Nutrition', avatar: '👤' },
+  { name: 'Priya Chandran', role: 'Head of Product', avatar: '👤' }
 ];
 
 // Invented publication names — not real news outlets. Written as brand flavor
@@ -43,16 +43,6 @@ export default function AboutPage() {
         <h1>Our Story</h1>
         <p className="about-subtitle">From one studio in 1994 to a global platform — same idea, bigger reach</p>
       </div>
-
-      <section className="founder-note">
-        <div className="founder-avatar">👤</div>
-        <blockquote>
-          "I opened the first OJAS studio because every plan I'd tried asked me to give something
-          up — my food, my schedule, or my patience with a program that didn't fit my life. OJAS is
-          the plan I wish had existed then: one that adapts to you, instead of the other way around."
-        </blockquote>
-        <div className="founder-signature">— Jas Singh, Founder &amp; CEO</div>
-      </section>
 
       <section className="timeline-section">
         <h2>Timeline</h2>

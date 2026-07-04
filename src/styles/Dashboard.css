@@ -87,7 +87,7 @@
 .stat-card:hover {
   border-color: var(--color-primary);
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(255, 68, 56, 0.15);
+  box-shadow: 0 8px 24px rgba(79, 140, 255, 0.15);
 }
 
 .stat-icon {
@@ -140,7 +140,7 @@
 .recipe-preview-card:hover {
   border-color: var(--color-primary);
   transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(255, 68, 56, 0.15);
+  box-shadow: 0 8px 24px rgba(79, 140, 255, 0.15);
 }
 
 .recipe-header {
