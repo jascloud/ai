@@ -7,6 +7,7 @@
   --color-gold: #F5B841;
   --color-success: #3DDC84;
   --color-error: #FF5C5C;
+  --color-info: #4A9EFF;
 
   --color-bg: #0B0B0E;
   --color-surface: #17171C;
@@ -72,16 +73,15 @@ html, body {
 
 .logo {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   gap: var(--spacing-sm);
   color: var(--color-text);
 }
 
 .logo-icon {
-  font-size: 1.5rem;
   display: inline-block;
   animation: flame-pulse 2.4s ease-in-out infinite;
-  transform-origin: center bottom;
+  transform-origin: center center;
 }
 
 @keyframes flame-pulse {

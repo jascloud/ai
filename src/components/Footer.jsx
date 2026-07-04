@@ -24,9 +24,9 @@ export default function Footer() {
         <section className="footer-story">
           <h2 className="footer-brand">OJAS</h2>
           <p>
-            Founded in 1994 as a single training studio, OJAS has grown into a global fitness
-            and nutrition platform trusted by members across more than 30 countries. Our name
-            comes from the Ayurvedic idea of ojas — vital energy — and it still shapes how we
+            Founded in 1994 by Jas Singh as a single training studio, OJAS has grown into a global
+            fitness and nutrition platform trusted by members across more than 30 countries. Our
+            name comes from the Ayurvedic idea of ojas — vital energy — and it still shapes how we
             build every plan: train with intent, eat real food, and recover like it matters.
           </p>
         </section>

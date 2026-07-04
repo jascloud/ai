@@ -243,6 +243,96 @@
   margin: 0;
 }
 
+.health-snapshot {
+  background-color: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-left: 3px solid var(--color-info);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-xl);
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.snapshot-header h2 {
+  margin-bottom: var(--spacing-xs);
+}
+
+.snapshot-note {
+  color: var(--color-muted);
+  font-size: 0.85rem;
+  margin: 0;
+}
+
+.snapshot-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--spacing-xl);
+}
+
+.snapshot-inputs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--spacing-md);
+  align-content: start;
+}
+
+.snapshot-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.snapshot-field label {
+  font-size: 0.78rem;
+  color: var(--color-muted);
+}
+
+.snapshot-results {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--spacing-md);
+}
+
+.snapshot-stat {
+  background-color: var(--color-surface-alt);
+  border-radius: var(--radius-md);
+  padding: var(--spacing-md);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+}
+
+.snapshot-stat-label {
+  font-size: 0.7rem;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+.snapshot-stat-value {
+  font-family: var(--font-mono);
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: var(--color-text);
+}
+
+.snapshot-stat-tag {
+  font-size: 0.68rem;
+  color: var(--color-muted);
+  line-height: 1.3;
+}
+
+.snapshot-disclaimer {
+  color: var(--color-muted);
+  font-size: 0.8rem;
+  line-height: 1.6;
+  margin: 0;
+  padding-top: var(--spacing-md);
+  border-top: 1px solid var(--color-border);
+}
+
 @media (max-width: 768px) {
   .welcome-section h1 {
     font-size: 1.75rem;
@@ -259,6 +349,14 @@
 
   .recipe-preview-grid,
   .tips-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .snapshot-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .snapshot-results {
     grid-template-columns: 1fr;
   }
 }

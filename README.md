@@ -2,9 +2,15 @@
 
 A global, dark-themed fitness and nutrition platform: personalized subscription plans (including 1:1 coaching), a daily meal plan drawing from 1,000 recipes across the world, a 1,000-exercise library, workout tracking, and 1,000 member reviews.
 
-> **Note:** OJAS is a demo/portfolio brand built for this project. The founding story, member counts, and testimonial personas in the app are fictional flavor text, not real company history or endorsements.
+> **Note:** OJAS is a demo/portfolio brand built for this project, founded (in the fictional brand story) by Jas Singh in 1994. Member counts and testimonial personas in the app are fictional flavor text, not real company history or endorsements. The Health section is general education only — see its disclaimer for details.
 
 ## Features
+
+### 🩺 Health & Recovery
+- **Health Tracks**: generic educational categories (weight management, metabolic health, PCOS, heart health, thyroid, bone health, fatty liver, fertility, kidney health) — lifestyle-level information only, each explicitly pointing to a doctor for diagnosis/treatment
+- **Recovery & Self-Care**: curated, well-established self-care basics for common everyday aches (soreness, minor sprains, stiffness, headaches, back discomfort, fatigue), each with an explicit "see a doctor instead if" red-flag list
+- A prominent medical disclaimer banner throughout — not a substitute for professional care
+- **Health Snapshot** widget on the Dashboard: log your own height/weight (auto-calculates BMI), resting heart rate, and sleep hours against general public-health reference ranges — your own numbers, not simulated sensor data
 
 ### 💳 Subscription Plans
 - Basic (₹99), Pro (₹199), Premium (₹299), and Elite (₹999, 1:1 coach matching) monthly tiers

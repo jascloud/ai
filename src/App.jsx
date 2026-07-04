@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import './App.css';
+import OjasLogo from './components/OjasLogo';
 import Dashboard from './components/Dashboard';
 import PlansPage from './components/PlansPage';
 import Meals from './components/Meals';
@@ -8,6 +9,7 @@ import WorkoutTracker from './components/WorkoutTracker';
 import ReviewsPage from './components/ReviewsPage';
 import ShopPage from './components/ShopPage';
 import BlogPage from './components/BlogPage';
+import HealthPage from './components/HealthPage';
 import AboutPage from './components/AboutPage';
 import Footer from './components/Footer';
 
@@ -17,6 +19,7 @@ const NAV_ITEMS = [
   { id: 'meals', label: 'Meals' },
   { id: 'exercises', label: 'Exercises' },
   { id: 'workouts', label: 'Workouts' },
+  { id: 'health', label: 'Health' },
   { id: 'shop', label: 'Shop' },
   { id: 'blog', label: 'Blog' },
   { id: 'reviews', label: 'Reviews' },
@@ -121,7 +124,7 @@ export default function App() {
       <header className="app-header">
         <div className="header-content">
           <div className="logo">
-            <span className="logo-icon">🔥</span>
+            <OjasLogo size={34} className="logo-icon" />
             <span className="logo-text">OJAS</span>
             <span className="logo-tagline">Train. Nourish. Rise.</span>
           </div>
@@ -147,6 +150,7 @@ export default function App() {
         {activeTab === 'meals' && <Meals recipes={recipes} userId={userId} />}
         {activeTab === 'exercises' && <ExercisesPage exercises={exercises} onLogExercise={handleLogExercise} />}
         {activeTab === 'workouts' && <WorkoutTracker workouts={workouts} onAddWorkout={handleAddWorkout} />}
+        {activeTab === 'health' && <HealthPage />}
         {activeTab === 'shop' && <ShopPage />}
         {activeTab === 'blog' && <BlogPage />}
         {activeTab === 'reviews' && <ReviewsPage />}
