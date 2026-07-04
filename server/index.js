@@ -121,6 +121,74 @@ db.serialize(() => {
     )
   `);
 
+  db.run(`
+    CREATE TABLE IF NOT EXISTS blogs (
+      id TEXT PRIMARY KEY,
+      title TEXT,
+      slug TEXT UNIQUE,
+      author TEXT,
+      category TEXT,
+      content TEXT,
+      image_url TEXT,
+      published_at DATE,
+      read_time_min INTEGER
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS shop_products (
+      id TEXT PRIMARY KEY,
+      name TEXT,
+      category TEXT,
+      price REAL,
+      currency TEXT DEFAULT 'INR',
+      description TEXT,
+      image_url TEXT,
+      in_stock INTEGER DEFAULT 1,
+      created_at DATE
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS nutrition_plans (
+      id TEXT PRIMARY KEY,
+      name TEXT,
+      description TEXT,
+      duration_days INTEGER,
+      goal TEXT,
+      image_url TEXT,
+      daily_calories INTEGER,
+      macros TEXT,
+      created_at DATE
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS workout_programs (
+      id TEXT PRIMARY KEY,
+      name TEXT,
+      description TEXT,
+      difficulty TEXT,
+      duration_weeks INTEGER,
+      focus_area TEXT,
+      image_url TEXT,
+      free_tier INTEGER DEFAULT 1,
+      created_at DATE
+    )
+  `);
+
+  db.run(`
+    CREATE TABLE IF NOT EXISTS coaching_agents (
+      id TEXT PRIMARY KEY,
+      user_id TEXT,
+      agent_type TEXT,
+      expertise TEXT,
+      last_interaction TEXT,
+      created_at DATE,
+      FOREIGN KEY (user_id) REFERENCES users(id)
+    )
+  `);
+
   // Demo user so the app works out of the box
   db.run(
     `INSERT OR IGNORE INTO users (id, name, email, plan) VALUES (?, ?, ?, ?)`,
@@ -129,7 +197,7 @@ db.serialize(() => {
 
   // Chained so each seed's transaction fully completes before the next begins
   // (they share one connection, so overlapping BEGIN/COMMIT would conflict).
-  seedRecipes(() => seedExercises(() => seedReviews()));
+  seedRecipes(() => seedExercises(() => seedReviews(1000, () => seedBlogs(() => seedShop(() => seedNutrition(() => seedWorkouts(() => seedCoachingAgents())))))));
 });
 
 // ---------------------------------------------------------------------------
@@ -620,6 +688,233 @@ function seedReviews(targetCount = 1000, done) {
   });
 }
 
+// Seed Blogs
+function seedBlogs(done) {
+  done = done || (() => {});
+  const blogs = [
+    { id: 'blog-1', title: 'Nutrition 101: Understanding Macros', slug: 'nutrition-101-macros', author: 'Dr. Priya Sharma', category: 'Nutrition', content: 'A comprehensive guide to understanding proteins, carbs, and fats in your diet...', image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop', published_at: new Date(Date.now() - 7*24*60*60*1000).toISOString().split('T')[0], read_time_min: 8 },
+    { id: 'blog-2', title: '10-Minute Morning Yoga Routine', slug: '10-min-morning-yoga', author: 'Yogi Ananya', category: 'Yoga', content: 'Start your day right with this energizing yoga flow that takes just 10 minutes...', image_url: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&h=600&fit=crop', published_at: new Date(Date.now() - 5*24*60*60*1000).toISOString().split('T')[0], read_time_min: 6 },
+    { id: 'blog-3', title: 'Recovery: Why Rest Days Matter', slug: 'recovery-rest-days', author: 'Coach Vikram', category: 'Training', content: 'Recovery is where the magic happens. Learn why rest days are crucial for progress...', image_url: 'https://images.unsplash.com/photo-1518611505868-d4c8e8c1f20f?w=800&h=600&fit=crop', published_at: new Date(Date.now() - 3*24*60*60*1000).toISOString().split('T')[0], read_time_min: 5 },
+    { id: 'blog-4', title: 'Meal Prep Sunday: Indian Edition', slug: 'meal-prep-sunday-indian', author: 'Chef Meera', category: 'Nutrition', content: 'Prepare a week of healthy Indian meals in just 2 hours...', image_url: 'https://images.unsplash.com/photo-1495521821757-a1efb6729352?w=800&h=600&fit=crop', published_at: new Date(Date.now() - 10*24*60*60*1000).toISOString().split('T')[0], read_time_min: 7 },
+    { id: 'blog-5', title: 'HIIT Workouts: Maximize Results', slug: 'hiit-maximize-results', author: 'Coach Rohan', category: 'Training', content: 'High-intensity interval training is one of the most efficient workout styles...', image_url: 'https://images.unsplash.com/photo-1552539618-7cdf54baf82f?w=800&h=600&fit=crop', published_at: new Date(Date.now() - 14*24*60*60*1000).toISOString().split('T')[0], read_time_min: 9 }
+  ];
+
+  const allBlogs = blogs.concat(generateBulkBlogs(95)); // Total 100 blogs
+
+  db.get('SELECT COUNT(*) AS count FROM blogs', (err, row) => {
+    if (err || (row && row.count > 0)) return done();
+    allBlogs.forEach(blog => {
+      db.run(
+        'INSERT OR IGNORE INTO blogs (id, title, slug, author, category, content, image_url, published_at, read_time_min) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [blog.id, blog.title, blog.slug, blog.author, blog.category, blog.content, blog.image_url, blog.published_at, blog.read_time_min]
+      );
+    });
+    done();
+  });
+}
+
+function generateBulkBlogs(count) {
+  const categories = ['Nutrition', 'Training', 'Yoga', 'Recovery', 'Lifestyle', 'Mental Health'];
+  const topics = {
+    Nutrition: ['protein intake', 'hydration tips', 'superfoods', 'meal timing', 'diet myths'],
+    Training: ['strength gains', 'cardio efficiency', 'form tips', 'progressive overload', 'cross-training'],
+    Yoga: ['flexibility work', 'breathing techniques', 'meditation', 'alignment cues', 'pose progression'],
+    Recovery: ['sleep hygiene', 'stress management', 'stretching routines', 'massage therapy', 'active recovery'],
+    Lifestyle: ['habit building', 'motivation hacks', 'work-life balance', 'travel fitness', 'tracking progress'],
+    'Mental Health': ['mindfulness', 'anxiety relief', 'goal setting', 'body confidence', 'holistic wellness']
+  };
+  const authors = ['Dr. Sharma', 'Coach Vikram', 'Yogi Ananya', 'Chef Meera', 'Dr. Gupta', 'Wellness Expert Rohan'];
+  const rng = makeRng(3141);
+
+  return Array.from({ length: count }, (_, i) => {
+    const category = pick(rng, categories);
+    const topic = pick(rng, topics[category]);
+    return {
+      id: `blog-${i + 6}`,
+      title: `${category}: Deep Dive into ${topic}`,
+      slug: `${category.toLowerCase()}-${topic.replace(/\s+/g, '-')}`,
+      author: pick(rng, authors),
+      category,
+      content: `Learn everything you need to know about ${topic} for optimal fitness and wellness...`,
+      image_url: `https://images.unsplash.com/photo-${1000000000 + i}?w=800&h=600&fit=crop`,
+      published_at: new Date(Date.now() - Math.floor(rng() * 365) * 24 * 60 * 60 * 1000).toISOString().split('T')[0],
+      read_time_min: 5 + Math.floor(rng() * 10)
+    };
+  });
+}
+
+// Seed Shop Products
+function seedShop(done) {
+  done = done || (() => {});
+  const products = [
+    { id: 'prod-1', name: 'OJAS Yoga Mat Pro', category: 'Equipment', price: 1299, description: 'Premium non-slip yoga mat with alignment marks', image_url: 'https://images.unsplash.com/photo-1601925260368-ae2f83cf8b7f?w=800&h=600&fit=crop', in_stock: 1 },
+    { id: 'prod-2', name: 'Protein Powder - Vanilla', category: 'Supplements', price: 1499, description: 'Plant-based protein with 25g per serving', image_url: 'https://images.unsplash.com/photo-1607623814075-e51df1bdc82f?w=800&h=600&fit=crop', in_stock: 1 },
+    { id: 'prod-3', name: 'OJAS Water Bottle', category: 'Accessories', price: 599, description: 'Insulated 1L water bottle with time markers', image_url: 'https://images.unsplash.com/photo-1602143407151-7e6650489147?w=800&h=600&fit=crop', in_stock: 1 },
+    { id: 'prod-4', name: 'Resistance Band Set', category: 'Equipment', price: 799, description: 'Set of 5 latex-free resistance bands', image_url: 'https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=800&h=600&fit=crop', in_stock: 1 },
+    { id: 'prod-5', name: 'Meditation Cushion', category: 'Recovery', price: 1199, description: 'Ergonomic cushion for meditation practice', image_url: 'https://images.unsplash.com/photo-1529919050490-b06fa7e5db2a?w=800&h=600&fit=crop', in_stock: 1 }
+  ];
+
+  const allProducts = products.concat(generateBulkProducts(95)); // Total 100 products
+
+  db.get('SELECT COUNT(*) AS count FROM shop_products', (err, row) => {
+    if (err || (row && row.count > 0)) return done();
+    allProducts.forEach(prod => {
+      db.run(
+        'INSERT OR IGNORE INTO shop_products (id, name, category, price, description, image_url, in_stock) VALUES (?, ?, ?, ?, ?, ?, ?)',
+        [prod.id, prod.name, prod.category, prod.price, prod.description, prod.image_url, prod.in_stock]
+      );
+    });
+    done();
+  });
+}
+
+function generateBulkProducts(count) {
+  const categories = ['Equipment', 'Supplements', 'Accessories', 'Recovery', 'Apparel'];
+  const items = {
+    Equipment: ['Dumbbells', 'Kettlebell', 'Resistance Band', 'Pull-up Bar', 'Exercise Ball', 'Foam Roller'],
+    Supplements: ['Protein Powder', 'BCAA', 'Creatine', 'Multivitamin', 'Omega-3', 'Pre-Workout'],
+    Accessories: ['Water Bottle', 'Gym Bag', 'Towel', 'Gloves', 'Headphones', 'Phone Holder'],
+    Recovery: ['Massage Gun', 'Compression Sleeve', 'Foam Roller', 'Stretching Strap', 'Ice Pack'],
+    Apparel: ['Yoga Pants', 'Sports Bra', 'Running Shoes', 'Tank Top', 'Shorts']
+  };
+  const rng = makeRng(2718);
+
+  return Array.from({ length: count }, (_, i) => {
+    const category = pick(rng, categories);
+    const item = pick(rng, items[category]);
+    const price = 299 + Math.floor(rng() * 2000);
+    return {
+      id: `prod-${i + 6}`,
+      name: `OJAS ${item}`,
+      category,
+      price,
+      description: `Premium ${item.toLowerCase()} for optimal performance`,
+      image_url: `https://images.unsplash.com/photo-${1500000000 + i}?w=800&h=600&fit=crop`,
+      in_stock: Math.random() > 0.1 ? 1 : 0
+    };
+  });
+}
+
+// Seed Nutrition Plans
+function seedNutrition(done) {
+  done = done || (() => {});
+  const plans = [
+    { id: 'nut-1', name: 'Weight Loss Warrior', description: 'High protein, calorie-deficit plan', duration_days: 30, goal: 'Weight Loss', image_url: 'https://images.unsplash.com/photo-1490645935967-10de6ba17061?w=800&h=600&fit=crop', daily_calories: 1800, macros: JSON.stringify({protein: 150, carbs: 180, fat: 60}), created_at: new Date().toISOString().split('T')[0] },
+    { id: 'nut-2', name: 'Muscle Builder', description: 'High calorie, high protein for gains', duration_days: 30, goal: 'Muscle Gain', image_url: 'https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=800&h=600&fit=crop', daily_calories: 2800, macros: JSON.stringify({protein: 200, carbs: 350, fat: 90}), created_at: new Date().toISOString().split('T')[0] },
+    { id: 'nut-3', name: 'Indian Vegan', description: 'Plant-based nutrition for wellness', duration_days: 30, goal: 'Wellness', image_url: 'https://images.unsplash.com/photo-1512621776951-a57141f2eefd?w=800&h=600&fit=crop', daily_calories: 2000, macros: JSON.stringify({protein: 120, carbs: 280, fat: 55}), created_at: new Date().toISOString().split('T')[0] },
+    { id: 'nut-4', name: 'Endurance Athlete', description: 'Optimized for stamina', duration_days: 30, goal: 'Endurance', image_url: 'https://images.unsplash.com/photo-1546069901-ba9599a7e63c?w=800&h=600&fit=crop', daily_calories: 2600, macros: JSON.stringify({protein: 140, carbs: 380, fat: 70}), created_at: new Date().toISOString().split('T')[0] },
+    { id: 'nut-5', name: 'Balanced Living', description: 'Sustainable nutrition for life', duration_days: 30, goal: 'Maintenance', image_url: 'https://images.unsplash.com/photo-1540189549336-e6e99c3679fe?w=800&h=600&fit=crop', daily_calories: 2200, macros: JSON.stringify({protein: 130, carbs: 275, fat: 73}), created_at: new Date().toISOString().split('T')[0] }
+  ];
+
+  const allPlans = plans.concat(generateBulkNutrition(95)); // Total 100 plans
+
+  db.get('SELECT COUNT(*) AS count FROM nutrition_plans', (err, row) => {
+    if (err || (row && row.count > 0)) return done();
+    allPlans.forEach(plan => {
+      db.run(
+        'INSERT OR IGNORE INTO nutrition_plans (id, name, description, duration_days, goal, image_url, daily_calories, macros, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [plan.id, plan.name, plan.description, plan.duration_days, plan.goal, plan.image_url, plan.daily_calories, plan.macros, plan.created_at]
+      );
+    });
+    done();
+  });
+}
+
+function generateBulkNutrition(count) {
+  const goals = ['Weight Loss', 'Muscle Gain', 'Endurance', 'Wellness', 'Maintenance'];
+  const rng = makeRng(1618);
+
+  return Array.from({ length: count }, (_, i) => {
+    const goal = pick(rng, goals);
+    const calorieBase = { 'Weight Loss': 1800, 'Muscle Gain': 2800, 'Endurance': 2600, 'Wellness': 2000, 'Maintenance': 2200 };
+    const calories = calorieBase[goal] + Math.floor((rng() - 0.5) * 400);
+    const protein = Math.round(calories * 0.35 / 4);
+    const carbs = Math.round(calories * 0.45 / 4);
+    const fat = Math.round(calories * 0.20 / 9);
+
+    return {
+      id: `nut-${i + 6}`,
+      name: `${goal} Plan ${i + 1}`,
+      description: `Customized nutrition for ${goal.toLowerCase()}`,
+      duration_days: 30,
+      goal,
+      image_url: `https://images.unsplash.com/photo-${2000000000 + i}?w=800&h=600&fit=crop`,
+      daily_calories: calories,
+      macros: JSON.stringify({protein, carbs, fat}),
+      created_at: new Date().toISOString().split('T')[0]
+    };
+  });
+}
+
+// Seed Workout Programs
+function seedWorkouts(done) {
+  done = done || (() => {});
+  const programs = [
+    { id: 'wp-1', name: 'Full Body 4x/week', description: 'Complete body training for all levels', difficulty: 'Beginner', duration_weeks: 12, focus_area: 'Strength', image_url: 'https://images.unsplash.com/photo-1534438327276-14e5300c3a48?w=800&h=600&fit=crop', free_tier: 1 },
+    { id: 'wp-2', name: 'HIIT Bootcamp', description: 'High intensity fat burning program', difficulty: 'Intermediate', duration_weeks: 8, focus_area: 'Cardio', image_url: 'https://images.unsplash.com/photo-1517836357463-d25ddfcbf042?w=800&h=600&fit=crop', free_tier: 1 },
+    { id: 'wp-3', name: 'Yoga Flow 21-Day', description: 'Mindful movement and flexibility', difficulty: 'Beginner', duration_weeks: 3, focus_area: 'Flexibility', image_url: 'https://images.unsplash.com/photo-1506126613408-eca07ce68773?w=800&h=600&fit=crop', free_tier: 1 },
+    { id: 'wp-4', name: 'Advanced Strength', description: 'Periodized strength building', difficulty: 'Advanced', duration_weeks: 16, focus_area: 'Strength', image_url: 'https://images.unsplash.com/photo-1540497905036-3b5e22d1e8c0?w=800&h=600&fit=crop', free_tier: 0 },
+    { id: 'wp-5', name: 'Endurance Builder', description: 'Build stamina and cardiovascular strength', difficulty: 'Intermediate', duration_weeks: 10, focus_area: 'Cardio', image_url: 'https://images.unsplash.com/photo-1461896836934-ffe607ba8211?w=800&h=600&fit=crop', free_tier: 1 }
+  ];
+
+  const allPrograms = programs.concat(generateBulkWorkouts(95)); // Total 100 programs
+
+  db.get('SELECT COUNT(*) AS count FROM workout_programs', (err, row) => {
+    if (err || (row && row.count > 0)) return done();
+    allPrograms.forEach(prog => {
+      db.run(
+        'INSERT OR IGNORE INTO workout_programs (id, name, description, difficulty, duration_weeks, focus_area, image_url, free_tier, created_at) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)',
+        [prog.id, prog.name, prog.description, prog.difficulty, prog.duration_weeks, prog.focus_area, prog.image_url, prog.free_tier, prog.created_at]
+      );
+    });
+    done();
+  });
+}
+
+function generateBulkWorkouts(count) {
+  const focuses = ['Strength', 'Cardio', 'Flexibility', 'Endurance', 'Power'];
+  const difficulties = ['Beginner', 'Intermediate', 'Advanced'];
+  const rng = makeRng(5000);
+
+  return Array.from({ length: count }, (_, i) => {
+    const focus = pick(rng, focuses);
+    const difficulty = pick(rng, difficulties);
+    const weeks = 4 + Math.floor(rng() * 12);
+    return {
+      id: `wp-${i + 6}`,
+      name: `${focus} - ${difficulty} (${weeks}w)`,
+      description: `${difficulty} level ${focus.toLowerCase()} program designed for optimal results`,
+      difficulty,
+      duration_weeks: weeks,
+      focus_area: focus,
+      image_url: `https://images.unsplash.com/photo-${2500000000 + i}?w=800&h=600&fit=crop`,
+      free_tier: rng() > 0.3 ? 1 : 0,
+      created_at: new Date().toISOString().split('T')[0]
+    };
+  });
+}
+
+// Seed Coaching Agents
+function seedCoachingAgents(done) {
+  done = done || (() => {});
+  const agents = [
+    { id: 'agent-1', user_id: DEMO_USER_ID, agent_type: 'Personal Trainer', expertise: 'Strength Training', last_interaction: new Date().toISOString().split('T')[0], created_at: new Date().toISOString().split('T')[0] },
+    { id: 'agent-2', user_id: DEMO_USER_ID, agent_type: 'Nutrition Coach', expertise: 'Meal Planning', last_interaction: new Date().toISOString().split('T')[0], created_at: new Date().toISOString().split('T')[0] },
+    { id: 'agent-3', user_id: DEMO_USER_ID, agent_type: 'Recovery Specialist', expertise: 'Sleep & Wellness', last_interaction: new Date().toISOString().split('T')[0], created_at: new Date().toISOString().split('T')[0] }
+  ];
+
+  db.get('SELECT COUNT(*) AS count FROM coaching_agents', (err, row) => {
+    if (err || (row && row.count > 0)) return done();
+    agents.forEach(agent => {
+      db.run(
+        'INSERT OR IGNORE INTO coaching_agents (id, user_id, agent_type, expertise, last_interaction, created_at) VALUES (?, ?, ?, ?, ?, ?)',
+        [agent.id, agent.user_id, agent.agent_type, agent.expertise, agent.last_interaction, agent.created_at]
+      );
+    });
+    done();
+  });
+}
+
 // ---------------------------------------------------------------------------
 // Recipes / Meals
 // ---------------------------------------------------------------------------
@@ -853,6 +1148,229 @@ app.post('/api/subscribe', (req, res) => {
         } else {
           res.json(row);
         }
+      });
+    }
+  );
+});
+
+// ---------------------------------------------------------------------------
+// Blogs
+// ---------------------------------------------------------------------------
+
+app.get('/api/blogs', (req, res) => {
+  const page = Math.max(parseInt(req.query.page, 10) || 1, 1);
+  const limit = Math.min(Math.max(parseInt(req.query.limit, 10) || 12, 1), 50);
+  const category = req.query.category;
+  const offset = (page - 1) * limit;
+
+  const whereClause = category ? 'WHERE category = ?' : '';
+  const params = category ? [category] : [];
+
+  db.get(`SELECT COUNT(*) AS count FROM blogs ${whereClause}`, params, (countErr, countRow) => {
+    if (countErr) return res.status(500).json({ error: countErr.message });
+
+    db.all(
+      `SELECT * FROM blogs ${whereClause} ORDER BY published_at DESC LIMIT ? OFFSET ?`,
+      [...params, limit, offset],
+      (err, rows) => {
+        if (err) return res.status(500).json({ error: err.message });
+        res.json({ blogs: rows, page, limit, total: countRow.count });
+      }
+    );
+  });
+});
+
+app.get('/api/blogs/:id', (req, res) => {
+  db.get('SELECT * FROM blogs WHERE id = ? OR slug = ?', [req.params.id, req.params.id], (err, row) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else if (!row) {
+      res.status(404).json({ error: 'Blog not found' });
+    } else {
+      res.json(row);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Shop
+// ---------------------------------------------------------------------------
+
+app.get('/api/shop', (req, res) => {
+  const category = req.query.category;
+  const whereClause = category ? 'WHERE category = ?' : '';
+  const params = category ? [category] : [];
+
+  db.all(`SELECT * FROM shop_products ${whereClause}`, params, (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
+app.get('/api/shop/:id', (req, res) => {
+  db.get('SELECT * FROM shop_products WHERE id = ?', [req.params.id], (err, row) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else if (!row) {
+      res.status(404).json({ error: 'Product not found' });
+    } else {
+      res.json(row);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Nutrition Plans
+// ---------------------------------------------------------------------------
+
+app.get('/api/nutrition-plans', (req, res) => {
+  const goal = req.query.goal;
+  const whereClause = goal ? 'WHERE goal = ?' : '';
+  const params = goal ? [goal] : [];
+
+  db.all(`SELECT * FROM nutrition_plans ${whereClause}`, params, (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.json(rows.map(row => ({
+        ...row,
+        macros: JSON.parse(row.macros)
+      })));
+    }
+  });
+});
+
+app.get('/api/nutrition-plans/:id', (req, res) => {
+  db.get('SELECT * FROM nutrition_plans WHERE id = ?', [req.params.id], (err, row) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else if (!row) {
+      res.status(404).json({ error: 'Plan not found' });
+    } else {
+      res.json({
+        ...row,
+        macros: JSON.parse(row.macros)
+      });
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Workout Programs
+// ---------------------------------------------------------------------------
+
+app.get('/api/workout-programs', (req, res) => {
+  const focus = req.query.focus;
+  const difficulty = req.query.difficulty;
+  const free = req.query.free === 'true';
+
+  let whereClause = [];
+  let params = [];
+
+  if (focus) {
+    whereClause.push('focus_area = ?');
+    params.push(focus);
+  }
+  if (difficulty) {
+    whereClause.push('difficulty = ?');
+    params.push(difficulty);
+  }
+  if (free) {
+    whereClause.push('free_tier = 1');
+  }
+
+  const where = whereClause.length > 0 ? 'WHERE ' + whereClause.join(' AND ') : '';
+
+  db.all(`SELECT * FROM workout_programs ${where}`, params, (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
+app.get('/api/workout-programs/:id', (req, res) => {
+  db.get('SELECT * FROM workout_programs WHERE id = ?', [req.params.id], (err, row) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else if (!row) {
+      res.status(404).json({ error: 'Program not found' });
+    } else {
+      res.json(row);
+    }
+  });
+});
+
+// ---------------------------------------------------------------------------
+// Agentic Features - AI Coaching
+// ---------------------------------------------------------------------------
+
+app.get('/api/coaching-agents/:userId', (req, res) => {
+  db.all('SELECT * FROM coaching_agents WHERE user_id = ?', [req.params.userId], (err, rows) => {
+    if (err) {
+      res.status(500).json({ error: err.message });
+    } else {
+      res.json(rows);
+    }
+  });
+});
+
+// AI-powered personalized recommendation endpoint
+app.post('/api/ai/recommendations', (req, res) => {
+  const { userId, type } = req.body;
+
+  // Simulated AI recommendation logic
+  const recommendations = {
+    workout: {
+      agent: 'Personal Trainer Bot',
+      recommendation: 'Based on your activity, try High-Intensity Interval Training 3x/week for maximum efficiency',
+      confidence: 0.87,
+      generated_at: new Date().toISOString()
+    },
+    nutrition: {
+      agent: 'Nutrition Coach Bot',
+      recommendation: 'Your macros suggest increasing protein intake by 15g daily for optimal muscle recovery',
+      confidence: 0.92,
+      generated_at: new Date().toISOString()
+    },
+    recovery: {
+      agent: 'Recovery Specialist Bot',
+      recommendation: 'Your sleep pattern indicates need for 30 minutes of evening yoga to improve sleep quality',
+      confidence: 0.85,
+      generated_at: new Date().toISOString()
+    }
+  };
+
+  const rec = recommendations[type] || recommendations.workout;
+  res.json(rec);
+});
+
+// AI chat endpoint for coaching
+app.post('/api/ai/coach-chat', (req, res) => {
+  const { userId, message, agentType } = req.body;
+
+  // Simulated coaching response
+  const responses = {
+    'Personal Trainer': 'Great question! Progressive overload is key. Increase weight by 5-10% every week while maintaining form.',
+    'Nutrition Coach': 'For muscle gain, aim for 2.2g of protein per kg of body weight daily. Spread it across 5-6 meals.',
+    'Recovery Specialist': 'Aim for 7-9 hours of sleep. Create a bedtime routine: 30 min yoga, meditation, and avoid screens 1 hour before bed.'
+  };
+
+  const response = responses[agentType] || 'I\'m here to help! What would you like to know?';
+
+  // Log interaction
+  db.run(
+    'UPDATE coaching_agents SET last_interaction = ? WHERE user_id = ? AND agent_type = ?',
+    [new Date().toISOString().split('T')[0], userId, agentType],
+    () => {
+      res.json({
+        agent: agentType,
+        response,
+        timestamp: new Date().toISOString()
       });
     }
   );
