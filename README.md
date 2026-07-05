@@ -1,53 +1,186 @@
-# AI Repository - CCXT Integration
+# OJAS — Train. Nourish. Rise.
 
-This repository contains integration and setup for the CCXT cryptocurrency trading library.
+A global, dark-themed fitness and nutrition platform: personalized subscription plans (including 1:1 coaching), a daily meal plan drawing from 1,000 recipes across the world, a 1,000-exercise library, workout tracking, and 1,000 member reviews.
 
-## Structure
+> **Note:** OJAS is a demo/portfolio brand built for this project. The founding story (1994), member counts, and testimonial personas in the app are fictional flavor text, not real company history or endorsements. The Health section is general education only — see its disclaimer for details.
 
-- **ccxt/** - Full CCXT repository (https://github.com/ccxt/ccxt)
-  - TypeScript source of truth in `ts/src/`
-  - Transpiled to JavaScript, Python, PHP, C#, and Go
-  - Comprehensive documentation in `CLAUDE.md`
+## Features
 
-## CCXT Skills
+### 🩺 Health & Recovery
+- **Health Tracks**: generic educational categories (weight management, metabolic health, PCOS, heart health, thyroid, bone health, fatty liver, fertility, kidney health) — lifestyle-level information only, each explicitly pointing to a doctor for diagnosis/treatment
+- **Recovery & Self-Care**: curated, well-established self-care basics for common everyday aches (soreness, minor sprains, stiffness, headaches, back discomfort, fatigue), each with an explicit "see a doctor instead if" red-flag list
+- A prominent medical disclaimer banner throughout — not a substitute for professional care
+- **Health Snapshot** widget on the Dashboard: log your own height/weight (auto-calculates BMI), resting heart rate, and sleep hours against general public-health reference ranges — your own numbers, not simulated sensor data
 
-The following skills are available when working with CCXT code:
+### 💳 Subscription Plans
+- Basic (₹99), Pro (₹199), Premium (₹299), and Elite (₹999, 1:1 coach matching) monthly tiers
+- Monthly/annual billing toggle with a 20% annual discount
+- Discount code support (`FIT10`, `WELCOME20`)
+- Community Telegram/WhatsApp channel access baked into plan features (see Footer for placeholder handles)
+- "Meet Your Coaches" preview section with fictional coach personas (illustrated avatars, not real photos)
 
-- `ccxt-typescript` - TypeScript/JavaScript (Node.js and browser)
-- `ccxt-python` - Python (sync and async support)
-- `ccxt-php` - PHP (sync and ReactPHP async)
-- `ccxt-csharp` - C# and .NET
-- `ccxt-go` - Go
-- `ccxt-java` - Java (Java 21+)
-- `new-exchange` - Scaffold new exchange integration
+### 🌍 Universal Meals
+- 1,000 recipes across 8 countries: India, Italy, Mexico, Japan, Thailand, Mediterranean, USA, China (33 hand-written signature dishes + procedurally generated variations)
+- Auto-generated daily breakfast/lunch/dinner/snack plan, filterable by country
+- Search + category filters (High Protein, Vegetarian, Quick Breakfast, Low Calorie, Balanced), with load-more pagination
 
-## Quick Start
+### 🏋️ Exercise Library
+- 1,000 exercises across Strength, Cardio, Yoga, Core, Flexibility, and HIIT (24 hand-written signature exercises + procedurally generated variations)
+- Instructions, difficulty, equipment, and coaching tips for each
+- Search + filters with load-more pagination
+- "Log It" sends the exercise straight into the workout tracker
 
-1. **Read CCXT documentation**: `ccxt/CLAUDE.md` contains the authoritative architecture guide
-2. **Edit TypeScript source**: All changes start in `ccxt/ts/src/`
-3. **Build for all languages**: Run `npm run build` in `ccxt/`
-4. **Test**: Use language-specific test runners in each language directory
+### 📈 Workout Tracker
+- Log workouts and see totals for calories, sessions, and minutes
+- History grouped by day
 
-## Key Rules
+### ⭐ Reviews
+- 1,000 generated member reviews with a rating distribution and star filters
+- Paginated, load-more browsing
 
-⚠️ **CRITICAL**: CCXT is a transpiled library. The single source of truth is TypeScript (`ts/src/`).
+### 📊 Dashboard
+- Today's stats, featured recipes, "Voices of OJAS" testimonials, and current plan status
 
-- ✅ DO edit: `ts/src/` (all `.ts` files)
-- ❌ NEVER edit: Generated files (`js/`, `python/ccxt/`, `php/`, `cs/ccxt/`, `go/v4/`)
-- ⚠️ MOSTLY DON'T: Base files with partly-transpiled code (see `CLAUDE.md` §4)
+### 🛍️ Shop
+- 10 OJAS-branded merch items (apparel, gear, accessories) with illustrated gradient product cards
+- Mock cart + checkout flow (no real payment gateway wired up)
 
-Always run the full test suite after changes:
+### 📰 Blog (The OJAS Journal)
+- 8 original articles on training, nutrition, recovery, and lifestyle, filterable by category
+
+### ℹ️ About
+- Expanded founding timeline (1994–2026), mission/values, illustrative leadership profiles, and a "Press" section using invented publication names (not real news coverage)
+
+## Tech Stack
+
+- **Frontend**: React + Vite
+- **Styling**: Dark-themed CSS with custom-property design tokens, Bebas Neue display type
+- **Backend**: Express.js
+- **Database**: SQLite (auto-seeds recipes, exercises, and reviews on first run)
+
+## Getting Started
+
+### Prerequisites
+- Node.js (v16+)
+- npm
+
+### Installation
+
 ```bash
-cd ccxt
-npm run build
-npm run test  # TypeScript
-npm run test-python  # Python
-# etc.
+git clone https://github.com/jascloud/ai.git
+cd ai
+npm install
 ```
 
-## Documentation
+### Development
 
-- `ccxt/CLAUDE.md` - Architecture, transpiler conventions, source of truth
-- `ccxt/CONTRIBUTING.md` - Detailed contribution guidelines
-- `ccxt/wiki/Manual.md` - Unified API specification
-- `ccxt/wiki/Requirements.md` - New exchange checklist
+```bash
+npm run dev
+```
+
+- Frontend: http://localhost:3000
+- Backend API: http://localhost:3001
+
+The database seeds itself automatically on first run — no manual setup needed.
+
+### Production Build
+
+```bash
+npm run build
+npm start
+```
+
+See `docs/deployment.md` for platform-specific deployment notes (env vars, persistent storage, Docker).
+
+## Project Structure
+
+```
+├── src/
+│   ├── components/
+│   │   ├── Dashboard.jsx
+│   │   ├── PlansPage.jsx
+│   │   ├── CoachesPreview.jsx
+│   │   ├── Meals.jsx
+│   │   ├── ExercisesPage.jsx
+│   │   ├── WorkoutTracker.jsx
+│   │   ├── ShopPage.jsx
+│   │   ├── BlogPage.jsx
+│   │   ├── ReviewsPage.jsx
+│   │   ├── AboutPage.jsx
+│   │   ├── FeaturedVoices.jsx
+│   │   └── Footer.jsx
+│   ├── styles/
+│   ├── App.jsx
+│   ├── App.css
+│   └── main.jsx
+├── server/
+│   └── index.js
+├── docs/
+│   ├── deployment.md
+│   ├── marketing-campaigns.md
+│   └── social-media-content-calendar.md
+├── index.html
+├── vite.config.js
+├── package.json
+└── README.md
+```
+
+## Design System
+
+A futuristic, agentic visual identity: a custom hexagonal node mark (no fire/flame imagery), an electric blue/cyan palette, and a geometric display face.
+
+### Color Palette
+- **Primary (Electric Blue)** `#4F8CFF` — energy, action
+- **Garnet (deep accent)** `#12142B` — deep gradient accent
+- **Cyan (secondary accent)** `#22D3EE` — premium secondary accent
+- **Info (violet)** `#8B7CF6` — clinical/informational accent (Health section)
+- **Success** `#3DDC84` — positive states
+- **Near-black** `#0A0B10` / **Surface** `#14151F` — dark ground
+
+### Typography
+- **Display**: Orbitron (geometric, futuristic) for headings
+- **Body**: Inter for content
+- **Mono**: IBM Plex Mono for stats and numbers
+
+## API Endpoints
+
+### Recipes / Meals
+- `GET /api/recipes` — all recipes
+- `GET /api/recipes/:id` — single recipe
+- `GET /api/daily-plan/:userId?country=` — generated daily meal plan
+
+### Exercises
+- `GET /api/exercises` — all exercises
+
+### Reviews
+- `GET /api/reviews?page=&limit=&rating=` — paginated reviews with rating distribution
+
+### Workouts
+- `GET /api/workouts/:userId`
+- `POST /api/workouts`
+
+### Users / Subscriptions
+- `GET /api/users/:id`
+- `POST /api/subscribe` — `{ userId, planId, billingCycle }`
+
+## Marketing Collateral
+
+See `docs/marketing-campaigns.md` for campaign concepts and `docs/social-media-content-calendar.md` for ready-to-post Instagram/TikTok content — written for you to use on real accounts you create yourself.
+
+## Automation
+
+- `docs/automation-plan.md` — an honest map of what can run itself (CI/CD, backups, content reseeding) vs. what needs a real account/credential set up once (billing, social posting) vs. what needs an accountable human on an ongoing basis (support judgment calls, legal/financial ownership)
+- `docs/social-automation-buffer-plan.md` + `scripts/schedule-social-posts.js` — how to actually automate Instagram/TikTok posting via Buffer once you've connected real accounts; the script refuses to run without real credentials
+
+## Future Enhancements
+
+- Real user authentication
+- Real payment gateway integration
+- AI-powered personalized meal plans
+- Wearables integration
+- Multi-language support
+- Offline mode
+
+## License
+
+MIT License - see LICENSE file for details
