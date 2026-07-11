@@ -233,6 +233,84 @@
           }
         }
       }
+    },
+    {
+      "phase": "phase_3_news_rebuild",
+      "timestamp": "2026-07-11T13:34:20.138000+00:00",
+      "note": "Rebuilt News Analyst on real headlines (NewsAPI.org, 24h lookback) scored by a finance-tuned lexicon sentiment classifier (deterministic, not random) via NEWS_API_KEY. Simulated random catalyst/impact/sentiment generation removed entirely; degrades to neutral rating=3/confidence=0.0/data_source=degraded_no_data when no key is set or no headlines are returned (both true in this session).",
+      "diagnostic": {
+        "n_trials_per_rating_level": 3000,
+        "agents_in_test": [
+          "Technical Analyst",
+          "Fundamental Analyst",
+          "Sentiment Analyst",
+          "News Analyst",
+          "Bull Researcher",
+          "Bear Researcher"
+        ],
+        "by_technical_rating": {
+          "1": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 1.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 2.0015,
+            "avg_flat_rating": 2.6691666666666665
+          },
+          "2": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 0.6256666666666667,
+            "current_hold_rate": 0.37433333333333335,
+            "avg_weighted_rating": 2.500166666666667,
+            "avg_flat_rating": 2.8336111111111113
+          },
+          "3": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 1.0,
+            "avg_weighted_rating": 2.9991999999999996,
+            "avg_flat_rating": 2.998666666666667
+          },
+          "4": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.6356666666666667,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 0.36433333333333334,
+            "avg_weighted_rating": 3.5026333333333333,
+            "avg_flat_rating": 3.1710555555555553
+          },
+          "5": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 1.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 3.994933333333333,
+            "avg_flat_rating": 3.3248888888888892
+          }
+        },
+        "headline": {
+          "buy_clearance_at_technical_5": {
+            "legacy_flat_mean_4.0_threshold": 0.0,
+            "weighted_mean_3.5_threshold": 1.0
+          },
+          "sell_clearance_at_technical_1": {
+            "legacy_flat_mean_2.0_threshold": 0.0,
+            "weighted_mean_2.5_threshold": 1.0
+          }
+        }
+      }
     }
   ]
 }

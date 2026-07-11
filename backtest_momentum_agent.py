@@ -19,6 +19,8 @@ from data_clients.earnings_calendar import get_earnings_surprise_history
 from data_clients.sec_filings import get_fundamentals_from_filings
 from data_clients.analyst_ratings import get_analyst_consensus
 from data_clients.estimate_revisions import get_estimate_revision_direction
+from data_clients.news_wire import get_recent_headlines
+from data_clients.news_sentiment import score_headlines
 
 # NOTE ON DATA SOURCES:
 # TechnicalAnalyst runs on REAL historical closing prices (Alpha Vantage or
@@ -324,25 +326,55 @@ class SentimentAnalyst(TradingAgent):
 
 
 class NewsAnalyst(TradingAgent):
-    """News and catalyst analysis agent"""
+    """PHASE 3: rebuilt on real headlines + a finance-tuned sentiment
+    scorer — `random.random()`/`random.choice()`/`random.uniform()` are
+    removed entirely. Rating derives from the average sentiment score
+    across recent (24h lookback) real headlines. No headlines available
+    (either no catalyst-worthy news, or the feed is degraded) reports a
+    neutral rating with confidence=0.0 and an honest data_source rather
+    than fabricating a catalyst.
+    """
 
     def analyze(self, symbol: str, price_data: Dict[str, Any]) -> Dict[str, Any]:
-        has_catalyst = random.random() > 0.6
-        impact = random.choice(['POSITIVE', 'NEUTRAL', 'NEGATIVE'])
+        headline_data, source, reason = get_recent_headlines(symbol, lookback_hours=24)
 
-        rating = 3
-        if has_catalyst and impact == 'POSITIVE':
-            rating = 5
-        elif has_catalyst and impact == 'NEGATIVE':
-            rating = 1
+        if source not in ("real", "cached_real") or not headline_data:
+            return {
+                'rating': 3,
+                'has_catalyst': False,
+                'headline_count': 0,
+                'degraded_reason': reason,
+                'confidence': 0.0,
+                'data_source': 'degraded_no_data',
+                'agent_role': 'other'
+            }
+
+        summary = score_headlines(headline_data.get("headlines", []))
+        if not summary:
+            return {
+                'rating': 3,
+                'has_catalyst': False,
+                'headline_count': 0,
+                'degraded_reason': 'headlines returned but none scoreable',
+                'confidence': 0.0,
+                'data_source': 'degraded_no_data',
+                'agent_role': 'other'
+            }
+
+        sentiment_score = summary['sentiment_score']
+        rating = max(1, min(5, int(round(3 + sentiment_score * 2))))
+        confidence = min(1.0, summary['headline_count'] / 10.0)  # more corroborating headlines = more confidence
+        has_catalyst = summary['positive_count'] + summary['negative_count'] > 0
 
         return {
             'rating': rating,
             'has_catalyst': has_catalyst,
-            'impact': impact,
-            'news_sentiment': random.uniform(-1, 1),
-            'catalyst_type': random.choice(['EARNINGS', 'ANNOUNCEMENT', 'REGULATORY', 'MACRO']),
-            'data_source': 'simulated_no_live_feed',
+            'headline_count': summary['headline_count'],
+            'sentiment_score': float(sentiment_score),
+            'positive_count': summary['positive_count'],
+            'negative_count': summary['negative_count'],
+            'confidence': float(confidence),
+            'data_source': source,
             'agent_role': 'other'
         }
 
