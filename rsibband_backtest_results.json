@@ -1,0 +1,27 @@
+{
+  "timestamp": "2026-07-11T20:11:13.983604+00:00",
+  "strategy": "RSI + Bollinger Band Mean Reversion",
+  "commodity": "XAUUSD (Gold)",
+  "timeframe": "1-hour",
+  "target_win_rate": "20-40%",
+  "result": {
+    "symbol": "XAUUSD",
+    "strategy": "RSI + Bollinger Band Mean Reversion",
+    "total_bars": 1485,
+    "backtest_bars": 1285,
+    "initial_capital": 10000,
+    "final_capital": 10000,
+    "total_return_pct": 0.0,
+    "num_trades": 0,
+    "buy_trades": 0,
+    "sell_trades": 0,
+    "winning_trades": 0,
+    "losing_trades": 0,
+    "win_rate_pct": 0,
+    "avg_win": 0,
+    "avg_loss": 0,
+    "profit_factor": 0,
+    "max_drawdown_pct": 0,
+    "trades": []
+  }
+}
