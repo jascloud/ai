@@ -548,6 +548,86 @@
           }
         }
       }
+    },
+    {
+      "phase": "phase_7_bull_bear_options_flow",
+      "timestamp": "2026-07-11T13:51:11.589019+00:00",
+      "note": "Fixed the int(confidence) truncation bug (rating=4+int(random.uniform(0.5,1.0)) always truncated to 4; rating=2-int(...) always truncated to 2) by removing random confidence entirely. Bull Researcher repointed to unusual call-side volume/open-interest skew, Bear Researcher to put/call ratio + put skew, both via Phase 1's options chain client called per-symbol. Verified with a controlled test (not just claimed): injected fake unusual call activity -> Bull rating hit 5; injected fake heavy put buying -> Bear rating hit 1, both moving off their old permanently-stuck values. Degrades to neutral (rating=3, confidence=0.0, data_source=degraded_no_data) when the options chain is unreachable (true in this session, no POLYGON_API_KEY). random import removed from the file entirely -- every agent is now either real-data-driven or an honest neutral fallback.",
+      "diagnostic": {
+        "n_trials_per_rating_level": 3000,
+        "agents_in_test": [
+          "Technical Analyst",
+          "Fundamental Analyst",
+          "Sentiment Analyst",
+          "News Analyst",
+          "Bull Researcher",
+          "Bear Researcher",
+          "Macro Agent",
+          "Geopolitical Agent"
+        ],
+        "by_technical_rating": {
+          "1": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 1.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 2.0,
+            "avg_flat_rating": 2.75
+          },
+          "2": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 1.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 2.5,
+            "avg_flat_rating": 2.875
+          },
+          "3": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 1.0,
+            "avg_weighted_rating": 3.0,
+            "avg_flat_rating": 3.0
+          },
+          "4": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 1.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 3.5,
+            "avg_flat_rating": 3.125
+          },
+          "5": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 1.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 4.0,
+            "avg_flat_rating": 3.25
+          }
+        },
+        "headline": {
+          "buy_clearance_at_technical_5": {
+            "legacy_flat_mean_4.0_threshold": 0.0,
+            "weighted_mean_3.5_threshold": 1.0
+          },
+          "sell_clearance_at_technical_1": {
+            "legacy_flat_mean_2.0_threshold": 0.0,
+            "weighted_mean_2.5_threshold": 1.0
+          }
+        }
+      }
     }
   ]
 }

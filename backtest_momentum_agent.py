@@ -7,7 +7,6 @@ Backtests momentum trading strategy using all 7 TradingAgents
 import json
 import sys
 from typing import Dict, List, Any, Tuple
-import random
 import numpy as np
 
 from market_data import fetch_sp500_universe, fetch_price_history, MarketDataError
@@ -29,6 +28,7 @@ from data_clients.macro_calendar import (
     get_recent_macro_releases,
 )
 from data_clients.geopolitical_risk import get_geopolitical_risk_level, get_oil_disruption_signal
+from data_clients.options_chain import get_options_chain, summarize_options_flow
 
 # NOTE ON DATA SOURCES:
 # TechnicalAnalyst runs on REAL historical closing prices (Alpha Vantage or
@@ -556,29 +556,88 @@ class GeopoliticalAgent(TradingAgent):
 
 
 class ResearchAgent(TradingAgent):
-    """Bull/Bear researcher agent"""
+    """PHASE 7: rebuilt on real options-flow data — the bug and the
+    simulation are BOTH gone.
+
+    Original bug: `rating = 4 + int(confidence)` /
+    `rating = 2 - int(confidence)` with `confidence = random.uniform(0.5,
+    1.0)`. Since `int()` truncates toward zero and confidence never
+    reaches 1.0 in practice, `int(confidence)` was 0 on essentially
+    every call — Bull Researcher's rating was permanently stuck at 4,
+    Bear Researcher's at 2. This was one of the two root causes (with
+    the flat-mean aggregation, fixed in Phase 0) of real signal being
+    drowned out.
+
+    Fix: repointed onto real per-symbol options chain data (see
+    data_clients/options_chain.py) instead of random confidence.
+      - Bull Researcher: unusual call-side activity (volume/open-interest
+        skew) — a real proxy for bullish options flow.
+      - Bear Researcher: put/call volume ratio + put-side skew — a real
+        proxy for hedging demand / bearish flow.
+    Both are one call each to the same options chain client Phase 1
+    already built (SPX/SPY was that phase's headline example; this
+    calls it per the symbol actually being evaluated). Degrades to
+    neutral (3) when the chain is unreachable — never fabricates flow.
+    """
 
     def __init__(self, name: str, focus: str, perspective: str):
         super().__init__(name, focus)
         self.perspective = perspective  # 'BULL' or 'BEAR'
 
     def analyze(self, symbol: str, price_data: Dict[str, Any]) -> Dict[str, Any]:
-        confidence = random.uniform(0.5, 1.0)
+        chain, source, reason = get_options_chain(underlying=symbol)
+
+        if source not in ("real", "cached_real") or not chain:
+            return {
+                'rating': 3,
+                'perspective': self.perspective,
+                'scenario': f"No options flow data available for {symbol}",
+                'degraded_reason': reason,
+                'confidence': 0.0,
+                'data_source': 'degraded_no_data',
+                'agent_role': 'other'
+            }
+
+        flow = summarize_options_flow(chain)
+        if not flow:
+            return {
+                'rating': 3,
+                'perspective': self.perspective,
+                'scenario': f"Options chain returned for {symbol} but had no scoreable volume",
+                'confidence': 0.0,
+                'data_source': 'degraded_no_data',
+                'agent_role': 'other'
+            }
 
         if self.perspective == 'BULL':
-            rating = 4 + int(confidence)
-            scenario = f"Bullish thesis: {symbol} shows strong momentum fundamentals with upside potential"
+            call_skew = flow['call_skew']
+            rating = 5 if call_skew > 2.0 else 4 if call_skew > 1.0 else 3
+            confidence = min(1.0, call_skew / 3.0)
+            scenario = (
+                f"Bullish thesis: {symbol} call volume/open-interest skew is {call_skew:.2f} "
+                f"({'unusual call activity' if call_skew > 1.0 else 'no unusual call activity'})"
+            )
         else:
-            rating = 2 - int(confidence)
-            scenario = f"Bearish thesis: {symbol} faces headwinds with downside risk"
+            put_call_ratio = flow['put_call_ratio']
+            put_skew = flow['put_skew']
+            if put_call_ratio > 1.5 and put_skew > 1.0:
+                rating = 1
+            elif put_call_ratio > 1.0:
+                rating = 2
+            else:
+                rating = 3
+            confidence = min(1.0, put_call_ratio / 2.0) if put_call_ratio != float("inf") else 1.0
+            scenario = (
+                f"Bearish thesis: {symbol} put/call ratio is {put_call_ratio:.2f}, put skew {put_skew:.2f} "
+                f"({'elevated hedging demand' if put_call_ratio > 1.0 else 'no elevated hedging demand'})"
+            )
 
         return {
-            'rating': max(1, min(5, rating)),
+            'rating': rating,
             'perspective': self.perspective,
-            'confidence': float(confidence),
             'scenario': scenario,
-            'debate_round': random.randint(1, 2),
-            'data_source': 'simulated_no_live_feed',
+            'confidence': float(confidence),
+            'data_source': source,
             'agent_role': 'other'
         }
 
