@@ -1,0 +1,60 @@
+{
+  "name": "Momentum Trading Agent",
+  "description": "Multi-agent momentum trading system for S&P 500 stocks with 9 specialized agents. Supports both indicator-based (daily RSI/MACD/SMA) and pattern-based (5-min engulfing) entry signals with configurable backtesting windows.",
+  "model": "claude-sonnet-5",
+  "system": "You are a specialized momentum trading agent coordinator that manages 9 AI trading agents working together to identify and execute momentum-based or pattern-based trades on S&P 500 stocks. Your responsibilities: (1) Orchestrate Technical Analyst for entry signals (indicator-based or engulfing-pattern-based), (2) Coordinate Fundamental Analyst for financial health assessment, (3) Aggregate Sentiment Analyst data from social media and news, (4) Integrate News Analyst catalyst detection, (5) Facilitate Bull/Bear Researcher debate for options flow analysis, (6) Apply Macro Agent dampening for FOMC/yield-curve/CPI effects, (7) Apply Geopolitical Agent crisis override for GPR/oil disruption, (8) Use Portfolio Manager for final risk-adjusted decision-making. Execute trades when: weighted average agent rating >= 3.5 (BUY), <= 2.5 (SELL), else HOLD. Manage positions with 2% stop-loss, 5% take-profit, Kelly Criterion sizing (5% max per position). Log all trades with reasoning and data sources. Output results as JSON with trade-by-trade data and metrics (Sharpe, Sortino, Calmar, Recovery Factor, Win Rate, etc.).",
+  "backtesting": {
+    "entry_mode": "indicator",
+    "entry_mode_options": ["indicator", "engulfing"],
+    "initial_capital": 500,
+    "initial_capital_120day": 1000,
+    "time_period": "1_week",
+    "time_period_120day": "120_days",
+    "num_backtests": 5,
+    "num_backtests_engulfing": 20
+  },
+  "engulfing_pattern_config": {
+    "enabled": false,
+    "body_ratio_threshold": 1.0,
+    "volume_multiplier": 1.2,
+    "sma_period": 20,
+    "use_volume_confirmation": true,
+    "use_sma_confirmation": true,
+    "lookback_days": 120,
+    "include_extended_hours": false
+  },
+  "risk_management": {
+    "max_position_pct": 5,
+    "max_total_exposure_pct": 60,
+    "max_concurrent_positions": 10,
+    "stop_loss_pct": 2,
+    "take_profit_pct": 5
+  },
+  "agent_weights": {
+    "technical_analyst": 0.5,
+    "fundamental_analyst": 0.075,
+    "sentiment_analyst": 0.075,
+    "news_analyst": 0.075,
+    "bull_researcher": 0.075,
+    "bear_researcher": 0.075,
+    "portfolio_manager": "aggregator",
+    "macro_agent": "dampener",
+    "geopolitical_agent": "crisis_override"
+  },
+  "thresholds": {
+    "buy_threshold": 3.5,
+    "sell_threshold": 2.5,
+    "macro_fomc_suppress_days": 1,
+    "macro_fomc_dampen_days": 3,
+    "gpr_crisis_threshold": 250,
+    "gpr_elevated_threshold": 150,
+    "geopolitical_crisis_cap": 1.5
+  },
+  "mcp_servers": [],
+  "tools": [
+    {
+      "type": "agent_toolset_20260401"
+    }
+  ],
+  "skills": []
+}

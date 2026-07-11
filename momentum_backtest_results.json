@@ -1,0 +1,301 @@
+{
+  "backtest_summary": {
+    "num_backtests": 5,
+    "initial_capital": 500.0,
+    "time_period": "1_week",
+    "symbols": [
+      "AAPL",
+      "MSFT",
+      "GOOGL",
+      "AMZN",
+      "TSLA"
+    ],
+    "agents": [
+      "Technical Analyst",
+      "Fundamental Analyst",
+      "Sentiment Analyst",
+      "News Analyst",
+      "Bull Researcher",
+      "Bear Researcher",
+      "Macro Agent",
+      "Geopolitical Agent",
+      "Portfolio Manager"
+    ]
+  },
+  "data_sources": {
+    "technical_analyst": "real_market_data (Alpha Vantage primary, Yahoo Finance fallback)",
+    "fundamental_analyst": "simulated_no_live_feed",
+    "sentiment_analyst": "simulated_no_live_feed",
+    "news_analyst": "simulated_no_live_feed",
+    "bull_researcher": "simulated_no_live_feed",
+    "bear_researcher": "simulated_no_live_feed",
+    "note": "TradingView has no public historical-data API; real prices are sourced from Alpha Vantage/Yahoo Finance as the practical equivalent."
+  },
+  "backtest_results": [
+    {
+      "backtest_id": 1,
+      "metrics": {
+        "total_return": 0.00042538220431140414,
+        "sharpe_ratio": 4.350374852093699,
+        "max_drawdown": -0.00031983624384313014,
+        "win_rate": 0.5,
+        "profit_factor": 0.0,
+        "recovery_factor": 1.3300000000001284,
+        "sortino_ratio": 15.353921853044032,
+        "calmar_ratio": 335.16000000003237,
+        "final_capital": 500.2126911021557,
+        "total_trades": 2,
+        "winning_trades": 1
+      },
+      "trades": [
+        {
+          "symbol": "AAPL",
+          "action": "BUY",
+          "price": 312.66,
+          "quantity": 0.07995906096078807,
+          "cost": 25.0
+        },
+        {
+          "symbol": "AMZN",
+          "action": "BUY",
+          "price": 245.34,
+          "quantity": 0.09680443466210158,
+          "cost": 23.75
+        },
+        {
+          "symbol": "AAPL",
+          "action": "SELL",
+          "exit_reason": "window_close",
+          "price": 315.32,
+          "quantity": 0.07995906096078807,
+          "proceeds": 25.212691102155695,
+          "profit": 0.21269110215569498
+        },
+        {
+          "symbol": "AMZN",
+          "action": "SELL",
+          "exit_reason": "window_close",
+          "price": 245.34,
+          "quantity": 0.09680443466210158,
+          "proceeds": 23.75,
+          "profit": 0.0
+        }
+      ],
+      "risk_blocked_trades": [],
+      "daily_returns": [
+        0.0,
+        -0.0003198362438431559,
+        0.0004367161504991011,
+        0.00045251545827984215,
+        -0.00014384441787761382
+      ],
+      "daily_portfolio_values": [
+        500.0,
+        500.0,
+        499.8400818780784,
+        500.0583701145014,
+        500.2846542570204,
+        500.2126911021557
+      ]
+    },
+    {
+      "backtest_id": 2,
+      "metrics": {
+        "total_return": -0.0037444157065600623,
+        "sharpe_ratio": -7.937253933193772,
+        "max_drawdown": -0.0037444157065600336,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "recovery_factor": -1.0000000000000075,
+        "sortino_ratio": 0.0,
+        "calmar_ratio": -252.00000000000193,
+        "final_capital": 498.12779214671997,
+        "total_trades": 1,
+        "winning_trades": 0
+      },
+      "trades": [
+        {
+          "symbol": "TSLA",
+          "action": "BUY",
+          "price": 425.3,
+          "quantity": 0.0587820362097343,
+          "cost": 25.0
+        },
+        {
+          "symbol": "TSLA",
+          "action": "SELL",
+          "exit_reason": "stop_loss",
+          "price": 393.45,
+          "quantity": 0.0587820362097343,
+          "proceeds": 23.127792146719962,
+          "profit": -1.8722078532800381
+        }
+      ],
+      "risk_blocked_trades": [],
+      "daily_returns": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        -0.0037444157065600623
+      ],
+      "daily_portfolio_values": [
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        498.12779214671997
+      ]
+    },
+    {
+      "backtest_id": 3,
+      "metrics": {
+        "total_return": 0.0,
+        "sharpe_ratio": 0.0,
+        "max_drawdown": 0.0,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "recovery_factor": 0.0,
+        "sortino_ratio": 0.0,
+        "calmar_ratio": 0.0,
+        "final_capital": 500.0,
+        "total_trades": 0,
+        "winning_trades": 0
+      },
+      "trades": [],
+      "risk_blocked_trades": [],
+      "daily_returns": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "daily_portfolio_values": [
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ]
+    },
+    {
+      "backtest_id": 4,
+      "metrics": {
+        "total_return": 0.0,
+        "sharpe_ratio": 0.0,
+        "max_drawdown": 0.0,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "recovery_factor": 0.0,
+        "sortino_ratio": 0.0,
+        "calmar_ratio": 0.0,
+        "final_capital": 500.0,
+        "total_trades": 0,
+        "winning_trades": 0
+      },
+      "trades": [],
+      "risk_blocked_trades": [],
+      "daily_returns": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "daily_portfolio_values": [
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0
+      ]
+    },
+    {
+      "backtest_id": 5,
+      "metrics": {
+        "total_return": -0.002819546300691172,
+        "sharpe_ratio": -11.878528880804396,
+        "max_drawdown": -0.0028195463006912558,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "recovery_factor": -0.9999999999999704,
+        "sortino_ratio": -18.77442745184223,
+        "calmar_ratio": -251.99999999999253,
+        "final_capital": 498.5902268496544,
+        "total_trades": 2,
+        "winning_trades": 0
+      },
+      "trades": [
+        {
+          "symbol": "AAPL",
+          "action": "BUY",
+          "price": 311.23,
+          "quantity": 0.08032644667930469,
+          "cost": 25.0
+        },
+        {
+          "symbol": "MSFT",
+          "action": "BUY",
+          "price": 428.05,
+          "quantity": 0.05548417240976521,
+          "cost": 23.75
+        },
+        {
+          "symbol": "MSFT",
+          "action": "SELL",
+          "exit_reason": "stop_loss",
+          "price": 416.67,
+          "quantity": 0.05548417240976521,
+          "proceeds": 23.118590117976872,
+          "profit": -0.631409882023128
+        },
+        {
+          "symbol": "AAPL",
+          "action": "SELL",
+          "exit_reason": "stop_loss",
+          "price": 301.54,
+          "quantity": 0.08032644667930469,
+          "proceeds": 24.22163673167754,
+          "profit": -0.7783632683224617
+        }
+      ],
+      "risk_blocked_trades": [],
+      "daily_returns": [
+        0.0,
+        -0.0018877595192112722,
+        -0.0009335490976756885,
+        0.0,
+        0.0
+      ],
+      "daily_portfolio_values": [
+        500.0,
+        500.0,
+        499.05612024039436,
+        498.5902268496544,
+        498.5902268496544,
+        498.5902268496544
+      ]
+    }
+  ],
+  "aggregate_metrics": {
+    "avg_total_return": -0.0012277159605879663,
+    "std_total_return": 0.0017096787970614616,
+    "avg_sharpe_ratio": -3.0930815923808934,
+    "std_sharpe_ratio": 5.919281054996557,
+    "avg_max_drawdown": -0.001376759650218884,
+    "std_max_drawdown": 0.0015871641298742095,
+    "avg_win_rate": 0.1,
+    "std_win_rate": 0.20000000000000004,
+    "avg_profit_factor": 0.0,
+    "std_profit_factor": 0.0,
+    "avg_recovery_factor": -0.1339999999999699,
+    "avg_sortino_ratio": -0.6841011197596394,
+    "avg_calmar_ratio": -33.76799999999242,
+    "total_trades_across_backtests": 5,
+    "avg_trades_per_backtest": 1.0
+  }
+}

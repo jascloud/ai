@@ -1,0 +1,113 @@
+# Momentum Trading Agent - Deployment Configuration
+# Deploy with: claude agent deploy --config deployment-config.yaml
+#
+# IMPORTANT: this file only configures the agent/schedule/credentials. The
+# deployment ENVIRONMENT ("Trading") must separately be given this
+# repository as a SOURCE, or /workspace will be empty when the agent runs
+# and run_momentum_backtest.sh will not exist. See `source:` below.
+
+agent:
+  name: "Momentum Trading Agent"
+  version: "v1"
+  model: "claude-sonnet-5"
+  description: "Multi-agent momentum trading system for S&P 500 stocks with 7 specialized agents"
+
+# Where the deployment pulls code from before each run. Without this,
+# the environment's /workspace starts empty every run.
+source:
+  type: "git"
+  repo: "https://github.com/jascloud/ai.git"
+  branch: "claude/tradingagents-system-setup-ucfkrt"
+  clone_target: "/workspace"
+
+trigger:
+  type: "schedule"
+  frequency: "weekdays"
+  timezone: "Australia/Perth"
+  cron: "0 9 * * 1-5"  # 9:00 AM Monday-Friday
+  next_runs:
+    - "Mon, Jul 13, 2026 at 9:00 AM"
+    - "Tue, Jul 14, 2026 at 9:00 AM"
+    - "Wed, Jul 15, 2026 at 9:00 AM"
+    - "Thu, Jul 16, 2026 at 9:00 AM"
+    - "Fri, Jul 17, 2026 at 9:00 AM"
+
+environment:
+  name: "Trading"
+  # This environment's own network/egress policy must allow outbound
+  # HTTPS to whichever real-data host is used below (Alpha Vantage
+  # and/or Yahoo Finance). That policy is separate from any dev/session
+  # sandbox policy and is configured wherever this platform manages
+  # environment network rules.
+  variables:
+    TRADINGAGENTS_LLM_PROVIDER: "anthropic"
+    TRADINGAGENTS_DEEP_THINK_LLM: "claude-opus-4-8"
+    TRADINGAGENTS_QUICK_THINK_LLM: "claude-opus-4-8"
+    INITIAL_CAPITAL: "500"
+    TIME_PERIOD: "1_week"
+    NUM_BACKTESTS: "5"
+    SYMBOLS: "AAPL,MSFT,GOOGL,AMZN,TSLA"
+    OUTPUT_FORMAT: "json"
+    TIMEZONE: "Australia/Perth"
+
+credentials:
+  vault: "Trading vault"
+  required:
+    # Real market data (Technical Analyst). Primary source — if this is
+    # missing/invalid, the agent falls back to Yahoo Finance (no key
+    # needed, but not always reachable) and fails loudly if neither works.
+    - ALPHA_VANTAGE_API_KEY
+  optional:
+    # Only needed if you want the coordinator LLM itself to call out to
+    # these providers beyond the bundled model; not required for the
+    # backtest engine (backtest_momentum_agent.py) to run.
+    - ANTHROPIC_API_KEY
+    - OPENAI_API_KEY
+
+initial_message: |
+  Ensure the repository is present before doing anything else: if
+  /workspace/run_momentum_backtest.sh does not exist, run
+    git clone -b claude/tradingagents-system-setup-ucfkrt https://github.com/jascloud/ai.git /workspace
+  Otherwise run `cd /workspace && git pull`.
+
+  Then run today's momentum trading backtest cycle for S&P 500 stocks:
+  1. bash run_momentum_backtest.sh
+  2. If it exits non-zero (e.g. real market data unreachable, missing
+     ALPHA_VANTAGE_API_KEY), report the exact error text — do not retry
+     blindly, and never fabricate metrics to fill in for a failed run.
+  3. On success, read momentum_backtest_results.json for the aggregate
+     metrics (total return, Sharpe ratio, max drawdown, win rate, profit
+     factor) and the `data_sources` block (Technical Analyst uses real
+     prices; Fundamental/Sentiment/News/Bull/Bear are simulated pending a
+     live feed — say so explicitly in the summary).
+  4. Flag anything unusual: Sharpe ratio below 1.0, max drawdown beyond
+     -15%, or win rate below 45%.
+  5. Summarize in 3-5 bullets, noting trend vs. yesterday's saved JSON if
+     present.
+
+execution:
+  command: "bash run_momentum_backtest.sh"
+  working_directory: "/workspace"
+  timeout_minutes: 30
+
+output:
+  files:
+    - momentum_backtest_results.json
+    - momentum_backtest_report_*.md
+  format: "json"
+  storage: "results_bucket"
+
+monitoring:
+  enabled: true
+  alerts:
+    on_failure: true
+    on_success: false
+  notifications:
+    email: "Singh.jas@aol.com"
+    slack: "trading-results"
+
+schedule_details:
+  # Runs every business day (Monday-Friday) at 9:00 AM Perth time
+  recurrence: "weekdays"
+  timezone: "GMT+08:00"
+  time: "09:00"

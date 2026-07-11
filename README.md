@@ -1,6 +1,6 @@
-# AI Repository - CCXT Integration
+# AI Repository - Trading System Integration
 
-This repository contains integration and setup for the CCXT cryptocurrency trading library.
+This repository contains integration and setup for advanced trading systems and libraries.
 
 ## Structure
 
@@ -8,6 +8,35 @@ This repository contains integration and setup for the CCXT cryptocurrency tradi
   - TypeScript source of truth in `ts/src/`
   - Transpiled to JavaScript, Python, PHP, C#, and Go
   - Comprehensive documentation in `CLAUDE.md`
+
+- **trading-agents/** - TradingAgents Framework (https://github.com/TauricResearch/TradingAgents)
+  - Multi-agent LLM financial trading framework
+  - Specialized agents: Fundamental, Sentiment, News, Technical Analysts
+  - Researcher, Trader, Risk Management, and Portfolio Manager agents
+  - Python-based implementation with CLI support
+
+## TradingAgents Quick Start
+
+1. **Install dependencies**:
+   ```bash
+   cd trading-agents
+   pip install -r requirements.txt
+   # or
+   pip install -e .
+   ```
+
+2. **Configure API keys**: Copy `.env.example` to `.env` and add your:
+   - LLM provider keys (OpenAI, Anthropic, Gemini, etc.)
+   - Data provider credentials (Alpha Vantage, Financial APIs, etc.)
+
+3. **Run the framework**:
+   ```bash
+   python main.py
+   # or use CLI
+   python cli/main.py
+   ```
+
+4. **Read the docs**: See `trading-agents/README.md` for detailed documentation
 
 ## CCXT Skills
 
