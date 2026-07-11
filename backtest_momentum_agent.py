@@ -28,6 +28,7 @@ from data_clients.macro_calendar import (
     get_fed_funds_rate_trend,
     get_recent_macro_releases,
 )
+from data_clients.geopolitical_risk import get_geopolitical_risk_level, get_oil_disruption_signal
 
 # NOTE ON DATA SOURCES:
 # TechnicalAnalyst runs on REAL historical closing prices (Alpha Vantage or
@@ -490,6 +491,70 @@ class MacroAgent(TradingAgent):
         }
 
 
+class GeopoliticalAgent(TradingAgent):
+    """PHASE 6: new net-new agent — does not replace anything. Rating
+    is neutral (3) by default and only moves during an active risk
+    event, per the requirement ("low-frequency updates, rating mostly
+    neutral except during active risk events"). Unlike MacroAgent, this
+    IS part of the weighted-average 'other' bucket (its rating
+    naturally sits at neutral 99% of the time) — but PortfolioManager
+    (Phase 0) also carries a crisis override keyed specifically on this
+    agent's name/rating: a rating <= 1.5 caps the decision at HOLD
+    regardless of the weighted average, so a real crisis "pulls the
+    aggregate down materially" instead of being diluted to one vote
+    among several, per the requirement.
+
+    Real data: the Caldara-Iacoviello Geopolitical Risk (GPR) Index
+    (public, keyless — see geopolitical_risk.py for why crisis/elevated
+    thresholds are set where they are against its documented real
+    distribution) and EIA WTI spot price as an oil-disruption proxy
+    (EIA_API_KEY). Degrades to neutral, not a fabricated risk level,
+    when both are unreachable.
+    """
+
+    def analyze(self, symbol: str, price_data: Dict[str, Any]) -> Dict[str, Any]:
+        risk_level, latest_gpr, gpr_source, gpr_reason = get_geopolitical_risk_level()
+        disrupted, oil_pct_change, oil_source, oil_reason = get_oil_disruption_signal()
+
+        real_signals_used = []
+        degraded_reasons = []
+        notes = []
+        rating = 3
+
+        if gpr_source == "real":
+            real_signals_used.append("gpr_index")
+            if risk_level == "crisis":
+                rating = 1
+                notes.append(f"GPR index at crisis level ({latest_gpr:.0f})")
+            elif risk_level == "elevated":
+                rating = 2
+                notes.append(f"GPR index elevated ({latest_gpr:.0f})")
+        else:
+            degraded_reasons.append(f"gpr_index: {gpr_reason}")
+
+        if oil_source == "real":
+            real_signals_used.append("oil_disruption")
+            if disrupted:
+                rating = min(rating, 1 if abs(oil_pct_change) > 0.10 else 2)
+                notes.append(f"WTI spot moved {oil_pct_change*100:+.1f}% — possible supply disruption")
+        else:
+            degraded_reasons.append(f"oil_disruption: {oil_reason}")
+
+        data_source = "real" if len(real_signals_used) == 2 else "real_partial" if real_signals_used else "degraded_no_data"
+        confidence = 0.8 if len(real_signals_used) == 2 else 0.4 if real_signals_used else 0.0
+
+        return {
+            'rating': rating,
+            'risk_level': risk_level or 'unknown',
+            'note': '; '.join(notes) if notes else 'no active geopolitical/commodity risk event detected',
+            'real_signals_used': real_signals_used,
+            'degraded_reasons': degraded_reasons,
+            'confidence': float(confidence),
+            'data_source': data_source,
+            'agent_role': 'other'
+        }
+
+
 class ResearchAgent(TradingAgent):
     """Bull/Bear researcher agent"""
 
@@ -705,6 +770,7 @@ class MomentumBacktester:
             ResearchAgent("Bull Researcher", "upside_scenarios", "BULL"),
             ResearchAgent("Bear Researcher", "downside_risks", "BEAR"),
             MacroAgent("Macro Agent", "macro_dampener"),
+            GeopoliticalAgent("Geopolitical Agent", "geopolitical_risk"),
             PortfolioManager("Portfolio Manager", "risk_control")
         ]
 

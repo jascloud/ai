@@ -468,6 +468,86 @@
           }
         }
       }
+    },
+    {
+      "phase": "phase_6_geopolitical_agent",
+      "timestamp": "2026-07-11T13:48:25.279261+00:00",
+      "note": "Added new Geopolitical Agent (net-new, not a replacement). Unlike Macro Agent, this IS part of the weighted 'other' bucket (rating sits at neutral 3 by default per the requirement), but PortfolioManager's Phase-0 crisis override (rating<=1.5 on this specific agent forces HOLD) provides the 'pull the aggregate down materially during active risk events' behavior without diluting it into one vote among several. Real data: Caldara-Iacoviello GPR index (public, keyless) and EIA WTI spot price (EIA_API_KEY) as an oil-disruption proxy. Verified end-to-end with a controlled test: a crisis-level Geopolitical Agent rating (1) correctly blocked a unanimous rating=5 BUY signal (decision=HOLD). Under real conditions right now both feeds are unreachable in this session (GPR file host blocked by egress policy, EIA_API_KEY unset), so the agent reports neutral and this diagnostic should show no change from Phase 5.",
+      "diagnostic": {
+        "n_trials_per_rating_level": 3000,
+        "agents_in_test": [
+          "Technical Analyst",
+          "Fundamental Analyst",
+          "Sentiment Analyst",
+          "News Analyst",
+          "Bull Researcher",
+          "Bear Researcher",
+          "Macro Agent",
+          "Geopolitical Agent"
+        ],
+        "by_technical_rating": {
+          "1": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 1.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 2.0,
+            "avg_flat_rating": 2.75
+          },
+          "2": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 1.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 2.5,
+            "avg_flat_rating": 2.875
+          },
+          "3": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 1.0,
+            "avg_weighted_rating": 3.0,
+            "avg_flat_rating": 3.0
+          },
+          "4": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 1.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 3.5,
+            "avg_flat_rating": 3.125
+          },
+          "5": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 1.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 4.0,
+            "avg_flat_rating": 3.25
+          }
+        },
+        "headline": {
+          "buy_clearance_at_technical_5": {
+            "legacy_flat_mean_4.0_threshold": 0.0,
+            "weighted_mean_3.5_threshold": 1.0
+          },
+          "sell_clearance_at_technical_1": {
+            "legacy_flat_mean_2.0_threshold": 0.0,
+            "weighted_mean_2.5_threshold": 1.0
+          }
+        }
+      }
     }
   ]
 }
