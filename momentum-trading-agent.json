@@ -1,0 +1,95 @@
+{
+  "name": "Momentum Trading Agent",
+  "description": "Multi-agent momentum trading system for S&P 500 stocks with comprehensive analysis and risk management",
+  "model": "claude-opus-4-8",
+  "system": "You are a specialized momentum trading agent that identifies and trades S&P 500 stocks with strong directional momentum. Coordinate with 7 specialized agents: Technical Analyst (momentum indicators), Fundamental Analyst (company strength), Sentiment Analyst (market mood), News Analyst (catalysts), Bull/Bear Researchers (debate), and Portfolio Manager (risk management). Execute momentum-based trading decisions with a focus on entry timing and position sizing based on momentum strength.",
+  "mcp_servers": [],
+  "strategy": {
+    "type": "momentum_trading",
+    "asset_class": "equity",
+    "universe": "sp500",
+    "entry_conditions": [
+      "RSI > 65 (strong uptrend)",
+      "MACD positive divergence",
+      "Price above 20-day SMA",
+      "Volume confirmation above average"
+    ],
+    "exit_conditions": [
+      "Stop loss at 2% below entry",
+      "Take profit at 5% above entry",
+      "RSI > 80 (overbought exit signal)",
+      "MACD bearish crossover"
+    ],
+    "position_sizing": "kelly_criterion",
+    "max_position_size": 0.05,
+    "risk_per_trade": 0.01
+  },
+  "backtesting": {
+    "initial_capital": 100000,
+    "time_period": "1_week",
+    "num_backtests": 5,
+    "metrics": [
+      "total_return",
+      "sharpe_ratio",
+      "max_drawdown",
+      "win_rate",
+      "profit_factor",
+      "recovery_factor",
+      "sortino_ratio",
+      "calmar_ratio"
+    ],
+    "rebalance_frequency": "daily"
+  },
+  "agents": {
+    "technical_analyst": {
+      "enabled": true,
+      "focus": "momentum_indicators",
+      "indicators": ["RSI", "MACD", "Stochastic", "CCI", "ROC"]
+    },
+    "fundamental_analyst": {
+      "enabled": true,
+      "focus": "earnings_quality",
+      "metrics": ["PE_ratio", "revenue_growth", "profit_margin"]
+    },
+    "sentiment_analyst": {
+      "enabled": true,
+      "focus": "market_sentiment",
+      "sources": ["social_media", "news_sentiment"]
+    },
+    "news_analyst": {
+      "enabled": true,
+      "focus": "catalyst_detection",
+      "lookback_days": 7
+    },
+    "bull_researcher": {
+      "enabled": true,
+      "focus": "upside_scenarios",
+      "debate_rounds": 2
+    },
+    "bear_researcher": {
+      "enabled": true,
+      "focus": "downside_risks",
+      "debate_rounds": 2
+    },
+    "portfolio_manager": {
+      "enabled": true,
+      "focus": "risk_control",
+      "max_correlation": 0.6,
+      "max_sector_exposure": 0.3
+    }
+  },
+  "tools": [
+    {
+      "type": "agent_toolset_20260401"
+    }
+  ],
+  "skills": [
+    "technical_analysis",
+    "fundamental_analysis",
+    "sentiment_analysis",
+    "news_analysis",
+    "research_debate",
+    "portfolio_management",
+    "risk_management"
+  ]
+}

@@ -1,0 +1,195 @@
+{
+  "backtest_summary": {
+    "num_backtests": 5,
+    "initial_capital": 100000.0,
+    "time_period": "1_week",
+    "agents": [
+      "Technical Analyst",
+      "Fundamental Analyst",
+      "Sentiment Analyst",
+      "News Analyst",
+      "Bull Researcher",
+      "Bear Researcher",
+      "Portfolio Manager"
+    ]
+  },
+  "backtest_results": [
+    {
+      "backtest_id": 1,
+      "metrics": {
+        "total_return": 0.0,
+        "sharpe_ratio": 0.0,
+        "max_drawdown": 0.0,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "recovery_factor": 0.0,
+        "sortino_ratio": 0.0,
+        "calmar_ratio": 0.0,
+        "final_capital": 100000.0,
+        "total_trades": 0,
+        "winning_trades": 0
+      },
+      "trades": [],
+      "daily_returns": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "daily_portfolio_values": [
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0
+      ]
+    },
+    {
+      "backtest_id": 2,
+      "metrics": {
+        "total_return": 0.0,
+        "sharpe_ratio": 0.0,
+        "max_drawdown": 0.0,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "recovery_factor": 0.0,
+        "sortino_ratio": 0.0,
+        "calmar_ratio": 0.0,
+        "final_capital": 100000.0,
+        "total_trades": 0,
+        "winning_trades": 0
+      },
+      "trades": [],
+      "daily_returns": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "daily_portfolio_values": [
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0
+      ]
+    },
+    {
+      "backtest_id": 3,
+      "metrics": {
+        "total_return": 0.0,
+        "sharpe_ratio": 0.0,
+        "max_drawdown": 0.0,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "recovery_factor": 0.0,
+        "sortino_ratio": 0.0,
+        "calmar_ratio": 0.0,
+        "final_capital": 100000.0,
+        "total_trades": 0,
+        "winning_trades": 0
+      },
+      "trades": [],
+      "daily_returns": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "daily_portfolio_values": [
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0
+      ]
+    },
+    {
+      "backtest_id": 4,
+      "metrics": {
+        "total_return": 0.0,
+        "sharpe_ratio": 0.0,
+        "max_drawdown": 0.0,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "recovery_factor": 0.0,
+        "sortino_ratio": 0.0,
+        "calmar_ratio": 0.0,
+        "final_capital": 100000.0,
+        "total_trades": 0,
+        "winning_trades": 0
+      },
+      "trades": [],
+      "daily_returns": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "daily_portfolio_values": [
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0
+      ]
+    },
+    {
+      "backtest_id": 5,
+      "metrics": {
+        "total_return": 0.0,
+        "sharpe_ratio": 0.0,
+        "max_drawdown": 0.0,
+        "win_rate": 0.0,
+        "profit_factor": 0.0,
+        "recovery_factor": 0.0,
+        "sortino_ratio": 0.0,
+        "calmar_ratio": 0.0,
+        "final_capital": 100000.0,
+        "total_trades": 0,
+        "winning_trades": 0
+      },
+      "trades": [],
+      "daily_returns": [
+        0.0,
+        0.0,
+        0.0,
+        0.0,
+        0.0
+      ],
+      "daily_portfolio_values": [
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0,
+        100000.0
+      ]
+    }
+  ],
+  "aggregate_metrics": {
+    "avg_total_return": 0.0,
+    "std_total_return": 0.0,
+    "avg_sharpe_ratio": 0.0,
+    "std_sharpe_ratio": 0.0,
+    "avg_max_drawdown": 0.0,
+    "std_max_drawdown": 0.0,
+    "avg_win_rate": 0.0,
+    "std_win_rate": 0.0,
+    "avg_profit_factor": 0.0,
+    "std_profit_factor": 0.0,
+    "avg_recovery_factor": 0.0,
+    "avg_sortino_ratio": 0.0,
+    "avg_calmar_ratio": 0.0,
+    "total_trades_across_backtests": 0,
+    "avg_trades_per_backtest": 0.0
+  }
+}
