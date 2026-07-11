@@ -852,6 +852,7 @@ class MomentumBacktester:
         "2_week": 10,
         "1_month": 21,
         "3_month": 63,
+        "30_days": 30,   # rolling 30-trading-day window
         "120_days": 120,  # rolling 120-calendar-day windows
     }
     INDICATOR_LOOKBACK = 60  # trailing real trading days used for RSI/MACD/SMA/Momentum

@@ -1,9 +1,17 @@
 #!/usr/bin/env python3
 """
-Engulfing candlestick pattern detection on 5-minute bars.
+Engulfing candlestick pattern detection on intraday bars.
 
-Detects bullish/bearish engulfing patterns during regular trading hours (9:30-16:00 ET).
-Returns pattern signals (bullish/bearish/none) with confidence based on volume and SMA confirmation.
+Detects bullish/bearish engulfing patterns. The pattern math (body-ratio,
+engulfment, SMA/volume confirmation) is bar-resolution-agnostic — it
+operates purely on whatever list of OHLCV bars it's given, whether those
+are 5-min, 1-hour, or any other intraday resolution. The cache file
+records which resolution it actually holds (`bar_resolution` per symbol)
+so a run is never silently mislabeled.
+
+The original build was 5-min-only (module/class names below still say
+"5min" for that reason); intraday_bar_cache.json / MOMENTUM_INTRADAY_CACHE_FILE
+now support any resolution written into it.
 """
 
 import json
@@ -14,17 +22,22 @@ from typing import Tuple, Optional, List, Dict, Any
 
 from data_clients.base_client import BaseRealDataClient, DataClientError
 
-DEFAULT_5MIN_CACHE_FILE = "intraday_5min_cache.json"
+DEFAULT_INTRADAY_CACHE_FILE = "intraday_bar_cache.json"
+# Old name kept as a fallback so a cache file written by an earlier 5-min-only
+# run is still picked up without needing to be regenerated.
+LEGACY_5MIN_CACHE_FILE = "intraday_5min_cache.json"
 
 
 def _fetch_from_cache_file(symbol: str, start_date: str, end_date: str) -> Optional[List[Dict[str, Any]]]:
-    """Real 5-min bars written to disk by whoever orchestrates a run (e.g.
-    via an IBKR MCP connector's get_price_history, converted to this
-    client's bar shape) — same local-cache-file-first convention
-    market_data.py already uses for daily closes. Returns None (never
-    fabricates) if the cache file, symbol, or in-range bars are missing,
-    so the caller falls through to the Polygon fetch."""
-    cache_path = os.environ.get("MOMENTUM_5MIN_CACHE_FILE", DEFAULT_5MIN_CACHE_FILE)
+    """Real intraday bars (any resolution) written to disk by whoever
+    orchestrates a run (e.g. via an IBKR MCP connector's get_price_history,
+    converted to this client's bar shape) — same local-cache-file-first
+    convention market_data.py already uses for daily closes. Returns None
+    (never fabricates) if the cache file, symbol, or in-range bars are
+    missing, so the caller falls through to the Polygon fetch."""
+    cache_path = os.environ.get("MOMENTUM_INTRADAY_CACHE_FILE") or os.environ.get("MOMENTUM_5MIN_CACHE_FILE")
+    if not cache_path:
+        cache_path = DEFAULT_INTRADAY_CACHE_FILE if os.path.isfile(DEFAULT_INTRADAY_CACHE_FILE) else LEGACY_5MIN_CACHE_FILE
     if not os.path.isfile(cache_path):
         return None
 
