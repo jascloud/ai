@@ -15,6 +15,10 @@ from data_clients.equity_quotes import get_level1_quote
 from data_clients.ohlcv_multi_timeframe import get_multi_timeframe_ohlcv
 from data_clients.extended_hours import get_overnight_gap
 from data_clients.risk_monitor import PositionRiskMonitor, RiskLimits
+from data_clients.earnings_calendar import get_earnings_surprise_history
+from data_clients.sec_filings import get_fundamentals_from_filings
+from data_clients.analyst_ratings import get_analyst_consensus
+from data_clients.estimate_revisions import get_estimate_revision_direction
 
 # NOTE ON DATA SOURCES:
 # TechnicalAnalyst runs on REAL historical closing prices (Alpha Vantage or
@@ -201,27 +205,99 @@ class TechnicalAnalyst(TradingAgent):
 
 
 class FundamentalAnalyst(TradingAgent):
-    """Fundamental analysis agent"""
+    """PHASE 2: rebuilt on four real data sources — the simulated
+    random-rating path (random.uniform PE ratio / revenue growth /
+    profit margin) has been removed entirely, not just deprioritized.
+
+    Rating is a -1/0/+1 score per available signal, averaged and mapped
+    onto the 1-5 scale (3 = neutral/no lean). If NONE of the four
+    sources are reachable (e.g. no API keys configured), the agent
+    reports a neutral rating with confidence=0.0 and
+    data_source='degraded_no_data' — an honest "we don't know" instead
+    of a fabricated number standing in for real data.
+    """
 
     def analyze(self, symbol: str, price_data: Dict[str, Any]) -> Dict[str, Any]:
-        # Simulated fundamental analysis
-        pe_ratio = random.uniform(10, 35)
-        revenue_growth = random.uniform(-10, 30)
-        profit_margin = random.uniform(5, 25)
+        current_price = price_data.get('current_price')
+        components = []
+        sources_used = []
+        degraded_reasons = []
 
-        rating = 3
-        if pe_ratio < 20 and revenue_growth > 10 and profit_margin > 10:
-            rating = 5
-        elif pe_ratio > 30 or revenue_growth < 0:
-            rating = 2
+        surprises, earn_source, earn_reason = get_earnings_surprise_history(symbol)
+        if earn_source in ("real", "cached_real") and surprises:
+            latest_surprise_pct = surprises[0].get("surprise_pct")
+            if latest_surprise_pct is not None:
+                components.append(1 if latest_surprise_pct > 5 else -1 if latest_surprise_pct < -5 else 0)
+                sources_used.append("earnings_calendar")
+        else:
+            degraded_reasons.append(f"earnings_calendar: {earn_reason}")
+
+        revisions, rev_source, rev_reason = get_estimate_revision_direction(symbol)
+        if rev_source in ("real", "cached_real") and revisions:
+            for direction in (revisions.get("eps_revision_direction"), revisions.get("revenue_revision_direction")):
+                if direction == "up":
+                    components.append(1)
+                elif direction == "down":
+                    components.append(-1)
+                elif direction == "flat":
+                    components.append(0)
+            sources_used.append("estimate_revisions")
+        else:
+            degraded_reasons.append(f"estimate_revisions: {rev_reason}")
+
+        consensus, cons_source, cons_reason = get_analyst_consensus(symbol, current_price or 0.0)
+        if cons_source in ("real", "cached_real") and consensus:
+            score = 0
+            lean = consensus.get("rating_lean")
+            if lean in ("strong_buy", "buy"):
+                score = 1
+            elif lean in ("sell", "strong_sell"):
+                score = -1
+            upside_pct = consensus.get("upside_pct")
+            if upside_pct is not None:
+                if upside_pct > 0.05:
+                    score = max(score, 1)
+                elif upside_pct < -0.05:
+                    score = min(score, -1)
+            components.append(score)
+            sources_used.append("analyst_ratings")
+        else:
+            degraded_reasons.append(f"analyst_ratings: {cons_reason}")
+
+        filings, filings_source, filings_reason = get_fundamentals_from_filings(symbol)
+        if filings_source in ("real", "cached_real") and filings:
+            guidance = filings.get("guidance_sentiment")
+            if guidance == "positive":
+                components.append(1)
+            elif guidance == "negative":
+                components.append(-1)
+            elif guidance == "neutral":
+                components.append(0)
+            for trend_key in ("revenue_trend_pct", "eps_trend_pct"):
+                trend = filings.get(trend_key)
+                if trend is not None:
+                    components.append(1 if trend > 0.03 else -1 if trend < -0.03 else 0)
+            sources_used.append("sec_filings")
+        else:
+            degraded_reasons.append(f"sec_filings: {filings_reason}")
+
+        if components:
+            score = sum(components) / len(components)
+            rating = max(1, min(5, int(round(3 + score * 2))))
+            confidence = min(1.0, abs(score) * 0.5 + 0.25)
+            data_source = "real_market_data" if len(sources_used) == 4 else "real_market_data_partial"
+        else:
+            rating = 3
+            confidence = 0.0
+            data_source = "degraded_no_data"
 
         return {
             'rating': rating,
-            'pe_ratio': float(pe_ratio),
-            'revenue_growth': float(revenue_growth),
-            'profit_margin': float(profit_margin),
-            'recommendation': 'STRONG_BUY' if rating == 5 else 'BUY' if rating >= 4 else 'HOLD',
-            'data_source': 'simulated_no_live_feed',
+            'sources_used': sources_used,
+            'degraded_reasons': degraded_reasons,
+            'confidence': float(confidence),
+            'recommendation': 'STRONG_BUY' if rating == 5 else 'BUY' if rating >= 4 else 'SELL' if rating <= 2 else 'HOLD',
+            'data_source': data_source,
             'agent_role': 'other'
         }
 
