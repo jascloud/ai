@@ -25,7 +25,7 @@
     "risk_per_trade": 0.01
   },
   "backtesting": {
-    "initial_capital": 100000,
+    "initial_capital": 500,
     "time_period": "1_week",
     "num_backtests": 5,
     "metrics": [

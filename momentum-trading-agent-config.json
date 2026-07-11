@@ -40,7 +40,7 @@
       "risk_per_trade": 0.01
     },
     "backtesting": {
-      "initial_capital": 100000,
+      "initial_capital": 500,
       "time_period": "1_week",
       "num_backtests": 5,
       "metrics": [
@@ -119,7 +119,7 @@
     },
     {
       "type": "python_direct",
-      "command": "python3 backtest_momentum_agent.py --capital 100000 --num-backtests 5",
+      "command": "python3 backtest_momentum_agent.py --capital 500 --num-backtests 5",
       "description": "Direct Python execution with customizable parameters"
     },
     {
@@ -134,7 +134,7 @@
     },
     {
       "type": "python_api",
-      "code": "from backtest_momentum_agent import MomentumBacktester; backtester = MomentumBacktester(100000, '1_week', 5); results = backtester.run_all_backtests()",
+      "code": "from backtest_momentum_agent import MomentumBacktester; backtester = MomentumBacktester(500, '1_week', 5); results = backtester.run_all_backtests()",
       "description": "Python package import and direct usage"
     }
   ],
@@ -143,7 +143,7 @@
     "structure": {
       "backtest_summary": {
         "num_backtests": 5,
-        "initial_capital": 100000,
+        "initial_capital": 500,
         "time_period": "1_week",
         "agents": 7
       },

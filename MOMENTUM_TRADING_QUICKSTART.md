@@ -46,7 +46,7 @@ TRADINGAGENTS_DEEP_THINK_LLM=claude-opus-4-8
 
 ### Step 3: Run Backtests
 
-**Simple (uses defaults: $100k capital, 1 week, 5 backtests)**:
+**Simple (uses defaults: $500 capital, 1 week, 5 backtests)**:
 ```bash
 bash run_momentum_backtest.sh
 ```
@@ -59,7 +59,7 @@ bash run_momentum_backtest.sh 50000 1_week 10
 **Via Python directly**:
 ```bash
 python3 backtest_momentum_agent.py \
-  --capital 100000 \
+  --capital 500 \
   --period 1_week \
   --num-backtests 5 \
   --output results.json
@@ -94,7 +94,7 @@ EOF
 {
   "backtest_summary": {
     "num_backtests": 5,
-    "initial_capital": 100000,
+    "initial_capital": 500,
     "time_period": "1_week",
     "agents": [
       "Technical Analyst",
@@ -118,7 +118,7 @@ EOF
         "recovery_factor": 1.67,
         "sortino_ratio": 2.15,
         "calmar_ratio": 1.67,
-        "final_capital": 114500.00,
+        "final_capital": 572.50,
         "total_trades": 13,
         "winning_trades": 8
       },
@@ -127,20 +127,20 @@ EOF
           "symbol": "AAPL",
           "action": "BUY",
           "price": 145.32,
-          "quantity": 34.5,
-          "cost": 5011.52
+          "quantity": 0.172,
+          "cost": 25.00
         },
         {
           "symbol": "AAPL",
           "action": "SELL",
           "price": 148.75,
-          "quantity": 34.5,
-          "proceeds": 5131.88,
-          "profit": 120.36
+          "quantity": 0.172,
+          "proceeds": 25.59,
+          "profit": 0.59
         }
       ],
       "daily_returns": [0.0045, 0.0032, -0.0018, 0.0078, 0.0089],
-      "daily_portfolio_values": [100000, 100450, 100882, 100750, 100828, 101719]
+      "daily_portfolio_values": [500.00, 502.25, 504.41, 503.75, 504.14, 508.60]
     }
   ],
   "aggregate_metrics": {
@@ -240,7 +240,7 @@ claude code --config momentum-trading-agent.json
 claude code console --config momentum-trading-agent.json
 
 # Execute backtests
-claude code run backtest_momentum_agent.py --capital 100000
+claude code run backtest_momentum_agent.py --capital 500
 ```
 
 ### With Python
@@ -347,7 +347,7 @@ bash run_momentum_backtest.sh
 
 ```bash
 # Reduce number of backtests
-bash run_momentum_backtest.sh 100000 1_week 2
+bash run_momentum_backtest.sh 500 1_week 2
 ```
 
 ## 📚 Next Steps

@@ -273,7 +273,7 @@ class MomentumBacktester:
 
     def __init__(
         self,
-        initial_capital: float = 100000,
+        initial_capital: float = 500,
         time_period: str = "1_week",
         num_backtests: int = 5,
         symbols: List[str] = None,
@@ -584,7 +584,7 @@ if __name__ == "__main__":
     import argparse
 
     parser = argparse.ArgumentParser(description="Momentum Trading Agent Backtester")
-    parser.add_argument("--capital", type=float, default=100000, help="Initial capital")
+    parser.add_argument("--capital", type=float, default=500, help="Initial capital")
     parser.add_argument("--period", type=str, default="1_week", help="Backtest period")
     parser.add_argument("--num-backtests", type=int, default=5, help="Number of backtests")
     parser.add_argument("--symbols", type=str, default="AAPL,MSFT,GOOGL,AMZN,TSLA",

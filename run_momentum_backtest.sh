@@ -15,7 +15,7 @@ BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-INITIAL_CAPITAL=${1:-100000}
+INITIAL_CAPITAL=${1:-500}
 TIME_PERIOD=${2:-1_week}
 NUM_BACKTESTS=${3:-5}
 OUTPUT_FILE="momentum_backtest_results.json"

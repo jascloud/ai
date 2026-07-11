@@ -76,7 +76,7 @@ A production-ready multi-agent momentum trading system for S&P 500 equities, fea
 ✅ Calmar Ratio  
 
 ### Configuration Options
-- Initial capital: $1K - $1M (default: $100k)
+- Initial capital: $1K - $1M (default: $500)
 - Time periods: Custom ranges (default: 1 week)
 - Number of backtests: 1-100+ (default: 5)
 - Asset universe: S&P 500 stocks
@@ -103,7 +103,7 @@ cp trading-agents/.env.example trading-agents/.env
 bash run_momentum_backtest.sh
 
 # Custom
-bash run_momentum_backtest.sh 100000 1_week 5
+bash run_momentum_backtest.sh 500 1_week 5
 ```
 
 ### 4. View Results
@@ -187,7 +187,7 @@ claude code run backtest_momentum_agent.py
 from backtest_momentum_agent import MomentumBacktester
 
 backtester = MomentumBacktester(
-    initial_capital=100000,
+    initial_capital=500,
     time_period="1_week",
     num_backtests=5
 )
@@ -227,7 +227,7 @@ Install: `pip install -r trading-agents/requirements.txt`
 Initialize Backtester
     ↓
 For Each Backtest:
-    ├─ Set Initial Capital ($100k)
+    ├─ Set Initial Capital ($500)
     ├─ For Each Trading Day:
     │   ├─ Select S&P 500 Stocks (5 simulated)
     │   ├─ Get Price Data

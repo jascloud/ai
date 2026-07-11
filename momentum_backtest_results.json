@@ -1,7 +1,7 @@
 {
   "backtest_summary": {
     "num_backtests": 5,
-    "initial_capital": 100000.0,
+    "initial_capital": 500.0,
     "time_period": "1_week",
     "symbols": [
       "AAPL",
@@ -41,7 +41,7 @@
         "recovery_factor": 0.0,
         "sortino_ratio": 0.0,
         "calmar_ratio": 0.0,
-        "final_capital": 100000.0,
+        "final_capital": 500.0,
         "total_trades": 0,
         "winning_trades": 0
       },
@@ -54,12 +54,12 @@
         0.0
       ],
       "daily_portfolio_values": [
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0
       ]
     },
     {
@@ -73,7 +73,7 @@
         "recovery_factor": 0.0,
         "sortino_ratio": 0.0,
         "calmar_ratio": 0.0,
-        "final_capital": 100000.0,
+        "final_capital": 500.0,
         "total_trades": 0,
         "winning_trades": 0
       },
@@ -86,12 +86,12 @@
         0.0
       ],
       "daily_portfolio_values": [
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0
       ]
     },
     {
@@ -105,7 +105,7 @@
         "recovery_factor": 0.0,
         "sortino_ratio": 0.0,
         "calmar_ratio": 0.0,
-        "final_capital": 100000.0,
+        "final_capital": 500.0,
         "total_trades": 0,
         "winning_trades": 0
       },
@@ -118,12 +118,12 @@
         0.0
       ],
       "daily_portfolio_values": [
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0
       ]
     },
     {
@@ -137,7 +137,7 @@
         "recovery_factor": 0.0,
         "sortino_ratio": 0.0,
         "calmar_ratio": 0.0,
-        "final_capital": 100000.0,
+        "final_capital": 500.0,
         "total_trades": 0,
         "winning_trades": 0
       },
@@ -150,61 +150,69 @@
         0.0
       ],
       "daily_portfolio_values": [
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0,
+        500.0
       ]
     },
     {
       "backtest_id": 5,
       "metrics": {
-        "total_return": 0.0,
-        "sharpe_ratio": 0.0,
-        "max_drawdown": 0.0,
+        "total_return": -0.002563935706383859,
+        "sharpe_ratio": -10.872850004633815,
+        "max_drawdown": -0.0027315025704431894,
         "win_rate": 0.0,
         "profit_factor": 0.0,
-        "recovery_factor": 0.0,
-        "sortino_ratio": 0.0,
-        "calmar_ratio": 0.0,
-        "final_capital": 100000.0,
+        "recovery_factor": -0.9386539606908945,
+        "sortino_ratio": -19.252611942948022,
+        "calmar_ratio": -236.5407980941054,
+        "final_capital": 498.71803214680807,
         "total_trades": 0,
         "winning_trades": 0
       },
-      "trades": [],
+      "trades": [
+        {
+          "symbol": "AAPL",
+          "action": "BUY",
+          "price": 307.34,
+          "quantity": 0.08134313789288736,
+          "cost": 25.0
+        }
+      ],
       "daily_returns": [
         0.0,
         0.0,
-        0.0,
-        0.0,
-        0.0
+        -0.0009435803995575042,
+        -0.0017896108125712005,
+        0.00016802582703772195
       ],
       "daily_portfolio_values": [
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0,
-        100000.0
+        500.0,
+        500.0,
+        500.0,
+        499.52820980022125,
+        498.63424871477844,
+        498.71803214680807
       ]
     }
   ],
   "aggregate_metrics": {
-    "avg_total_return": 0.0,
-    "std_total_return": 0.0,
-    "avg_sharpe_ratio": 0.0,
-    "std_sharpe_ratio": 0.0,
-    "avg_max_drawdown": 0.0,
-    "std_max_drawdown": 0.0,
+    "avg_total_return": -0.0005127871412767718,
+    "std_total_return": 0.0010255742825535435,
+    "avg_sharpe_ratio": -2.174570000926763,
+    "std_sharpe_ratio": 4.349140001853526,
+    "avg_max_drawdown": -0.0005463005140886379,
+    "std_max_drawdown": 0.0010926010281772757,
     "avg_win_rate": 0.0,
     "std_win_rate": 0.0,
     "avg_profit_factor": 0.0,
     "std_profit_factor": 0.0,
-    "avg_recovery_factor": 0.0,
-    "avg_sortino_ratio": 0.0,
-    "avg_calmar_ratio": 0.0,
+    "avg_recovery_factor": -0.1877307921381789,
+    "avg_sortino_ratio": -3.8505223885896043,
+    "avg_calmar_ratio": -47.30815961882108,
     "total_trades_across_backtests": 0,
     "avg_trades_per_backtest": 0.0
   }

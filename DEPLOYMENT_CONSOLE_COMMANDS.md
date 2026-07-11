@@ -63,7 +63,7 @@ claude agent deploy \
 export TRADINGAGENTS_LLM_PROVIDER=anthropic
 export TRADINGAGENTS_DEEP_THINK_LLM=claude-opus-4-8
 export TRADINGAGENTS_QUICK_THINK_LLM=claude-opus-4-8
-export INITIAL_CAPITAL=100000
+export INITIAL_CAPITAL=500
 export TIME_PERIOD=1_week
 export NUM_BACKTESTS=5
 export TIMEZONE="Australia/Perth"
@@ -177,7 +177,7 @@ Next 5 Runs:
 TRADINGAGENTS_LLM_PROVIDER: anthropic
 TRADINGAGENTS_DEEP_THINK_LLM: claude-opus-4-8
 TRADINGAGENTS_QUICK_THINK_LLM: claude-opus-4-8
-INITIAL_CAPITAL: 100000
+INITIAL_CAPITAL: 500
 TIME_PERIOD: 1_week
 NUM_BACKTESTS: 5
 TIMEZONE: Australia/Perth
@@ -203,7 +203,7 @@ Required Secrets:
   "backtest_summary": {
     "timestamp": "2026-07-13T09:00:00Z",
     "num_backtests": 5,
-    "initial_capital": 100000,
+    "initial_capital": 500,
     "time_period": "1_week",
     "agents": 7
   },

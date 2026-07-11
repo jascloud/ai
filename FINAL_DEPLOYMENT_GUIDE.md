@@ -65,7 +65,7 @@ MOMENTUM TRADING AGENT SYSTEM
     "risk_per_trade": 0.01
   },
   "backtesting": {
-    "initial_capital": 100000,
+    "initial_capital": 500,
     "time_period": "1_week",
     "num_backtests": 5,
     "metrics": [
@@ -128,7 +128,7 @@ MOMENTUM TRADING AGENT SYSTEM
 ### Option 1: Quick Run (Recommended for First-Time)
 
 ```bash
-# Default: $100k capital, 1 week, 5 backtests
+# Default: $500 capital, 1 week, 5 backtests
 bash run_momentum_backtest.sh
 ```
 
@@ -140,7 +140,7 @@ bash run_momentum_backtest.sh
 
 ```bash
 # Run with custom parameters
-bash run_momentum_backtest.sh 100000 1_week 5
+bash run_momentum_backtest.sh 500 1_week 5
 
 # Larger capital, longer period
 bash run_momentum_backtest.sh 250000 1_month 10
@@ -157,14 +157,14 @@ python3 backtest_momentum_agent.py --validate
 
 # Run single backtest
 python3 backtest_momentum_agent.py \
-  --capital 100000 \
+  --capital 500 \
   --period 1_week \
   --num-backtests 1 \
   --output test_results.json
 
 # Full run with custom output
 python3 backtest_momentum_agent.py \
-  --capital 100000 \
+  --capital 500 \
   --period 1_week \
   --num-backtests 5 \
   --output momentum_backtest_results.json
@@ -177,11 +177,11 @@ python3 backtest_momentum_agent.py \
 claude code console --config momentum-trading-agent.json
 
 # Execute backtests via Claude Code
-claude code run backtest_momentum_agent.py --capital 100000
+claude code run backtest_momentum_agent.py --capital 500
 
 # With all parameters
 claude code run backtest_momentum_agent.py \
-  --capital 100000 \
+  --capital 500 \
   --period 1_week \
   --num-backtests 5
 ```
@@ -196,7 +196,7 @@ claude code run backtest_momentum_agent.py \
 {
   "backtest_summary": {
     "num_backtests": 5,
-    "initial_capital": 100000,
+    "initial_capital": 500,
     "time_period": "1_week",
     "agents": [
       "Technical Analyst",
@@ -220,7 +220,7 @@ claude code run backtest_momentum_agent.py \
         "recovery_factor": 1.67,
         "sortino_ratio": 2.15,
         "calmar_ratio": 1.67,
-        "final_capital": 114500.00,
+        "final_capital": 572.50,
         "total_trades": 13,
         "winning_trades": 8
       },
@@ -229,20 +229,20 @@ claude code run backtest_momentum_agent.py \
           "symbol": "AAPL",
           "action": "BUY",
           "price": 145.32,
-          "quantity": 34.5,
-          "cost": 5011.52
+          "quantity": 0.172,
+          "cost": 25.00
         },
         {
           "symbol": "AAPL",
           "action": "SELL",
           "price": 148.75,
-          "quantity": 34.5,
-          "proceeds": 5131.88,
-          "profit": 120.36
+          "quantity": 0.172,
+          "proceeds": 25.59,
+          "profit": 0.59
         }
       ],
       "daily_returns": [0.0045, 0.0032, -0.0018, 0.0078, 0.0089],
-      "daily_portfolio_values": [100000, 100450, 100882, 100750, 100828, 101719]
+      "daily_portfolio_values": [500.00, 502.25, 504.41, 503.75, 504.14, 508.60]
     },
     {
       "backtest_id": 2,
@@ -308,7 +308,7 @@ from backtest_momentum_agent import MomentumBacktester
 
 # Initialize
 backtester = MomentumBacktester(
-    initial_capital=100000,
+    initial_capital=500,
     time_period="1_week",
     num_backtests=5
 )
@@ -380,7 +380,7 @@ bash run_momentum_backtest.sh 500000 1_month 10
 
 ```bash
 python3 backtest_momentum_agent.py \
-  --capital 100000 \
+  --capital 500 \
   --period 1_month \
   --num-backtests 10 \
   --output extended_backtest_results.json

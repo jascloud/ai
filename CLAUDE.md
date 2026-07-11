@@ -15,7 +15,7 @@ The Momentum Trading Agent is a coordinated system of 7 specialized agents that 
 
 **Type**: Momentum Trading  
 **Asset Class**: Equities (S&P 500)  
-**Capital**: $100,000  
+**Capital**: $500  
 **Time Period**: 1 week (rolling)  
 
 ### Entry Signals
@@ -204,7 +204,7 @@ from backtest_momentum_agent import MomentumBacktester
 
 # Initialize backtester
 backtester = MomentumBacktester(
-    initial_capital=100000,
+    initial_capital=500,
     time_period="1_week",
     num_backtests=5
 )
@@ -229,7 +229,7 @@ See `momentum-trading-agent.json` for full schema:
     "exit_conditions": [...]
   },
   "backtesting": {
-    "initial_capital": 100000,
+    "initial_capital": 500,
     "time_period": "1_week",
     "num_backtests": 5,
     "metrics": [...]
