@@ -99,22 +99,46 @@ All metrics calculated across 5 independent backtests:
 ## 🚀 Files
 
 ### Core Files
-- `momentum-trading-agent.json` - Agent configuration
+- `momentum-trading-agent-final.json` - Agent configuration
 - `backtest_momentum_agent.py` - Backtesting engine with all 7 agents
+- `market_data.py` - Real market data fetching (Alpha Vantage / Yahoo Finance)
 - `run_momentum_backtest.sh` - Bash script to execute backtests
 
 ### Configuration
 - `.env.example` - Environment variables template
-- `tradingagents/` - Full TradingAgents framework
+- `requirements.txt` - Python dependencies for the backtest engine
+- `tradingagents/` - Full TradingAgents framework (optional, not required by the backtester)
+
+## 📡 Data Sources — Read This First
+
+**TradingView has no public REST API for historical OHLCV data** — it's a
+charting/broker-integration product, not a data-licensing API. "Connecting
+with TradingView" for real prices is implemented via:
+
+1. **Alpha Vantage** (primary) — requires `ALPHA_VANTAGE_API_KEY`
+2. **Yahoo Finance** via `yfinance` (fallback) — no key required, but the
+   host must be reachable from wherever this runs
+
+| Agent | Data Source |
+|-------|--------------|
+| Technical Analyst | **Real** historical closing prices |
+| Fundamental Analyst | Simulated (no live fundamentals feed configured) |
+| Sentiment Analyst | Simulated (no live social/sentiment feed configured) |
+| News Analyst | Simulated (no live news feed configured) |
+| Bull / Bear Researcher | Simulated (debate framing over the above) |
+| Portfolio Manager | Aggregates whatever the above produced |
+
+`backtest_momentum_agent.py` and `market_data.py` **never fabricate prices**
+as a fallback — if neither Alpha Vantage nor Yahoo Finance is reachable, the
+run fails loudly with the specific cause (see `MarketDataError`) instead of
+producing numbers. Every result file tags each agent's `data_source` so
+simulated ratings are never presented as real.
 
 ## 🔧 Setup
 
 ### 1. Installation
 
 ```bash
-cd trading-agents
-pip install -e .
-# or
 pip install -r requirements.txt
 ```
 
@@ -124,17 +148,22 @@ pip install -r requirements.txt
 cp .env.example .env
 ```
 
-Edit `.env` with your API keys:
+Edit `.env` with your real API key:
 ```
-TRADINGAGENTS_LLM_PROVIDER=anthropic
-TRADINGAGENTS_DEEP_THINK_LLM=claude-opus-4-8
-TRADINGAGENTS_QUICK_THINK_LLM=claude-opus-4-8
-OPENAI_API_KEY=your_key
-ANTHROPIC_API_KEY=your_key
-ALPHA_VANTAGE_API_KEY=your_key
+ALPHA_VANTAGE_API_KEY=your_key   # required for real price data
 ```
 
-### 3. Run Backtests
+### 3. Validate (checks strategy config AND real data connectivity)
+
+```bash
+python3 backtest_momentum_agent.py --validate
+```
+
+This exits non-zero and prints the specific network/API error if real
+market data cannot be reached — that must be resolved before backtests
+will produce results.
+
+### 4. Run Backtests
 
 ```bash
 bash run_momentum_backtest.sh

@@ -5,19 +5,20 @@ Backtests momentum trading strategy using all 7 TradingAgents
 """
 
 import json
-import os
 import sys
-from datetime import datetime, timedelta
 from typing import Dict, List, Any, Tuple
 import random
 import numpy as np
 
-try:
-    from tradingagents.graph.trading_graph import TradingAgentsGraph
-    from tradingagents.default_config import DEFAULT_CONFIG
-    HAS_TRADINGAGENTS = True
-except ImportError:
-    HAS_TRADINGAGENTS = False
+from market_data import fetch_sp500_universe, fetch_price_history, MarketDataError
+
+# NOTE ON DATA SOURCES:
+# TechnicalAnalyst runs on REAL historical closing prices (Alpha Vantage or
+# Yahoo Finance via market_data.py). Fundamental/Sentiment/News/Bull/Bear
+# agents below are SIMULATED placeholders (random) because no live
+# fundamentals/sentiment/news feed is configured in this repo. Every
+# analysis dict below is tagged with 'data_source' so results never present
+# simulated numbers as if they were real.
 
 
 class MomentumIndicators:
@@ -124,7 +125,8 @@ class TechnicalAnalyst(TradingAgent):
             'histogram': float(histogram),
             'sma': float(sma),
             'momentum': float(momentum),
-            'confidence': abs((rsi - 50) / 50)
+            'confidence': abs((rsi - 50) / 50),
+            'data_source': 'real_market_data'
         }
 
 
@@ -148,7 +150,8 @@ class FundamentalAnalyst(TradingAgent):
             'pe_ratio': float(pe_ratio),
             'revenue_growth': float(revenue_growth),
             'profit_margin': float(profit_margin),
-            'recommendation': 'STRONG_BUY' if rating == 5 else 'BUY' if rating >= 4 else 'HOLD'
+            'recommendation': 'STRONG_BUY' if rating == 5 else 'BUY' if rating >= 4 else 'HOLD',
+            'data_source': 'simulated_no_live_feed'
         }
 
 
@@ -167,7 +170,8 @@ class SentimentAnalyst(TradingAgent):
             'sentiment_score': float(sentiment_score),
             'sentiment': sentiment,
             'social_volume': random.randint(100, 10000),
-            'trend': 'INCREASING' if random.random() > 0.5 else 'DECREASING'
+            'trend': 'INCREASING' if random.random() > 0.5 else 'DECREASING',
+            'data_source': 'simulated_no_live_feed'
         }
 
 
@@ -189,7 +193,8 @@ class NewsAnalyst(TradingAgent):
             'has_catalyst': has_catalyst,
             'impact': impact,
             'news_sentiment': random.uniform(-1, 1),
-            'catalyst_type': random.choice(['EARNINGS', 'ANNOUNCEMENT', 'REGULATORY', 'MACRO'])
+            'catalyst_type': random.choice(['EARNINGS', 'ANNOUNCEMENT', 'REGULATORY', 'MACRO']),
+            'data_source': 'simulated_no_live_feed'
         }
 
 
@@ -215,7 +220,8 @@ class ResearchAgent(TradingAgent):
             'perspective': self.perspective,
             'confidence': float(confidence),
             'scenario': scenario,
-            'debate_round': random.randint(1, 2)
+            'debate_round': random.randint(1, 2),
+            'data_source': 'simulated_no_live_feed'
         }
 
 
@@ -237,6 +243,8 @@ class PortfolioManager(TradingAgent):
             decision = 'HOLD'
             position_size = 0.02
 
+        data_sources = sorted({a.get('data_source', 'unknown') for a in all_analyses if isinstance(a, dict)})
+
         return {
             'decision': decision,
             'position_size': float(position_size),
@@ -244,18 +252,46 @@ class PortfolioManager(TradingAgent):
             'max_risk': 0.01,
             'max_correlation': 0.6,
             'sector_exposure': 0.3,
-            'confidence': float(np.mean([a.get('confidence', 0.5) for a in all_analyses if isinstance(a, dict)]))
+            'confidence': float(np.mean([a.get('confidence', 0.5) for a in all_analyses if isinstance(a, dict)])),
+            'data_sources_used': data_sources
         }
 
 
 class MomentumBacktester:
-    """Backtesting engine for momentum trading strategy"""
+    """Backtesting engine for momentum trading strategy, driven by real
+    historical closing prices (see market_data.py). Raises MarketDataError
+    immediately if real data cannot be fetched — it never substitutes
+    randomly generated prices for the technical/execution layer."""
 
-    def __init__(self, initial_capital: float = 100000, time_period: str = "1_week", num_backtests: int = 5):
+    PERIOD_TRADING_DAYS = {
+        "1_week": 5,
+        "2_week": 10,
+        "1_month": 21,
+        "3_month": 63,
+    }
+    INDICATOR_LOOKBACK = 60  # trailing real trading days used for RSI/MACD/SMA/Momentum
+
+    def __init__(
+        self,
+        initial_capital: float = 100000,
+        time_period: str = "1_week",
+        num_backtests: int = 5,
+        symbols: List[str] = None,
+        lookback_days: int = None,
+    ):
         self.initial_capital = initial_capital
         self.time_period = time_period
         self.num_backtests = num_backtests
+        self.symbols = symbols or ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA']
         self.all_results = []
+
+        self.window_days = self.PERIOD_TRADING_DAYS.get(time_period, 5)
+        if time_period not in self.PERIOD_TRADING_DAYS:
+            print(f"⚠ Unknown time_period '{time_period}', defaulting to 5 trading days (1 week)")
+
+        trading_days_needed = self.INDICATOR_LOOKBACK + num_backtests * self.window_days
+        default_lookback_days = int(trading_days_needed * 1.6) + 30  # buffer for weekends/holidays
+        self.lookback_days = lookback_days or default_lookback_days
 
         # Initialize agents
         self.agents = [
@@ -268,38 +304,58 @@ class MomentumBacktester:
             PortfolioManager("Portfolio Manager", "risk_control")
         ]
 
-    def simulate_trading_day(self, symbol: str, current_price: float) -> Tuple[str, float, Dict]:
-        """Simulate one trading day with all 7 agents"""
+        print(f"Fetching real market data for {len(self.symbols)} symbols "
+              f"({self.lookback_days} calendar days lookback)...")
+        # Raises MarketDataError with the specific cause if anything fails —
+        # this is intentional. Do not wrap this in a try/except that falls
+        # back to fabricated prices.
+        self.price_history = fetch_sp500_universe(self.symbols, lookback_days=self.lookback_days)
 
-        # Generate price history for technical analysis
-        price_history = [current_price * (1 + random.uniform(-0.05, 0.05)) for _ in range(100)]
-        price_history[-1] = current_price
+        min_len = min(len(v) for v in self.price_history.values())
+        required = self.INDICATOR_LOOKBACK + num_backtests * self.window_days
+        if min_len < required:
+            raise MarketDataError(
+                f"Only {min_len} real trading days available but {required} are needed "
+                f"for {num_backtests} backtests of {self.window_days} days each plus a "
+                f"{self.INDICATOR_LOOKBACK}-day indicator lookback. "
+                f"Reduce --num-backtests, shorten --period, or increase --lookback-days."
+            )
+        print(f"✓ Real market data loaded: {min_len} trading days per symbol")
 
-        price_data = {'prices': price_history, 'current_price': current_price}
+    def evaluate_symbol(self, symbol: str, trailing_prices: List[float], current_price: float) -> Dict[str, Any]:
+        """Run all 7 agents for one symbol on one trading day."""
 
-        # Get analyses from all agents
+        price_data = {'prices': trailing_prices, 'current_price': current_price}
+
         analyses = []
         for agent in self.agents[:-1]:  # All but portfolio manager
-            analysis = agent.analyze(symbol, price_data)
-            analyses.append(analysis)
+            analyses.append(agent.analyze(symbol, price_data))
 
-        # Portfolio manager makes final decision
         portfolio_analysis = self.agents[-1].analyze(symbol, price_data, analyses)
-
-        decision = portfolio_analysis['decision']
-        position_size = portfolio_analysis['position_size']
-
-        return decision, position_size, portfolio_analysis
+        return portfolio_analysis
 
     def run_backtest(self, backtest_id: int) -> Dict[str, Any]:
-        """Run a single backtest"""
+        """Run a single backtest over a real, non-overlapping historical window.
+
+        Backtest #1 uses the most recent window; #2 the window immediately
+        before it; and so on. Technical indicators for day t are computed
+        strictly from closes before day t (no lookahead) — day t's own
+        close is only used as the execution price for that day's trade.
+        """
+
+        any_symbol = self.symbols[0]
+        total_len = len(self.price_history[any_symbol])
+
+        end_idx = total_len - (backtest_id - 1) * self.window_days
+        start_idx = end_idx - self.window_days
 
         print(f"\n{'='*60}")
         print(f"Running Backtest #{backtest_id}")
         print(f"{'='*60}")
         print(f"Initial Capital: ${self.initial_capital:,.2f}")
-        print(f"Time Period: {self.time_period}")
-        print(f"Assets: S&P 500 (simulated 5 stocks)")
+        print(f"Time Period: {self.time_period} ({self.window_days} real trading days)")
+        print(f"Assets: S&P 500 ({', '.join(self.symbols)}) — REAL market data")
+        print(f"Window: trading-day index {start_idx} to {end_idx} (most recent = backtest #1)")
 
         capital = self.initial_capital
         positions = {}
@@ -307,23 +363,19 @@ class MomentumBacktester:
         daily_returns = []
         daily_portfolio_values = [capital]
 
-        # Simulate 5 trading days
-        sp500_symbols = ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA']
-        initial_prices = {s: 100 + random.uniform(-20, 20) for s in sp500_symbols}
-
-        for day in range(5):
+        for day_idx in range(start_idx, end_idx):
             day_trades = []
-            day_portfolio_value = capital
 
-            for symbol in sp500_symbols:
-                # Update price (momentum simulation)
-                current_price = initial_prices[symbol] * (1 + random.uniform(-0.03, 0.04))
-                initial_prices[symbol] = current_price
+            for symbol in self.symbols:
+                closes = self.price_history[symbol]
+                trailing_prices = closes[:day_idx]  # everything strictly before today — no lookahead
+                current_price = closes[day_idx]
 
-                # Get trading decision
-                decision, position_size, analysis = self.simulate_trading_day(symbol, current_price)
+                portfolio_analysis = self.evaluate_symbol(symbol, trailing_prices, current_price)
+                decision = portfolio_analysis['decision']
+                position_size = portfolio_analysis['position_size']
 
-                if decision == 'BUY' and position_size > 0:
+                if decision == 'BUY' and position_size > 0 and symbol not in positions:
                     cost = capital * position_size
                     shares = cost / current_price
                     positions[symbol] = {'shares': shares, 'entry_price': current_price, 'cost': cost}
@@ -354,15 +406,16 @@ class MomentumBacktester:
 
                     del positions[symbol]
 
-            # Calculate daily portfolio value
+            # Calculate day-end portfolio value using today's real closes
+            day_portfolio_value = capital
             for symbol, pos in positions.items():
-                day_portfolio_value += pos['shares'] * initial_prices[symbol]
+                day_portfolio_value += pos['shares'] * self.price_history[symbol][day_idx]
 
             daily_returns.append((day_portfolio_value - daily_portfolio_values[-1]) / daily_portfolio_values[-1])
             daily_portfolio_values.append(day_portfolio_value)
             trades.extend(day_trades)
 
-            print(f"  Day {day+1}: Portfolio Value: ${day_portfolio_value:,.2f} | Trades: {len(day_trades)}")
+            print(f"  Day {day_idx - start_idx + 1}: Portfolio Value: ${day_portfolio_value:,.2f} | Trades: {len(day_trades)}")
 
         # Calculate metrics
         final_value = daily_portfolio_values[-1]
@@ -460,7 +513,18 @@ class MomentumBacktester:
                 'num_backtests': self.num_backtests,
                 'initial_capital': self.initial_capital,
                 'time_period': self.time_period,
+                'symbols': self.symbols,
                 'agents': [a.name for a in self.agents]
+            },
+            'data_sources': {
+                'technical_analyst': 'real_market_data (Alpha Vantage primary, Yahoo Finance fallback)',
+                'fundamental_analyst': 'simulated_no_live_feed',
+                'sentiment_analyst': 'simulated_no_live_feed',
+                'news_analyst': 'simulated_no_live_feed',
+                'bull_researcher': 'simulated_no_live_feed',
+                'bear_researcher': 'simulated_no_live_feed',
+                'note': 'TradingView has no public historical-data API; real prices are sourced '
+                        'from Alpha Vantage/Yahoo Finance as the practical equivalent.'
             },
             'backtest_results': self.all_results,
             'aggregate_metrics': {
@@ -523,23 +587,44 @@ if __name__ == "__main__":
     parser.add_argument("--capital", type=float, default=100000, help="Initial capital")
     parser.add_argument("--period", type=str, default="1_week", help="Backtest period")
     parser.add_argument("--num-backtests", type=int, default=5, help="Number of backtests")
+    parser.add_argument("--symbols", type=str, default="AAPL,MSFT,GOOGL,AMZN,TSLA",
+                         help="Comma-separated S&P 500 symbols")
+    parser.add_argument("--lookback-days", type=int, default=None,
+                         help="Calendar days of history to fetch (auto-computed if omitted)")
     parser.add_argument("--output", type=str, default="momentum_backtest_results.json", help="Output JSON file")
-    parser.add_argument("--validate", action="store_true", help="Validate strategy only")
+    parser.add_argument("--validate", action="store_true",
+                         help="Validate strategy config AND real market data connectivity")
 
     args = parser.parse_args()
+    symbols = [s.strip().upper() for s in args.symbols.split(",") if s.strip()]
 
     if args.validate:
         print("✓ Strategy validation: PASSED")
         print("  - 7 agents configured")
         print("  - Momentum indicators validated")
         print("  - Risk management rules confirmed")
-        sys.exit(0)
+        print()
+        print(f"Checking real market data connectivity for {symbols[0]}...")
+        try:
+            prices = fetch_price_history(symbols[0], lookback_days=60)
+            print(f"✓ Real market data reachable: fetched {len(prices)} real trading days for {symbols[0]}")
+            sys.exit(0)
+        except MarketDataError as e:
+            print(f"✗ Real market data NOT reachable: {e}")
+            print("  Backtests cannot run against fabricated prices — this must be fixed first.")
+            sys.exit(1)
 
-    backtester = MomentumBacktester(
-        initial_capital=args.capital,
-        time_period=args.period,
-        num_backtests=args.num_backtests
-    )
+    try:
+        backtester = MomentumBacktester(
+            initial_capital=args.capital,
+            time_period=args.period,
+            num_backtests=args.num_backtests,
+            symbols=symbols,
+            lookback_days=args.lookback_days,
+        )
+    except MarketDataError as e:
+        print(f"\n✗ FATAL: {e}", file=sys.stderr)
+        sys.exit(1)
 
     results = backtester.run_all_backtests()
     save_results_to_json(results, args.output)

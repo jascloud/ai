@@ -54,40 +54,50 @@ check_requirements() {
     fi
     print_success "Python 3 found: $(python3 --version)"
 
-    # Check if in right directory
-    if [ ! -d "trading-agents" ]; then
-        print_error "trading-agents directory not found. Please run from repository root."
+    # Check this script's own directory (not trading-agents/) since
+    # backtest_momentum_agent.py and market_data.py live alongside it
+    if [ ! -f "backtest_momentum_agent.py" ] || [ ! -f "market_data.py" ]; then
+        print_error "backtest_momentum_agent.py / market_data.py not found in $(pwd)."
+        print_error "This usually means the repository was not checked out into the working"
+        print_error "directory before this script ran. Clone jascloud/ai (branch"
+        print_error "claude/tradingagents-system-setup-ucfkrt) into this directory and retry."
         exit 1
     fi
-    print_success "trading-agents directory found"
+    print_success "Backtesting engine files found"
 
     # Check Python dependencies
-    if ! python3 -c "import numpy" 2>/dev/null; then
+    if ! python3 -c "import numpy, requests" 2>/dev/null; then
         print_info "Installing required Python packages..."
-        pip install numpy pandas scipy scikit-learn -q
+        pip install numpy pandas scipy scikit-learn requests yfinance -q
         print_success "Python packages installed"
+    fi
+
+    # Real data source check (not fatal here — --validate below reports specifics)
+    if [ -z "${ALPHA_VANTAGE_API_KEY}" ]; then
+        print_info "ALPHA_VANTAGE_API_KEY not set — will attempt Yahoo Finance (yfinance) fallback."
+        print_info "Set ALPHA_VANTAGE_API_KEY in the credentials vault for a more reliable data source."
+    else
+        print_success "ALPHA_VANTAGE_API_KEY is set"
     fi
 }
 
 setup_environment() {
     print_header "Setting Up Environment"
 
-    # Create output directory
-    mkdir -p trading-agents/logs
     mkdir -p ~/.tradingagents/logs
     mkdir -p ~/.tradingagents/cache
-
     print_success "Output directories created"
 
-    # Check for .env file
-    if [ ! -f "trading-agents/.env" ]; then
-        print_info "No .env file found. Using defaults."
-        print_info "For full functionality, create trading-agents/.env with API keys:"
-        print_info "  ANTHROPIC_API_KEY=your_key"
-        print_info "  OPENAI_API_KEY=your_key"
-        print_info "  ALPHA_VANTAGE_API_KEY=your_key"
+    # Load .env from repo root if present (real API keys, e.g. ALPHA_VANTAGE_API_KEY)
+    if [ -f ".env" ]; then
+        set -a
+        # shellcheck disable=SC1091
+        source .env
+        set +a
+        print_success ".env file loaded"
     else
-        print_success ".env file found"
+        print_info "No .env file found in repo root. Using process environment / credentials vault."
+        print_info "Required for real data: ALPHA_VANTAGE_API_KEY (or reachable Yahoo Finance)."
     fi
 }
 
@@ -148,6 +158,15 @@ Multi-agent momentum trading system backtested on S&P 500 stocks with 7 speciali
 5. **Bull Researcher** - Upside scenario analysis
 6. **Bear Researcher** - Downside risk assessment
 7. **Portfolio Manager** - Risk control and final decision-making
+
+## Data Sources (Read This Before Trusting Any Number Below)
+
+- **Technical Analyst**: REAL historical closing prices (Alpha Vantage primary,
+  Yahoo Finance fallback). TradingView itself has no public historical-data
+  API, so these are the practical real-data equivalent.
+- **Fundamental / Sentiment / News / Bull / Bear agents**: SIMULATED
+  (randomized) placeholders — no live fundamentals, social sentiment, or news
+  feed is configured yet. Treat their ratings as illustrative only.
 
 ## Strategy Overview
 
