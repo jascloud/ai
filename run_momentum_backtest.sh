@@ -125,7 +125,7 @@ run_backtests() {
     echo "  Time Period: ${TIME_PERIOD}"
     echo "  Number of Backtests: ${NUM_BACKTESTS}"
     echo "  Strategy: S&P 500 Momentum Trading"
-    echo "  Agents: 7 (Technical, Fundamental, Sentiment, News, Bull, Bear, Portfolio Manager)"
+    echo "  Agents: 9 (Technical, Fundamental, Sentiment, News, Bull, Bear, Macro, Geopolitical, Portfolio Manager)"
     echo ""
 
     python3 backtest_momentum_agent.py \

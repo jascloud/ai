@@ -797,6 +797,8 @@ class MomentumBacktester:
         "3_month": 63,
     }
     INDICATOR_LOOKBACK = 60  # trailing real trading days used for RSI/MACD/SMA/Momentum
+    STOP_LOSS_PCT = 0.02     # documented strategy exit: -2% from entry (was never actually checked before this fix)
+    TAKE_PROFIT_PCT = 0.05   # documented strategy exit: +5% from entry (was never actually checked before this fix)
 
     def __init__(
         self,
@@ -913,6 +915,46 @@ class MomentumBacktester:
                 trailing_prices = closes[:day_idx]  # everything strictly before today — no lookahead
                 current_price = closes[day_idx]
 
+                # FINAL PHASE FIX: the documented strategy (CLAUDE.md) has
+                # always specified a 2% stop-loss / 5% take-profit as exit
+                # signals, but until now the code never checked entry_price
+                # vs current_price — the ONLY exit path was the agent
+                # ensemble's SELL rating. That's the real reason every
+                # backtest across every phase so far showed BUYs firing but
+                # zero closed round-trips: a 5-day window rarely gives the
+                # rating enough time to swing back to SELL on its own.
+                # Price-based exits are checked first and are independent
+                # of what the agents think, matching real momentum-strategy
+                # practice (and the documentation) — if one fires, this
+                # symbol's agent-based BUY/SELL evaluation is skipped for
+                # today since the position is already closed.
+                if symbol in positions:
+                    pos = positions[symbol]
+                    pct_change = (current_price - pos['entry_price']) / pos['entry_price']
+
+                    exit_reason = None
+                    if pct_change <= -self.STOP_LOSS_PCT:
+                        exit_reason = 'stop_loss'
+                    elif pct_change >= self.TAKE_PROFIT_PCT:
+                        exit_reason = 'take_profit'
+
+                    if exit_reason:
+                        exit_cost = pos['shares'] * current_price
+                        profit = exit_cost - pos['cost']
+                        capital += exit_cost
+
+                        day_trades.append({
+                            'symbol': symbol,
+                            'action': 'SELL',
+                            'exit_reason': exit_reason,
+                            'price': float(current_price),
+                            'quantity': float(pos['shares']),
+                            'proceeds': float(exit_cost),
+                            'profit': float(profit)
+                        })
+                        del positions[symbol]
+                        continue  # already closed today — skip the agent-based decision below
+
                 portfolio_analysis = self.evaluate_symbol(symbol, trailing_prices, current_price)
                 decision = portfolio_analysis['decision']
                 position_size = portfolio_analysis['position_size']
@@ -956,6 +998,7 @@ class MomentumBacktester:
                     day_trades.append({
                         'symbol': symbol,
                         'action': 'SELL',
+                        'exit_reason': 'agent_decision',
                         'price': float(current_price),
                         'quantity': float(pos['shares']),
                         'proceeds': float(exit_cost),
@@ -974,6 +1017,38 @@ class MomentumBacktester:
             trades.extend(day_trades)
 
             print(f"  Day {day_idx - start_idx + 1}: Portfolio Value: ${day_portfolio_value:,.2f} | Trades: {len(day_trades)}")
+
+        # FINAL PHASE FIX: force-close any positions still open when the
+        # window ends, at the last available real close. Standard
+        # backtesting practice — otherwise unrealized P&L on open
+        # positions is never counted in win_rate/profit_factor at all,
+        # which is a big part of why those metrics were stuck at 0.
+        # Tagged distinctly (exit_reason='window_close') so it's never
+        # confused with a real agent- or price-triggered exit.
+        last_close_idx = end_idx - 1
+        for symbol, pos in list(positions.items()):
+            final_price = self.price_history[symbol][last_close_idx]
+            exit_cost = pos['shares'] * final_price
+            profit = exit_cost - pos['cost']
+            capital += exit_cost
+
+            trades.append({
+                'symbol': symbol,
+                'action': 'SELL',
+                'exit_reason': 'window_close',
+                'price': float(final_price),
+                'quantity': float(pos['shares']),
+                'proceeds': float(exit_cost),
+                'profit': float(profit)
+            })
+            del positions[symbol]
+
+        # Force-closing at the same day's close price used for the last
+        # mark-to-market valuation is value-neutral (cash <-> position at
+        # an identical price, no slippage) — this just makes the final
+        # recorded value reflect 100% realized cash instead of a mix of
+        # cash + mark-to-market positions. Safe no-op if nothing was open.
+        daily_portfolio_values[-1] = capital
 
         # Calculate metrics
         final_value = daily_portfolio_values[-1]
@@ -1051,7 +1126,7 @@ class MomentumBacktester:
         print("="*60)
         print(f"Strategy: S&P 500 Momentum Trading")
         print(f"Number of Backtests: {self.num_backtests}")
-        print(f"Agents: 7 (Technical, Fundamental, Sentiment, News, Bull, Bear, Portfolio Manager)")
+        print(f"Agents: 9 (Technical, Fundamental, Sentiment, News, Bull, Bear, Macro, Geopolitical, Portfolio Manager)")
 
         for i in range(1, self.num_backtests + 1):
             result = self.run_backtest(i)
@@ -1159,7 +1234,7 @@ if __name__ == "__main__":
 
     if args.validate:
         print("✓ Strategy validation: PASSED")
-        print("  - 7 agents configured")
+        print("  - 9 agents configured (Technical, Fundamental, Sentiment, News, Bull, Bear, Macro, Geopolitical, Portfolio Manager)")
         print("  - Momentum indicators validated")
         print("  - Risk management rules confirmed")
         print()

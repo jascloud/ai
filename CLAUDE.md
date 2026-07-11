@@ -36,52 +36,87 @@ The Momentum Trading Agent is a coordinated system of 7 specialized agents that 
 - Risk per trade: 1%
 - Rebalance: Daily
 
-## 👥 7 Specialized Agents
+## 👥 9 Specialized Agents
 
-### 1. **Technical Analyst Agent**
+Real-data status per agent, and which `data_clients/` module backs each
+one, per the phased real-data rollout (see
+`agent_rating_diagnostics_summary.json` for the clearance-rate
+diagnostics run after every phase):
+
+### 1. **Technical Analyst Agent** — real data
 - **Role**: Identifies momentum patterns and technical signals
-- **Indicators**: RSI, MACD, Stochastic, CCI, Rate of Change (ROC)
-- **Focus**: Entry/exit timing based on technical analysis
-- **Output**: Technical rating (1-5), recommended action
+- **Indicators**: RSI, MACD, SMA, Momentum, plus optional live
+  enrichment (overnight gap, 5min RSI confirmation) via
+  `data_clients/equity_quotes.py`, `ohlcv_multi_timeframe.py`,
+  `extended_hours.py` — never used during the historical backtest loop
+  (would be lookahead bias)
+- **Output**: Technical rating (1-5), recommended action, confidence
 
-### 2. **Fundamental Analyst Agent**
-- **Role**: Assesses company financial health
-- **Metrics**: P/E ratio, revenue growth, profit margin, ROE
-- **Focus**: Ensure trading quality companies
-- **Output**: Fundamental rating (1-5), financial health assessment
+### 2. **Fundamental Analyst Agent** — real data
+- **Role**: Assesses company financial health from earnings surprise
+  history, estimate revisions, analyst consensus/price targets, and SEC
+  filing trends/guidance language
+- **Sources**: `earnings_calendar.py`, `estimate_revisions.py`,
+  `analyst_ratings.py`, `sec_filings.py`
+- **Output**: Fundamental rating (1-5), sources used, degraded reasons
 
-### 3. **Sentiment Analyst Agent**
-- **Role**: Gauges market sentiment and investor mood
-- **Sources**: StockTwits, Reddit, social media sentiment analysis
-- **Focus**: Short-term market psychology
-- **Output**: Sentiment score (-1 to +1), sentiment trend
+### 3. **Sentiment Analyst Agent** — real data
+- **Role**: One combined social-sentiment score from Twitter/X + Reddit
+  + StockTwits (deliberately not three separate averaged agents)
+- **Source**: `social_sentiment.py`
+- **Output**: Sentiment score (-1 to +1), social volume, sources used
 
-### 4. **News Analyst Agent**
-- **Role**: Monitors catalysts and news events
-- **Lookback**: 7-day news window
-- **Focus**: Identify catalyst-driven momentum
-- **Output**: Catalyst assessment, impact rating
+### 4. **News Analyst Agent** — real data
+- **Role**: Real-time headline feed scored by a finance-tuned lexicon
+  sentiment classifier
+- **Sources**: `news_wire.py`, `news_sentiment.py`
+- **Output**: Rating (1-5), headline count, sentiment score
 
-### 5. **Bull Researcher Agent**
-- **Role**: Identifies upside opportunities and positive scenarios
-- **Debate Rounds**: 2 rounds of analysis
-- **Focus**: Bullish thesis development
-- **Output**: Bull case summary, upside scenario
+### 5. **Bull Researcher Agent** — real data
+- **Role**: Unusual call-side options volume/open-interest skew (a
+  bullish-flow proxy) — no longer random confidence
+- **Source**: `options_chain.py` (per-symbol)
+- **Output**: Rating (1-5), scenario, confidence
 
-### 6. **Bear Researcher Agent**
-- **Role**: Identifies risks and downside scenarios
-- **Debate Rounds**: 2 rounds of analysis
-- **Focus**: Risk assessment and contrarian views
-- **Output**: Bear case summary, downside risk assessment
+### 6. **Bear Researcher Agent** — real data
+- **Role**: Put/call volume ratio + put-side skew (a hedging-demand /
+  bearish-flow proxy) — no longer random confidence
+- **Source**: `options_chain.py` (per-symbol)
+- **Output**: Rating (1-5), scenario, confidence
 
-### 7. **Portfolio Manager Agent**
-- **Role**: Final decision-maker and risk controller
-- **Constraints**: 
+### 7. **Macro Agent** — real data (new, dampener)
+- **Role**: FOMC-meeting proximity (local calendar, no key needed),
+  2s10s yield curve, fed funds rate trend, CPI/PCE/jobs releases.
+  Excluded from the weighted average entirely — applied afterward as a
+  multiplicative `dampen_factor` and/or hard `suppress_buy` override
+  (e.g. the day before an FOMC decision), so it can't be diluted away
+  like an ordinary averaged vote
+- **Source**: `macro_calendar.py`
+- **Output**: dampen_factor, suppress_buy, note
+
+### 8. **Geopolitical Agent** — real data (new)
+- **Role**: Caldara-Iacoviello Geopolitical Risk (GPR) Index + EIA WTI
+  oil-price-based supply-disruption proxy. Neutral (3) by default;
+  PortfolioManager applies a crisis override (rating <= 1.5 caps the
+  decision at HOLD) so an active crisis pulls the aggregate down
+  materially instead of being one vote among several
+- **Source**: `geopolitical_risk.py`
+- **Output**: Rating (1-5), risk level, note
+
+### 9. **Portfolio Manager Agent**
+- **Role**: Final decision-maker and risk controller. Weighted mean
+  (Technical Analyst = 50% of the decision, every other averaged agent
+  shares the remaining 50%), thresholds BUY >= 3.5 / SELL <= 2.5,
+  dampener/crisis-override application, full `agent_ratings_log` for
+  auditability
+- **Constraints**:
   - Max correlation between positions: 0.6
   - Max sector exposure: 30%
-  - Max drawdown tolerance: 10%
-- **Focus**: Portfolio-level risk management
-- **Output**: Trade decision (BUY/SELL/HOLD), position size, risk controls
+  - Max position size / total exposure / open positions: enforced by
+    `data_clients/risk_monitor.py` as a hard-stop gate before every BUY
+- **Output**: Trade decision (BUY/SELL/HOLD), position size, `avg_rating`
+  (the weighted+dampened value that drove the decision), `flat_avg_rating`
+  (old-style mean, audit-only), `agent_ratings_log`
 
 ## 📊 Backtesting Metrics
 
