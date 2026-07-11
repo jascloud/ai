@@ -126,7 +126,8 @@ class TechnicalAnalyst(TradingAgent):
             'sma': float(sma),
             'momentum': float(momentum),
             'confidence': abs((rsi - 50) / 50),
-            'data_source': 'real_market_data'
+            'data_source': 'real_market_data',
+            'agent_role': 'technical'
         }
 
 
@@ -151,7 +152,8 @@ class FundamentalAnalyst(TradingAgent):
             'revenue_growth': float(revenue_growth),
             'profit_margin': float(profit_margin),
             'recommendation': 'STRONG_BUY' if rating == 5 else 'BUY' if rating >= 4 else 'HOLD',
-            'data_source': 'simulated_no_live_feed'
+            'data_source': 'simulated_no_live_feed',
+            'agent_role': 'other'
         }
 
 
@@ -171,7 +173,8 @@ class SentimentAnalyst(TradingAgent):
             'sentiment': sentiment,
             'social_volume': random.randint(100, 10000),
             'trend': 'INCREASING' if random.random() > 0.5 else 'DECREASING',
-            'data_source': 'simulated_no_live_feed'
+            'data_source': 'simulated_no_live_feed',
+            'agent_role': 'other'
         }
 
 
@@ -194,7 +197,8 @@ class NewsAnalyst(TradingAgent):
             'impact': impact,
             'news_sentiment': random.uniform(-1, 1),
             'catalyst_type': random.choice(['EARNINGS', 'ANNOUNCEMENT', 'REGULATORY', 'MACRO']),
-            'data_source': 'simulated_no_live_feed'
+            'data_source': 'simulated_no_live_feed',
+            'agent_role': 'other'
         }
 
 
@@ -221,38 +225,149 @@ class ResearchAgent(TradingAgent):
             'confidence': float(confidence),
             'scenario': scenario,
             'debate_round': random.randint(1, 2),
-            'data_source': 'simulated_no_live_feed'
+            'data_source': 'simulated_no_live_feed',
+            'agent_role': 'other'
         }
 
 
 class PortfolioManager(TradingAgent):
-    """Portfolio management and risk control agent"""
+    """Portfolio management and risk control agent.
 
-    def analyze(self, symbol: str, price_data: Dict[str, Any], all_analyses: List[Dict]) -> Dict[str, Any]:
-        # Aggregate all agent analyses
+    Aggregation history / why this isn't a flat mean:
+    A prior diagnostic (see diagnose_agent_ratings.py /
+    agent_rating_diagnostics_summary.json) found that averaging the
+    Technical Analyst (the only agent backed by real data) in flat with
+    5 simulated agents let a maximal real BUY signal (Technical=5)
+    clear the old 4.0 threshold only ~3.25% of the time — the simulated
+    agents' noise was doing most of the work. Root causes: Bull
+    Researcher's rating was structurally stuck at 4 and Bear
+    Researcher's at 2 (an `int(confidence)` truncation bug, fixed in
+    Phase 7), and a flat average gives one real signal the same weight
+    as an arbitrary number of simulated ones.
+
+    Fix: Technical Analyst is weighted equal to the combined weight of
+    every other *averaged* agent (i.e. always a 50% share of the
+    decision, regardless of how many other agents exist), thresholds
+    moved to BUY >= 3.5 / SELL <= 2.5, and every input is logged in
+    `agent_ratings_log` for auditability. `flat_avg_rating` (the old
+    unweighted mean) is still computed and reported for comparison, but
+    no longer drives the decision — `avg_rating` now means "the rating
+    that drove this decision" (weighted), which is a documented change
+    from its previous meaning (flat mean).
+
+    Dampener agents (agent_role == 'dampener', e.g. the Macro Agent) are
+    excluded from the weighted average entirely and instead applied
+    afterward via `dampen_factor` (multiplicative) and/or `suppress_buy`
+    (hard override) — see PHASE 5. This matches the requirement that a
+    dampener isn't "just another averaged input."
+    """
+
+    BUY_THRESHOLD = 3.5
+    SELL_THRESHOLD = 2.5
+
+    @staticmethod
+    def legacy_flat_decision(all_analyses: List[Dict]) -> Dict[str, Any]:
+        """Reproduces the ORIGINAL flat-mean / 4.0-2.0-threshold logic,
+        kept only so diagnose_agent_ratings.py can report an apples-to-apples
+        before/after comparison. Not used by the live trading path."""
         avg_rating = np.mean([a.get('rating', 3) for a in all_analyses if isinstance(a, dict)])
-
-        # Decision logic
         if avg_rating >= 4.0:
             decision = 'BUY'
-            position_size = 0.05
         elif avg_rating <= 2.0:
+            decision = 'SELL'
+        else:
+            decision = 'HOLD'
+        return {'decision': decision, 'avg_rating': float(avg_rating)}
+
+    def _weighted_rating(self, scored: List[Dict]) -> float:
+        """50% Technical Analyst / 50% everything else in the 'other' bucket.
+        Degrades gracefully to a plain mean of whichever bucket is non-empty
+        if the other bucket is missing (e.g. unit tests with partial agent sets)."""
+        technical = [a['rating'] for a in scored if a.get('agent_role') == 'technical']
+        others = [a['rating'] for a in scored if a.get('agent_role') == 'other']
+
+        if technical and others:
+            return 0.5 * np.mean(technical) + 0.5 * np.mean(others)
+        if technical:
+            return float(np.mean(technical))
+        if others:
+            return float(np.mean(others))
+        return 3.0
+
+    def analyze(self, symbol: str, price_data: Dict[str, Any], all_analyses: List[Dict]) -> Dict[str, Any]:
+        scored = [a for a in all_analyses if isinstance(a, dict) and 'rating' in a]
+        dampeners = [a for a in scored if a.get('agent_role') == 'dampener']
+        non_dampeners = [a for a in scored if a.get('agent_role') != 'dampener']
+
+        flat_avg_rating = float(np.mean([a['rating'] for a in scored])) if scored else 3.0
+        weighted_rating = self._weighted_rating(non_dampeners)
+
+        # Apply dampeners (e.g. Macro Agent) after the weighted average,
+        # not as another averaged-in vote.
+        dampen_factor = 1.0
+        suppress_buy = False
+        dampener_notes = []
+        for d in dampeners:
+            dampen_factor *= float(d.get('dampen_factor', 1.0))
+            if d.get('suppress_buy'):
+                suppress_buy = True
+            if d.get('note'):
+                dampener_notes.append(d['note'])
+
+        # Geopolitical crisis override: a crisis-level Geopolitical Agent
+        # reading (rating <= 1.5) caps the decision at HOLD regardless of
+        # the weighted average, so an active crisis can't be diluted away
+        # by averaging (Phase 6 requirement: "pull the aggregate down
+        # materially", not just contribute one more vote among several).
+        geo_override = False
+        for a in non_dampeners:
+            if a.get('agent_role') == 'geopolitical_crisis_override' or (
+                a.get('name') == 'Geopolitical Agent' and a.get('rating', 3) <= 1.5
+            ):
+                geo_override = True
+
+        adjusted_rating = weighted_rating * dampen_factor
+
+        if suppress_buy or geo_override:
+            decision = 'SELL' if adjusted_rating <= self.SELL_THRESHOLD else 'HOLD'
+            position_size = 0.0 if decision == 'SELL' else 0.02
+        elif adjusted_rating >= self.BUY_THRESHOLD:
+            decision = 'BUY'
+            position_size = 0.05
+        elif adjusted_rating <= self.SELL_THRESHOLD:
             decision = 'SELL'
             position_size = 0.0
         else:
             decision = 'HOLD'
             position_size = 0.02
 
-        data_sources = sorted({a.get('data_source', 'unknown') for a in all_analyses if isinstance(a, dict)})
+        agent_ratings_log = [
+            {
+                'name': a.get('name', 'unknown'),
+                'agent_role': a.get('agent_role', 'unknown'),
+                'rating': a.get('rating'),
+                'confidence': a.get('confidence'),
+                'data_source': a.get('data_source', 'unknown'),
+            }
+            for a in scored
+        ]
+
+        data_sources = sorted({a.get('data_source', 'unknown') for a in scored})
 
         return {
             'decision': decision,
             'position_size': float(position_size),
-            'avg_rating': float(avg_rating),
+            'avg_rating': float(adjusted_rating),        # rating that drove the decision (weighted + dampened)
+            'weighted_avg_rating': float(weighted_rating),  # weighted, pre-dampener
+            'flat_avg_rating': flat_avg_rating,             # old-style unweighted mean, audit-only
+            'dampen_factor': float(dampen_factor),
+            'suppress_buy': bool(suppress_buy or geo_override),
+            'dampener_notes': dampener_notes,
+            'agent_ratings_log': agent_ratings_log,
             'max_risk': 0.01,
             'max_correlation': 0.6,
             'sector_exposure': 0.3,
-            'confidence': float(np.mean([a.get('confidence', 0.5) for a in all_analyses if isinstance(a, dict)])),
+            'confidence': float(np.mean([a.get('confidence', 0.5) for a in scored])) if scored else 0.5,
             'data_sources_used': data_sources
         }
 
@@ -329,7 +444,9 @@ class MomentumBacktester:
 
         analyses = []
         for agent in self.agents[:-1]:  # All but portfolio manager
-            analyses.append(agent.analyze(symbol, price_data))
+            result = agent.analyze(symbol, price_data)
+            result.setdefault('name', agent.name)
+            analyses.append(result)
 
         portfolio_analysis = self.agents[-1].analyze(symbol, price_data, analyses)
         return portfolio_analysis
