@@ -1,0 +1,61 @@
+{
+  "timestamp": "2026-07-11T20:27:53.045923+00:00",
+  "strategy": "Optimized Mean Reversion (RSI + EMA Trend Filter)",
+  "data_period": "1 Year (2025-07-10 to 2026-07-09)",
+  "commodity": "XAUUSD (Gold)",
+  "result": {
+    "symbol": "XAUUSD",
+    "strategy": "Optimized Mean Reversion (RSI + EMA Trend Filter)",
+    "total_bars": 258,
+    "backtest_days": 258,
+    "initial_capital": 10000,
+    "final_capital": 9514.26,
+    "total_return_pct": -4.86,
+    "num_trades": 2,
+    "buy_trades": 1,
+    "sell_trades": 1,
+    "winning_trades": 1,
+    "losing_trades": 1,
+    "win_rate_pct": 50.0,
+    "avg_win": 48.82,
+    "avg_loss": -270.55,
+    "profit_factor": 0.18,
+    "max_drawdown_pct": 5.82,
+    "optimizations": [
+      "Tighter stops (1.5 ATR instead of 2.5)",
+      "EMA trend filter (skip against trend)",
+      "Scaled exits (50% at mean, 50% at target)",
+      "Kelly Criterion position sizing"
+    ],
+    "trades": [
+      {
+        "entry_time": "2026-03-18 22:00:00+00:00",
+        "entry_price": 4650.51,
+        "entry_type": "mean_reversion_buy",
+        "exit_time": "2026-03-25 22:00:00+00:00",
+        "exit_price": 4379.96,
+        "pnl": -270.55,
+        "pnl_pct": -5.82,
+        "bars_held": 5,
+        "exit_reason": "stop_loss",
+        "rsi_entry": 20.4,
+        "rsi_exit": 15.2,
+        "position_fraction": 0.1
+      },
+      {
+        "entry_time": "2026-04-15 22:00:00+00:00",
+        "entry_price": 4788.52,
+        "entry_type": "mean_reversion_sell",
+        "exit_time": "2026-04-21 22:00:00+00:00",
+        "exit_price": 4739.7,
+        "pnl": 48.82,
+        "pnl_pct": 1.02,
+        "bars_held": 4,
+        "exit_reason": "mean_reversion_complete",
+        "rsi_entry": 74.9,
+        "rsi_exit": 46.1,
+        "position_fraction": 0.1
+      }
+    ]
+  }
+}
