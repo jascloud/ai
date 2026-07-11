@@ -3,6 +3,13 @@
     "num_backtests": 5,
     "initial_capital": 100000.0,
     "time_period": "1_week",
+    "symbols": [
+      "AAPL",
+      "MSFT",
+      "GOOGL",
+      "AMZN",
+      "TSLA"
+    ],
     "agents": [
       "Technical Analyst",
       "Fundamental Analyst",
@@ -12,6 +19,15 @@
       "Bear Researcher",
       "Portfolio Manager"
     ]
+  },
+  "data_sources": {
+    "technical_analyst": "real_market_data (Alpha Vantage primary, Yahoo Finance fallback)",
+    "fundamental_analyst": "simulated_no_live_feed",
+    "sentiment_analyst": "simulated_no_live_feed",
+    "news_analyst": "simulated_no_live_feed",
+    "bull_researcher": "simulated_no_live_feed",
+    "bear_researcher": "simulated_no_live_feed",
+    "note": "TradingView has no public historical-data API; real prices are sourced from Alpha Vantage/Yahoo Finance as the practical equivalent."
   },
   "backtest_results": [
     {

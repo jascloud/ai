@@ -4,26 +4,58 @@ Real market data fetching for S&P 500 momentum backtesting.
 
 TradingView has no public REST API for historical OHLCV data — it is a
 charting/broker-integration product, not a data-licensing API. The real
-data sources wired in here are:
+data sources wired in here, tried in order:
 
-  1. Alpha Vantage (primary) - requires ALPHA_VANTAGE_API_KEY
-  2. Yahoo Finance via yfinance (fallback) - no key required, but the host
-     must be reachable from wherever this runs
+  1. Local cache file (MOMENTUM_PRICE_CACHE_FILE, default
+     market_data_cache.json if present) - real closes fetched by whoever
+     is orchestrating a run (e.g. via an MCP broker connector such as
+     Interactive Brokers) and written to disk in the format
+     {"SYMBOL": {"dates": [...], "closes": [...]}, ...}. Useful when this
+     process has no direct outbound HTTPS to a data vendor, but something
+     upstream does.
+  2. Alpha Vantage (requires ALPHA_VANTAGE_API_KEY)
+  3. Yahoo Finance via yfinance (no key required, but the host must be
+     reachable from wherever this runs)
 
 This module never fabricates data. Every failure raises MarketDataError
 with the specific cause so callers can report it and stop, instead of
 silently falling back to randomly generated prices.
 """
 
+import json
 import os
 import time
 from typing import Dict, List
 
 import requests
 
+DEFAULT_CACHE_FILE = "market_data_cache.json"
+
 
 class MarketDataError(Exception):
     """Raised when real market data cannot be fetched or is insufficient."""
+
+
+def _fetch_from_cache_file(symbol: str, lookback_days: int) -> List[float]:
+    cache_path = os.environ.get("MOMENTUM_PRICE_CACHE_FILE", DEFAULT_CACHE_FILE)
+    if not os.path.isfile(cache_path):
+        raise MarketDataError(f"Cache file not found: {cache_path}")
+
+    try:
+        with open(cache_path) as f:
+            cache = json.load(f)
+    except (json.JSONDecodeError, OSError) as e:
+        raise MarketDataError(f"Could not read cache file {cache_path}: {e}") from e
+
+    entry = cache.get(symbol)
+    if not entry or "closes" not in entry:
+        raise MarketDataError(f"No cached data for {symbol} in {cache_path}")
+
+    closes = [float(c) for c in entry["closes"]]
+    if len(closes) < 30:
+        raise MarketDataError(f"Cache file has only {len(closes)} days for {symbol} (need >= 30)")
+
+    return closes[-lookback_days:] if len(closes) > lookback_days else closes
 
 
 def _fetch_alpha_vantage(symbol: str, api_key: str, lookback_days: int) -> List[float]:
@@ -71,14 +103,20 @@ def _fetch_yfinance(symbol: str, lookback_days: int) -> List[float]:
 def fetch_price_history(symbol: str, lookback_days: int = 180) -> List[float]:
     """Fetch real daily closing prices for one symbol.
 
-    Tries Alpha Vantage first (if ALPHA_VANTAGE_API_KEY is set), then
-    falls back to Yahoo Finance. Raises MarketDataError with every
-    attempted-source failure reason if neither works — never fabricates
+    Tries, in order: a local cache file (MOMENTUM_PRICE_CACHE_FILE /
+    market_data_cache.json), then Alpha Vantage (if ALPHA_VANTAGE_API_KEY
+    is set), then Yahoo Finance. Raises MarketDataError with every
+    attempted-source failure reason if none works — never fabricates
     data as a fallback.
     """
-    api_key = os.environ.get("ALPHA_VANTAGE_API_KEY")
     errors = []
 
+    try:
+        return _fetch_from_cache_file(symbol, lookback_days)
+    except MarketDataError as e:
+        errors.append(str(e))
+
+    api_key = os.environ.get("ALPHA_VANTAGE_API_KEY")
     if api_key:
         try:
             closes = _fetch_alpha_vantage(symbol, api_key, lookback_days)

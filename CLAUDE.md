@@ -112,12 +112,25 @@ All metrics calculated across 5 independent backtests:
 ## 📡 Data Sources — Read This First
 
 **TradingView has no public REST API for historical OHLCV data** — it's a
-charting/broker-integration product, not a data-licensing API. "Connecting
-with TradingView" for real prices is implemented via:
+charting/broker-integration product, not a data-licensing API. **There is
+also no dedicated "Yahoo Finance" MCP server in the connector registry**
+(checked via `SearchMcpRegistry`). "Connecting with TradingView"/Yahoo for
+real prices is implemented via, tried in this order:
 
-1. **Alpha Vantage** (primary) — requires `ALPHA_VANTAGE_API_KEY`
-2. **Yahoo Finance** via `yfinance` (fallback) — no key required, but the
-   host must be reachable from wherever this runs
+1. **Local cache file** (`market_data_cache.json` / `MOMENTUM_PRICE_CACHE_FILE`)
+   — real closes written to disk by whoever orchestrates a run. In
+   practice this is populated by an **Interactive Brokers (IBKR) MCP
+   connector** call (`get_price_history`) when one is available and
+   authenticated — that path was verified working end-to-end in this
+   repo's dev session, and it sidesteps any outbound-HTTPS egress policy
+   since it goes through the MCP connector infrastructure instead of raw
+   HTTP. See `scripts/build_ibkr_price_cache.py` for the format.
+2. **Alpha Vantage** (registry has an official "Alpha Vantage MCP
+   Server", not installed by default here) — requires `ALPHA_VANTAGE_API_KEY`
+3. **Yahoo Finance** via `yfinance` (fallback) — no key required, but the
+   host must be reachable from wherever this runs; confirmed blocked by
+   this dev session's own egress policy (403 from the agent proxy) —
+   your deployment environment's policy may differ
 
 | Agent | Data Source |
 |-------|--------------|
