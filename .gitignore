@@ -2,3 +2,6 @@ __pycache__/
 *.pyc
 .env
 momentum_backtest_report_*.md
+# Agent output files
+prediction_arbitrage_results_*.json
+.paper_trading_logs/
