@@ -1,0 +1,90 @@
+{
+  "paper_trading": {
+    "symbol": "XAUUSD",
+    "initial_capital": 10000,
+    "duration_days": 30,
+    "comment": "2-4 week validation period with simulated execution",
+
+    "risk_controls": {
+      "daily_loss_limit_pct": 2,
+      "daily_loss_limit_usd": 200,
+      "max_position_size_pct": 5,
+      "max_position_size_usd": 500,
+      "max_concurrent_positions": 3,
+      "max_position_hold_days": 14,
+      "comment": "Stops trading after -2% daily loss, limits position to $500"
+    },
+
+    "execution_assumptions": {
+      "bid_ask_spread_usd": 0.75,
+      "execution_slippage_usd": 0.25,
+      "total_cost_per_trade_usd": 1.00,
+      "comment": "Gold typically trades with $0.50-1.00 spread; add slippage"
+    },
+
+    "strategy_parameters": {
+      "rsi_period": 14,
+      "rsi_buy_threshold": 30,
+      "rsi_sell_threshold": 70,
+      "rsi_exit_threshold": 50,
+      "atr_period": 14,
+      "stop_loss_atr_multiple": 1.5,
+      "take_profit_atr_multiple": 2.5,
+      "position_sizing": "kelly_criterion_2_to_25pct"
+    },
+
+    "data_sources": {
+      "primary": "intraday_bar_cache.json (IBKR real data)",
+      "fallback": "historical daily data (backtest archive)",
+      "comment": "Will use most recent XAUUSD prices from IBKR"
+    },
+
+    "monitoring": {
+      "log_interval_minutes": 1440,
+      "check_interval_minutes": 1,
+      "daily_summary": true,
+      "email_alerts": false,
+      "comment": "Logs daily, checks for new prices every minute"
+    },
+
+    "exit_criteria": {
+      "completion": "30 days or 20+ trades completed",
+      "emergency_stop": "Daily loss reaches -2%",
+      "max_drawdown": "25% of initial capital",
+      "position_timeout": "14 days without exit signal"
+    }
+  },
+
+  "validation_checklist": {
+    "pre_start": [
+      "Verify IBKR price cache is recent (< 24 hours old)",
+      "Confirm initial capital $10,000 is paper-only (simulated)",
+      "Review risk limits (2% daily stop, $500 max position)",
+      "Check log directory exists and is writable",
+      "Ensure continuous execution environment (VPS/Cloud)"
+    ],
+    "during_trading": [
+      "Monitor equity curve daily (should stay > $9,800)",
+      "Review each trade for realistic execution",
+      "Check slippage assumptions vs actual market",
+      "Verify no position exceeds risk limits",
+      "Ensure strategy is trading (not just logging)"
+    ],
+    "post_completion": [
+      "Compare paper trading results vs backtest",
+      "Analyze slippage impact on returns",
+      "Review win rate and average trade size",
+      "Assess max drawdown vs acceptable risk",
+      "Decide: proceed to small live trading or refine strategy"
+    ]
+  },
+
+  "success_criteria": {
+    "minimum_trades": 5,
+    "minimum_win_rate_pct": 30,
+    "target_return_pct": 2.5,
+    "max_acceptable_slippage_per_trade": 2.0,
+    "max_drawdown_pct": 20,
+    "comment": "If all criteria met, strategy ready for small live test"
+  }
+}
