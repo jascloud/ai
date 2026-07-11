@@ -1,0 +1,77 @@
+{
+  "prediction_arbitrage": {
+    "bankroll": 1000,
+    "comment": "Starting capital for position sizing",
+
+    "market_monitoring": {
+      "polymarket_limit": 10,
+      "kalshi_limit": 10,
+      "scan_interval_minutes": 60,
+      "comment": "Monitor top 10 markets on each platform, scan hourly"
+    },
+
+    "arbitrage_detection": {
+      "min_spread_threshold_pct": 1.0,
+      "min_liquidity_usd": 5000,
+      "max_execution_slippage_pct": 1.0,
+      "comment": "Only trade spreads > 1% with sufficient liquidity"
+    },
+
+    "position_sizing": {
+      "method": "kelly_criterion",
+      "kelly_fraction": 0.25,
+      "max_position_size_pct": 15,
+      "min_position_size_usd": 10,
+      "comment": "Use 25% of full Kelly for arbs, cap at 15% of bankroll"
+    },
+
+    "fee_assumptions": {
+      "polymarket_taker_pct": 2.0,
+      "polymarket_maker_pct": 0.0,
+      "kalshi_taker_pct": 2.0,
+      "kalshi_maker_pct": 0.5,
+      "estimated_total_cost_pct": 3.0,
+      "comment": "Typical prediction market fees; verify on platforms"
+    },
+
+    "execution": {
+      "mode": "analysis_only",
+      "manual_execution": true,
+      "automated_execution": false,
+      "api_keys_required": false,
+      "comment": "MVP is analysis. Execution requires Polymarket/Kalshi API keys"
+    },
+
+    "data_sources": {
+      "polymarket_api": "https://clob.polymarket.com/markets",
+      "kalshi_api": "https://api.kalshi.com/v2/markets",
+      "fallback": "synthetic_demo_data",
+      "comment": "Uses public APIs; falls back to demo if blocked"
+    },
+
+    "output": {
+      "display_top_n": 10,
+      "save_results_json": true,
+      "save_directory": ".",
+      "filename_format": "prediction_arbitrage_results_YYYYMMDD_HHMMSS.json"
+    }
+  },
+
+  "example_opportunity": {
+    "market": "Will Bitcoin reach $100k by EOY 2024?",
+    "buy_side": "NO on Polymarket @ $0.30",
+    "sell_side": "NO on Kalshi @ $0.55",
+    "spread_pct": 83.33,
+    "net_profit": 0.233,
+    "recommended_size": 125.0,
+    "kelly_fraction": 12.5,
+    "interpretation": "Buy small position (12.5% of bankroll) with high confidence"
+  },
+
+  "risk_management": {
+    "daily_loss_limit": false,
+    "max_concurrent_positions": 5,
+    "position_corr_limit": 0.3,
+    "comment": "Prevent overexposure to single outcome"
+  }
+}
