@@ -1,0 +1,76 @@
+# Momentum Trading Agent - Deployment Configuration
+# Deploy with: claude agent deploy --config deployment-config.yaml
+
+agent:
+  name: "Momentum Trading Agent"
+  version: "v1"
+  model: "claude-sonnet-5"
+  description: "Multi-agent momentum trading system for S&P 500 stocks with 7 specialized agents"
+
+trigger:
+  type: "schedule"
+  frequency: "weekdays"
+  timezone: "Australia/Perth"
+  cron: "0 9 * * 1-5"  # 9:00 AM Monday-Friday
+  next_runs:
+    - "Mon, Jul 13, 2026 at 9:00 AM"
+    - "Tue, Jul 14, 2026 at 9:00 AM"
+    - "Wed, Jul 15, 2026 at 9:00 AM"
+    - "Thu, Jul 16, 2026 at 9:00 AM"
+    - "Fri, Jul 17, 2026 at 9:00 AM"
+
+environment:
+  name: "Trading"
+  variables:
+    TRADINGAGENTS_LLM_PROVIDER: "anthropic"
+    TRADINGAGENTS_DEEP_THINK_LLM: "claude-opus-4-8"
+    TRADINGAGENTS_QUICK_THINK_LLM: "claude-opus-4-8"
+    INITIAL_CAPITAL: "100000"
+    TIME_PERIOD: "1_week"
+    NUM_BACKTESTS: "5"
+    OUTPUT_FORMAT: "json"
+    TIMEZONE: "Australia/Perth"
+
+credentials:
+  vault: "Trading vault"
+  required:
+    - ANTHROPIC_API_KEY
+    - OPENAI_API_KEY
+    - ALPHA_VANTAGE_API_KEY
+
+initial_message: |
+  Run momentum trading agent backtests:
+  - Execute 5 independent backtests
+  - $100,000 initial capital
+  - 1-week trading period
+  - S&P 500 stocks (simulated 5 symbols)
+  - Generate JSON results and markdown report
+  - Output to: momentum_backtest_results.json
+
+execution:
+  command: "bash run_momentum_backtest.sh"
+  working_directory: "/home/user/ai"
+  timeout_minutes: 30
+
+output:
+  files:
+    - momentum_backtest_results.json
+    - momentum_backtest_report_*.md
+  format: "json"
+  storage: "results_bucket"
+
+monitoring:
+  enabled: true
+  alerts:
+    on_failure: true
+    on_success: false
+  notifications:
+    email: "Singh.jas@aol.com"
+    slack: "trading-results"
+
+schedule_details:
+  # Runs every business day (Monday-Friday) at 9:00 AM Perth time
+  # This gives daily momentum analysis and backtest results
+  recurrence: "weekdays"
+  timezone: "GMT+08:00"
+  time: "09:00"
