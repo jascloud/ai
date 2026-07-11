@@ -866,12 +866,20 @@ class MomentumBacktester:
         symbols: List[str] = None,
         lookback_days: int = None,
         entry_mode: str = "indicator",
+        engulfing_use_volume_confirmation: bool = True,
+        engulfing_regular_hours_only: bool = True,
     ):
         self.initial_capital = initial_capital
         self.time_period = time_period
         self.num_backtests = num_backtests
         self.symbols = symbols or ['AAPL', 'MSFT', 'GOOGL', 'AMZN', 'TSLA']
         self.entry_mode = entry_mode  # 'indicator' or 'engulfing'
+        # Both default to the equity assumptions this system was built
+        # around (real traded volume, 9:30-16:00 ET session). Set both
+        # False for near-24h instruments without a reported-volume feed
+        # (spot commodities/FX) -- see engulfing_pattern.py's CMDTY path.
+        self.engulfing_use_volume_confirmation = engulfing_use_volume_confirmation
+        self.engulfing_regular_hours_only = engulfing_regular_hours_only
         self.all_results = []
 
         self.window_days = self.PERIOD_TRADING_DAYS.get(time_period, 5)
@@ -980,6 +988,8 @@ class MomentumBacktester:
                 end_date=newest_date,
                 body_ratio_threshold=1.0,
                 volume_multiplier=1.2,
+                use_volume_confirmation=self.engulfing_use_volume_confirmation,
+                regular_hours_only=self.engulfing_regular_hours_only,
             )
             by_date: Dict[str, Dict[str, Any]] = {}
             if source in ('real', 'cached_real', 'real_cache_file') and patterns:
@@ -1417,6 +1427,10 @@ if __name__ == "__main__":
     parser.add_argument("--output", type=str, default="momentum_backtest_results.json", help="Output JSON file")
     parser.add_argument("--entry-mode", type=str, default="indicator", choices=["indicator", "engulfing"],
                          help="Entry signal mode: 'indicator' (RSI/MACD/SMA) or 'engulfing' (5-min candlestick patterns)")
+    parser.add_argument("--no-volume-confirmation", action="store_true",
+                         help="Disable engulfing volume confirmation (use for instruments with no real traded-volume feed, e.g. spot commodities/FX)")
+    parser.add_argument("--no-regular-hours-only", action="store_true",
+                         help="Disable the 9:30-16:00 ET session filter for engulfing patterns (use for near-24h instruments, e.g. spot commodities/FX)")
     parser.add_argument("--validate", action="store_true",
                          help="Validate strategy config AND real market data connectivity")
 
@@ -1447,6 +1461,8 @@ if __name__ == "__main__":
             symbols=symbols,
             lookback_days=args.lookback_days,
             entry_mode=args.entry_mode,
+            engulfing_use_volume_confirmation=not args.no_volume_confirmation,
+            engulfing_regular_hours_only=not args.no_regular_hours_only,
         )
     except MarketDataError as e:
         print(f"\n✗ FATAL: {e}", file=sys.stderr)

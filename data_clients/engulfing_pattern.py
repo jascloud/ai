@@ -124,6 +124,7 @@ def detect_engulfing_pattern(
     sma_period: int = 20,
     use_volume_confirmation: bool = True,
     use_sma_confirmation: bool = True,
+    regular_hours_only: bool = True,
 ) -> List[Dict[str, Any]]:
     """
     Detect engulfing patterns in a list of 5-min bars.
@@ -172,8 +173,12 @@ def detect_engulfing_pattern(
         bar_n_1 = bars[i - 1]
         bar_n = bars[i]
 
-        # Skip if outside regular hours
-        if not is_regular_hours(bar_n["timestamp"]):
+        # Skip if outside regular hours (equity-session concept; not
+        # applicable to near-24h instruments like spot commodities/FX --
+        # callers pass regular_hours_only=False for those rather than
+        # discarding almost all of their real bars against an equity
+        # session window that doesn't describe how they trade)
+        if regular_hours_only and not is_regular_hours(bar_n["timestamp"]):
             results.append(
                 {
                     "timestamp": bar_n["timestamp"],
@@ -263,6 +268,8 @@ def get_engulfing_patterns_for_period(
     end_date: str,
     body_ratio_threshold: float = 1.0,
     volume_multiplier: float = 1.2,
+    use_volume_confirmation: bool = True,
+    regular_hours_only: bool = True,
 ) -> Tuple[Optional[List[Dict[str, Any]]], str, Optional[str]]:
     """
     Fetch 5-min bars and detect engulfing patterns.
@@ -272,6 +279,14 @@ def get_engulfing_patterns_for_period(
     orchestrates a run, e.g. via an IBKR MCP connector), then Polygon.
     Same source-priority convention market_data.py already uses for
     daily closes.
+
+    use_volume_confirmation / regular_hours_only default to the equity
+    assumptions this system was originally built around (real traded
+    volume available, 9:30-16:00 ET session). Pass both False for
+    near-24h instruments without a reported-volume feed, e.g. spot
+    commodities/FX (see data_clients/engulfing_pattern.py's CMDTY path)
+    — never fabricate a volume signal or apply an equity session window
+    to something that doesn't trade on one.
 
     Returns: (patterns_list, data_source, error_reason)
     data_source: 'real' (Polygon), 'cached_real' (Polygon, from its own
@@ -283,8 +298,9 @@ def get_engulfing_patterns_for_period(
             cached_bars,
             body_ratio_threshold=body_ratio_threshold,
             volume_multiplier=volume_multiplier,
-            use_volume_confirmation=True,
+            use_volume_confirmation=use_volume_confirmation,
             use_sma_confirmation=True,
+            regular_hours_only=regular_hours_only,
         )
         return patterns, "real_cache_file", None
 
@@ -299,8 +315,9 @@ def get_engulfing_patterns_for_period(
             bars,
             body_ratio_threshold=body_ratio_threshold,
             volume_multiplier=volume_multiplier,
-            use_volume_confirmation=True,
+            use_volume_confirmation=use_volume_confirmation,
             use_sma_confirmation=True,
+            regular_hours_only=regular_hours_only,
         )
         return patterns, source, None
     else:
