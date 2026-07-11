@@ -22,6 +22,12 @@ from data_clients.estimate_revisions import get_estimate_revision_direction
 from data_clients.news_wire import get_recent_headlines
 from data_clients.news_sentiment import score_headlines
 from data_clients.social_sentiment import get_combined_social_sentiment
+from data_clients.macro_calendar import (
+    days_until_next_fomc_meeting,
+    get_yield_curve_spread,
+    get_fed_funds_rate_trend,
+    get_recent_macro_releases,
+)
 
 # NOTE ON DATA SOURCES:
 # TechnicalAnalyst runs on REAL historical closing prices (Alpha Vantage or
@@ -402,6 +408,88 @@ class NewsAnalyst(TradingAgent):
         }
 
 
+class MacroAgent(TradingAgent):
+    """PHASE 5: new net-new agent — does NOT replace anything and is
+    NOT part of the weighted average. Tagged agent_role='dampener' so
+    PortfolioManager excludes it from the averaged bucket entirely and
+    instead applies it afterward via `dampen_factor` (multiplicative)
+    and `suppress_buy` (hard override). This agent only ever reduces
+    the aggregate rating or blocks a BUY outright — it never amplifies,
+    matching "dampener" rather than a bidirectional macro-sentiment vote.
+
+    `days_until_next_fomc`/`days_since_last_fomc` are pure local
+    calendar math against a maintained static schedule of publicly-
+    announced FOMC meeting dates (see macro_calendar.py) — this works
+    with NO API key configured, so the "suppress BUY the day before
+    FOMC" behavior this phase specifically calls for doesn't depend on
+    a paid feed being reachable. Yield-curve, rate-trend, and CPI/PCE/
+    jobs inputs are real FRED data when FRED_API_KEY is configured and
+    reachable, and are simply skipped (not faked) when degraded.
+    """
+
+    def analyze(self, symbol: str, price_data: Dict[str, Any]) -> Dict[str, Any]:
+        days_until_fomc = days_until_next_fomc_meeting()
+
+        dampen_factor = 1.0
+        suppress_buy = False
+        notes = []
+        degraded_reasons = []
+        real_signals_used = []
+
+        if days_until_fomc <= 1:
+            suppress_buy = True
+            notes.append(f"FOMC decision in {days_until_fomc} day(s) — suppressing BUY regardless of other agents")
+        elif days_until_fomc <= 3:
+            dampen_factor *= 0.85
+            notes.append(f"FOMC decision in {days_until_fomc} days — reducing conviction")
+
+        spread, spread_source, spread_reason = get_yield_curve_spread()
+        if spread_source == 'real':
+            real_signals_used.append('yield_curve')
+            if spread < 0:
+                dampen_factor *= 0.85
+                notes.append(f"2s10s yield curve inverted ({spread:.2f}pp) — macro headwind")
+        else:
+            degraded_reasons.append(f"yield_curve: {spread_reason}")
+
+        rate_trend, rate_source, rate_reason = get_fed_funds_rate_trend()
+        if rate_source == 'real':
+            real_signals_used.append('fed_funds_rate_trend')
+            if rate_trend == 'up':
+                dampen_factor *= 0.95
+                notes.append("Fed funds rate trending up (tightening) — mild macro headwind")
+        else:
+            degraded_reasons.append(f"fed_funds_rate_trend: {rate_reason}")
+
+        releases, releases_source, releases_reason = get_recent_macro_releases()
+        if releases_source in ('real', 'real_partial'):
+            real_signals_used.append('macro_releases')
+            cpi_change = releases.get('CPI') if releases else None
+            if cpi_change is not None and cpi_change > 0.005:  # >0.5% MoM CPI is a hot print
+                dampen_factor *= 0.9
+                notes.append(f"CPI MoM +{cpi_change*100:.2f}% — hotter-than-typical inflation print")
+        else:
+            degraded_reasons.append(f"macro_releases: {releases_reason}")
+
+        data_source = 'real_partial' if real_signals_used else 'local_calendar_only'
+        # Informational rating only — dampeners are excluded from the
+        # weighted-average bucket by PortfolioManager, this is for logging.
+        rating = 1 if suppress_buy else max(1, min(5, int(round(3 - (1 - dampen_factor) * 10))))
+
+        return {
+            'rating': rating,
+            'dampen_factor': float(dampen_factor),
+            'suppress_buy': suppress_buy,
+            'note': '; '.join(notes) if notes else 'no active macro headwinds detected',
+            'days_until_next_fomc': days_until_fomc,
+            'real_signals_used': real_signals_used,
+            'degraded_reasons': degraded_reasons,
+            'confidence': 0.8 if real_signals_used else 0.3,
+            'data_source': data_source,
+            'agent_role': 'dampener'
+        }
+
+
 class ResearchAgent(TradingAgent):
     """Bull/Bear researcher agent"""
 
@@ -616,6 +704,7 @@ class MomentumBacktester:
             NewsAnalyst("News Analyst", "catalyst_detection"),
             ResearchAgent("Bull Researcher", "upside_scenarios", "BULL"),
             ResearchAgent("Bear Researcher", "downside_risks", "BEAR"),
+            MacroAgent("Macro Agent", "macro_dampener"),
             PortfolioManager("Portfolio Manager", "risk_control")
         ]
 

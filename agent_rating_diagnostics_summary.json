@@ -389,6 +389,85 @@
           }
         }
       }
+    },
+    {
+      "phase": "phase_5_macro_agent",
+      "timestamp": "2026-07-11T13:44:54.165653+00:00",
+      "note": "Added new Macro Agent (net-new, not a replacement) as a rating dampener excluded from the weighted average, per the requirement that it not be 'just another averaged input'. days_until_next_fomc/days_since_last_fomc are pure local calendar math against a maintained static schedule of publicly-announced FOMC dates, so the day-before-FOMC suppression works even with no FRED_API_KEY configured. Verified directly (not just claimed): a controlled test forcing days_until_next_fomc=1 correctly set suppress_buy=True and blocked a unanimous all-agent rating=5 from becoming a BUY (decision=HOLD). Under current real calendar conditions (18 days from the next scheduled FOMC meeting), no suppression is active, so this diagnostic run (which uses today's real date) should be unaffected.",
+      "diagnostic": {
+        "n_trials_per_rating_level": 3000,
+        "agents_in_test": [
+          "Technical Analyst",
+          "Fundamental Analyst",
+          "Sentiment Analyst",
+          "News Analyst",
+          "Bull Researcher",
+          "Bear Researcher",
+          "Macro Agent"
+        ],
+        "by_technical_rating": {
+          "1": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 1.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 2.0,
+            "avg_flat_rating": 2.714285714285715
+          },
+          "2": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 1.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 2.5,
+            "avg_flat_rating": 2.8571428571428568
+          },
+          "3": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 1.0,
+            "avg_weighted_rating": 3.0,
+            "avg_flat_rating": 3.0
+          },
+          "4": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 1.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 3.5,
+            "avg_flat_rating": 3.1428571428571432
+          },
+          "5": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 1.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 4.0,
+            "avg_flat_rating": 3.285714285714285
+          }
+        },
+        "headline": {
+          "buy_clearance_at_technical_5": {
+            "legacy_flat_mean_4.0_threshold": 0.0,
+            "weighted_mean_3.5_threshold": 1.0
+          },
+          "sell_clearance_at_technical_1": {
+            "legacy_flat_mean_2.0_threshold": 0.0,
+            "weighted_mean_2.5_threshold": 1.0
+          }
+        }
+      }
     }
   ]
 }
