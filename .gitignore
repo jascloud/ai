@@ -1,0 +1,4 @@
+__pycache__/
+*.pyc
+.env
+momentum_backtest_report_*.md
