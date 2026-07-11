@@ -1,0 +1,205 @@
+{
+  "name": "Momentum Trading Agent",
+  "description": "Multi-agent momentum trading system for S&P 500 stocks with 7 specialized agents (Technical, Fundamental, Sentiment, News, Bull/Bear Researchers, Portfolio Manager) integrated with comprehensive backtesting engine.",
+  "model": "claude-sonnet-5",
+  "system": "You are a specialized momentum trading agent coordinator that manages 7 AI trading agents working together to identify and execute momentum-based trades on S&P 500 stocks. Your responsibilities: (1) Orchestrate Technical Analyst for momentum indicators (RSI > 65, MACD, SMA, Volume), (2) Coordinate Fundamental Analyst for financial health assessment, (3) Aggregate Sentiment Analyst data from social media and news, (4) Integrate News Analyst catalyst detection, (5) Facilitate Bull/Bear Researcher debate for balanced perspectives, (6) Use Portfolio Manager for final risk-adjusted decision-making. Execute trades when: average agent rating >= 4.0 (BUY), <= 2.0 (SELL), else HOLD. Manage positions with 2% stop-loss, 5% take-profit, Kelly Criterion sizing (5% max per position, 1% risk per trade). Log all trades with reasoning. Backtest over configurable periods (default 1 week, $100k capital). Output results as JSON with trade-by-trade data and metrics (Sharpe, Sortino, Calmar, Recovery Factor, Win Rate, etc.).",
+  "mcp_servers": [],
+  "tools": [
+    {
+      "type": "agent_toolset_20260401"
+    }
+  ],
+  "skills": [
+    "technical_analysis",
+    "fundamental_analysis",
+    "sentiment_analysis",
+    "news_analysis",
+    "research_debate",
+    "portfolio_management",
+    "risk_management"
+  ],
+  "configuration": {
+    "strategy": {
+      "type": "momentum_trading",
+      "asset_class": "equity",
+      "universe": "sp500",
+      "entry_signals": [
+        "RSI > 65 (strong uptrend)",
+        "MACD positive divergence",
+        "Price > 20-day SMA",
+        "Volume confirmation"
+      ],
+      "exit_signals": [
+        "Stop loss at 2%",
+        "Take profit at 5%",
+        "RSI > 80 (overbought)",
+        "MACD bearish crossover"
+      ],
+      "position_sizing": "kelly_criterion",
+      "max_position": 0.05,
+      "risk_per_trade": 0.01
+    },
+    "backtesting": {
+      "initial_capital": 100000,
+      "time_period": "1_week",
+      "num_backtests": 5,
+      "metrics": [
+        "total_return",
+        "sharpe_ratio",
+        "max_drawdown",
+        "win_rate",
+        "profit_factor",
+        "recovery_factor",
+        "sortino_ratio",
+        "calmar_ratio"
+      ]
+    },
+    "agents": [
+      {
+        "name": "Technical Analyst",
+        "focus": "momentum_indicators",
+        "indicators": ["RSI", "MACD", "Stochastic", "CCI", "ROC"],
+        "output": "Technical rating (1-5), action recommendation"
+      },
+      {
+        "name": "Fundamental Analyst",
+        "focus": "financial_health",
+        "metrics": ["PE_ratio", "revenue_growth", "profit_margin", "ROE"],
+        "output": "Fundamental rating (1-5), company assessment"
+      },
+      {
+        "name": "Sentiment Analyst",
+        "focus": "market_psychology",
+        "sources": ["social_media", "news_sentiment", "StockTwits", "Reddit"],
+        "output": "Sentiment score (-1 to +1), trend direction"
+      },
+      {
+        "name": "News Analyst",
+        "focus": "catalyst_detection",
+        "lookback_days": 7,
+        "types": ["earnings", "announcements", "regulatory", "macro"],
+        "output": "Catalyst assessment, impact rating"
+      },
+      {
+        "name": "Bull Researcher",
+        "focus": "upside_scenarios",
+        "debate_rounds": 2,
+        "output": "Bull case summary, upside scenario"
+      },
+      {
+        "name": "Bear Researcher",
+        "focus": "downside_risks",
+        "debate_rounds": 2,
+        "output": "Bear case summary, downside risks"
+      },
+      {
+        "name": "Portfolio Manager",
+        "focus": "risk_control",
+        "constraints": {
+          "max_correlation": 0.6,
+          "max_sector_exposure": 0.3,
+          "max_drawdown_tolerance": 0.1
+        },
+        "output": "Final decision (BUY/SELL/HOLD), position size"
+      }
+    ]
+  },
+  "execution": {
+    "mode": "backtesting",
+    "output_format": "json",
+    "log_trades": true,
+    "save_results": "momentum_backtest_results.json",
+    "generate_report": "momentum_backtest_report.md"
+  },
+  "deployment_options": [
+    {
+      "type": "bash_script",
+      "command": "bash run_momentum_backtest.sh",
+      "description": "Automated one-command execution with full validation and reporting"
+    },
+    {
+      "type": "python_direct",
+      "command": "python3 backtest_momentum_agent.py --capital 100000 --num-backtests 5",
+      "description": "Direct Python execution with customizable parameters"
+    },
+    {
+      "type": "claude_console",
+      "command": "claude code console --config momentum-trading-agent.json",
+      "description": "Interactive Claude Code Console mode"
+    },
+    {
+      "type": "claude_cli",
+      "command": "claude code run backtest_momentum_agent.py",
+      "description": "Claude Code CLI execution"
+    },
+    {
+      "type": "python_api",
+      "code": "from backtest_momentum_agent import MomentumBacktester; backtester = MomentumBacktester(100000, '1_week', 5); results = backtester.run_all_backtests()",
+      "description": "Python package import and direct usage"
+    }
+  ],
+  "expected_output": {
+    "format": "json",
+    "structure": {
+      "backtest_summary": {
+        "num_backtests": 5,
+        "initial_capital": 100000,
+        "time_period": "1_week",
+        "agents": 7
+      },
+      "backtest_results": [
+        {
+          "backtest_id": "number",
+          "metrics": {
+            "total_return": "float (0.145 = 14.5%)",
+            "sharpe_ratio": "float",
+            "max_drawdown": "float (-0.087 = -8.7%)",
+            "win_rate": "float (0.62 = 62%)",
+            "profit_factor": "float",
+            "recovery_factor": "float",
+            "sortino_ratio": "float",
+            "calmar_ratio": "float",
+            "final_capital": "float",
+            "total_trades": "integer",
+            "winning_trades": "integer"
+          },
+          "trades": [
+            {
+              "symbol": "string",
+              "action": "BUY|SELL",
+              "price": "float",
+              "quantity": "float",
+              "cost_or_proceeds": "float",
+              "profit": "float (if SELL)"
+            }
+          ],
+          "daily_returns": ["float array"],
+          "daily_portfolio_values": ["float array"]
+        }
+      ],
+      "aggregate_metrics": {
+        "avg_total_return": "float",
+        "std_total_return": "float",
+        "avg_sharpe_ratio": "float",
+        "std_sharpe_ratio": "float",
+        "avg_max_drawdown": "float",
+        "avg_win_rate": "float",
+        "avg_profit_factor": "float",
+        "avg_recovery_factor": "float",
+        "avg_sortino_ratio": "float",
+        "avg_calmar_ratio": "float",
+        "total_trades_across_backtests": "integer",
+        "avg_trades_per_backtest": "float"
+      }
+    }
+  },
+  "documentation": {
+    "full_guide": "CLAUDE.md",
+    "quick_start": "MOMENTUM_TRADING_QUICKSTART.md",
+    "deployment": "FINAL_DEPLOYMENT_GUIDE.md",
+    "setup_verification": "SYSTEM_SETUP_SUMMARY.md"
+  },
+  "status": "PRODUCTION_READY",
+  "version": "1.0.0",
+  "last_updated": "2026-07-11"
+}
