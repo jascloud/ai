@@ -128,12 +128,20 @@ class BaseRealDataClient:
     API_KEY_ENV: Optional[str] = None
     CACHE_NAMESPACE = "generic"
     CACHE_TTL_SECONDS = 3600
+    # How long a *failed* fetch is remembered before retrying the network
+    # again. Deliberately short relative to CACHE_TTL_SECONDS — a dead
+    # feed shouldn't be retried with full exponential backoff on every
+    # single call (e.g. once per symbol-day in a backtest, or once per
+    # Monte Carlo trial in the diagnostic tool), but it also shouldn't be
+    # written off for as long as a real successful response is trusted.
+    NEGATIVE_CACHE_TTL_SECONDS = 60
     RATE_LIMIT_CALLS = 5
     RATE_LIMIT_PERIOD = 60.0
 
     def __init__(self):
         self.api_key = os.environ.get(self.API_KEY_ENV) if self.API_KEY_ENV else "not_required"
         self.cache = FileCache(self.CACHE_NAMESPACE, self.CACHE_TTL_SECONDS)
+        self.negative_cache = FileCache(f"{self.CACHE_NAMESPACE}__negative", self.NEGATIVE_CACHE_TTL_SECONDS)
         self.rate_limiter = RateLimiter(self.RATE_LIMIT_CALLS, self.RATE_LIMIT_PERIOD)
 
     def _cache_key(self, **kwargs) -> str:
@@ -165,14 +173,20 @@ class BaseRealDataClient:
         if cached is not None:
             return cached, "cached_real", None
 
+        cached_failure = self.negative_cache.get(cache_key)
+        if cached_failure is not None:
+            return None, "degraded", f"{cached_failure} (from negative cache, retry suppressed for {self.NEGATIVE_CACHE_TTL_SECONDS}s)"
+
         try:
             self.rate_limiter.acquire()
             data = with_retry(lambda: self._fetch_live(**kwargs))
             self.cache.set(cache_key, data)
             return data, "real", None
         except DataClientError as e:
+            self.negative_cache.set(cache_key, str(e))
             return None, "degraded", str(e)
         except Exception as e:  # noqa: BLE001 - last-resort guard so a client bug can never crash an agent
+            self.negative_cache.set(cache_key, f"unexpected client error: {e}")
             return None, "degraded", f"unexpected client error: {e}"
 
 

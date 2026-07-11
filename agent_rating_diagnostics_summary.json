@@ -311,6 +311,84 @@
           }
         }
       }
+    },
+    {
+      "phase": "phase_4_sentiment_rebuild",
+      "timestamp": "2026-07-11T13:40:58.522402+00:00",
+      "note": "Rebuilt Sentiment Analyst on a single combined social score merging Twitter/X cashtag search + Reddit (WSB/stocks/investing) + StockTwits stream, deliberately NOT split into 3 separate averaged agents. Simulated random sentiment/volume/trend generation removed entirely. Verified the StockTwits path (keyless) actually attempts a real network call and correctly degrades on the same 403 policy denial seen from every other financial host in this session, rather than short-circuiting on a missing-key check alone. Also fixed a real perf bug found while running this: base_client.py previously had no negative cache, so every degraded call retried full exponential backoff -- harmless for a single call, but would have made both this diagnostic (thousands of trials) and a real backtest (one evaluation per symbol-day) unusably slow against a persistently-down feed. Added a short-TTL negative cache (60s) so a dead feed's retry cost is paid once, not every call.",
+      "diagnostic": {
+        "n_trials_per_rating_level": 3000,
+        "agents_in_test": [
+          "Technical Analyst",
+          "Fundamental Analyst",
+          "Sentiment Analyst",
+          "News Analyst",
+          "Bull Researcher",
+          "Bear Researcher"
+        ],
+        "by_technical_rating": {
+          "1": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 1.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 2.0,
+            "avg_flat_rating": 2.6666666666666665
+          },
+          "2": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 1.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 2.5,
+            "avg_flat_rating": 2.8333333333333326
+          },
+          "3": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 1.0,
+            "avg_weighted_rating": 3.0,
+            "avg_flat_rating": 3.0
+          },
+          "4": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 1.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 3.5,
+            "avg_flat_rating": 3.1666666666666665
+          },
+          "5": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 1.0,
+            "current_buy_rate": 1.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 4.0,
+            "avg_flat_rating": 3.3333333333333335
+          }
+        },
+        "headline": {
+          "buy_clearance_at_technical_5": {
+            "legacy_flat_mean_4.0_threshold": 0.0,
+            "weighted_mean_3.5_threshold": 1.0
+          },
+          "sell_clearance_at_technical_1": {
+            "legacy_flat_mean_2.0_threshold": 0.0,
+            "weighted_mean_2.5_threshold": 1.0
+          }
+        }
+      }
     }
   ]
 }

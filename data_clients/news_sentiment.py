@@ -32,7 +32,7 @@ NEGATIVE_TERMS = (
 )
 
 
-def _score_headline(title: str) -> int:
+def score_text(title: str) -> int:
     text = title.lower()
     pos_hits = sum(1 for term in POSITIVE_TERMS if term in text)
     neg_hits = sum(1 for term in NEGATIVE_TERMS if term in text)
@@ -48,7 +48,7 @@ def score_headlines(headlines: List[dict]) -> Optional[dict]:
     if not headlines:
         return None
 
-    scores = [_score_headline(h["title"]) for h in headlines if h.get("title")]
+    scores = [score_text(h["title"]) for h in headlines if h.get("title")]
     if not scores:
         return None
 

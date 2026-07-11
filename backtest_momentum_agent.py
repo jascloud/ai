@@ -21,6 +21,7 @@ from data_clients.analyst_ratings import get_analyst_consensus
 from data_clients.estimate_revisions import get_estimate_revision_direction
 from data_clients.news_wire import get_recent_headlines
 from data_clients.news_sentiment import score_headlines
+from data_clients.social_sentiment import get_combined_social_sentiment
 
 # NOTE ON DATA SOURCES:
 # TechnicalAnalyst runs on REAL historical closing prices (Alpha Vantage or
@@ -305,22 +306,44 @@ class FundamentalAnalyst(TradingAgent):
 
 
 class SentimentAnalyst(TradingAgent):
-    """Market sentiment analysis agent"""
+    """PHASE 4: rebuilt on ONE combined social-sentiment score merging
+    Twitter/X + Reddit + StockTwits (see data_clients/social_sentiment.py)
+    — `random.uniform`/`random.randint`/`random.random` removed
+    entirely. Per the requirement, these three sources are deliberately
+    NOT run as three separate averaged-in agents (which would just
+    reintroduce the original dilution problem with more voices); they
+    combine into a single sentiment_score before this agent ever
+    computes a rating.
+    """
 
     def analyze(self, symbol: str, price_data: Dict[str, Any]) -> Dict[str, Any]:
-        sentiment_score = random.uniform(-1, 1)
+        combined, source, reason = get_combined_social_sentiment(symbol)
 
+        if source not in ("real", "real_partial") or not combined:
+            return {
+                'rating': 3,
+                'sentiment': 'NEUTRAL',
+                'social_volume': 0,
+                'degraded_reason': reason,
+                'confidence': 0.0,
+                'data_source': 'degraded_no_data',
+                'agent_role': 'other'
+            }
+
+        sentiment_score = combined['sentiment_score']
+        rating = max(1, min(5, int(round(3 + sentiment_score * 2))))
         sentiment = 'BULLISH' if sentiment_score > 0.2 else 'BEARISH' if sentiment_score < -0.2 else 'NEUTRAL'
-        rating = round(3 + (sentiment_score * 2))
-        rating = max(1, min(5, rating))
+        # confidence scales with both corroborating volume and source coverage (1-3 of Twitter/Reddit/StockTwits)
+        confidence = min(1.0, (combined['social_volume'] / 30.0) * (len(combined['sources_used']) / 3.0))
 
         return {
             'rating': rating,
             'sentiment_score': float(sentiment_score),
             'sentiment': sentiment,
-            'social_volume': random.randint(100, 10000),
-            'trend': 'INCREASING' if random.random() > 0.5 else 'DECREASING',
-            'data_source': 'simulated_no_live_feed',
+            'social_volume': combined['social_volume'],
+            'sources_used': combined['sources_used'],
+            'confidence': float(confidence),
+            'data_source': source,
             'agent_role': 'other'
         }
 
