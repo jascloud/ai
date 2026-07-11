@@ -109,11 +109,19 @@ run_strategy_validation() {
     print_success "Strategy validation passed"
 }
 
+format_money() {
+    # Formats a numeric value with thousands separators and 2 decimal places,
+    # without relying on a locale-specific printf "%'d" (not reliably
+    # available in minimal containers).
+    local value="$1"
+    printf "%.2f" "$value" | sed -E ':a; s/^([0-9]+)([0-9]{3})/\1,\2/; ta'
+}
+
 run_backtests() {
     print_header "Running Momentum Trading Agent Backtests"
 
     echo -e "\nConfiguration:"
-    echo "  Initial Capital: \$${INITIAL_CAPITAL:,.2f}"
+    echo "  Initial Capital: \$$(format_money "${INITIAL_CAPITAL}")"
     echo "  Time Period: ${TIME_PERIOD}"
     echo "  Number of Backtests: ${NUM_BACKTESTS}"
     echo "  Strategy: S&P 500 Momentum Trading"
