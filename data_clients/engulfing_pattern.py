@@ -6,11 +6,54 @@ Detects bullish/bearish engulfing patterns during regular trading hours (9:30-16
 Returns pattern signals (bullish/bearish/none) with confidence based on volume and SMA confirmation.
 """
 
+import json
+import os
 import requests
 from datetime import datetime, timezone
 from typing import Tuple, Optional, List, Dict, Any
 
 from data_clients.base_client import BaseRealDataClient, DataClientError
+
+DEFAULT_5MIN_CACHE_FILE = "intraday_5min_cache.json"
+
+
+def _fetch_from_cache_file(symbol: str, start_date: str, end_date: str) -> Optional[List[Dict[str, Any]]]:
+    """Real 5-min bars written to disk by whoever orchestrates a run (e.g.
+    via an IBKR MCP connector's get_price_history, converted to this
+    client's bar shape) — same local-cache-file-first convention
+    market_data.py already uses for daily closes. Returns None (never
+    fabricates) if the cache file, symbol, or in-range bars are missing,
+    so the caller falls through to the Polygon fetch."""
+    cache_path = os.environ.get("MOMENTUM_5MIN_CACHE_FILE", DEFAULT_5MIN_CACHE_FILE)
+    if not os.path.isfile(cache_path):
+        return None
+
+    try:
+        with open(cache_path) as f:
+            cache = json.load(f)
+    except (json.JSONDecodeError, OSError):
+        return None
+
+    entry = cache.get(symbol)
+    if not entry or "bars" not in entry:
+        return None
+
+    start_ts = datetime.strptime(start_date, "%Y-%m-%d").replace(tzinfo=timezone.utc).timestamp() * 1000
+    end_ts = (datetime.strptime(end_date, "%Y-%m-%d").replace(tzinfo=timezone.utc).timestamp() + 86400) * 1000
+
+    bars = [
+        {
+            "timestamp": b["t"],
+            "open": b["o"],
+            "high": b["h"],
+            "low": b["l"],
+            "close": b["c"],
+            "volume": b["v"],
+        }
+        for b in entry["bars"]
+        if start_ts <= b["t"] < end_ts
+    ]
+    return bars or None
 
 
 class PolygonIntraday5MinClient(BaseRealDataClient):
@@ -224,9 +267,27 @@ def get_engulfing_patterns_for_period(
     """
     Fetch 5-min bars and detect engulfing patterns.
 
+    Tries, in order: a local cache file (MOMENTUM_5MIN_CACHE_FILE /
+    intraday_5min_cache.json — real bars written to disk by whoever
+    orchestrates a run, e.g. via an IBKR MCP connector), then Polygon.
+    Same source-priority convention market_data.py already uses for
+    daily closes.
+
     Returns: (patterns_list, data_source, error_reason)
-    data_source: 'real', 'cached_real', or 'degraded'
+    data_source: 'real' (Polygon), 'cached_real' (Polygon, from its own
+    cache), 'real_cache_file' (local cache file), or 'degraded'
     """
+    cached_bars = _fetch_from_cache_file(symbol, start_date, end_date)
+    if cached_bars:
+        patterns = detect_engulfing_pattern(
+            cached_bars,
+            body_ratio_threshold=body_ratio_threshold,
+            volume_multiplier=volume_multiplier,
+            use_volume_confirmation=True,
+            use_sma_confirmation=True,
+        )
+        return patterns, "real_cache_file", None
+
     client = PolygonIntraday5MinClient()
     data, source, reason = client.fetch(
         symbol=symbol, start_date=start_date, end_date=end_date

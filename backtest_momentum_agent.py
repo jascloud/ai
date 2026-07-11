@@ -969,8 +969,8 @@ class MomentumBacktester:
         — the gate is "did a confirmed engulfing pattern occur today",
         not a sub-day event queue.
         """
-        oldest_date = min(self.price_dates[s][0] for s in self.symbols if self.price_dates.get(s))
-        newest_date = max(self.price_dates[s][-1] for s in self.symbols if self.price_dates.get(s))
+        oldest_date = self._day_key(min(self.price_dates[s][0] for s in self.symbols if self.price_dates.get(s)))
+        newest_date = self._day_key(max(self.price_dates[s][-1] for s in self.symbols if self.price_dates.get(s)))
 
         print(f"Pre-loading 5-minute engulfing patterns ({oldest_date} to {newest_date})...")
         for symbol in self.symbols:
@@ -982,7 +982,7 @@ class MomentumBacktester:
                 volume_multiplier=1.2,
             )
             by_date: Dict[str, Dict[str, Any]] = {}
-            if source in ('real', 'cached_real') and patterns:
+            if source in ('real', 'cached_real', 'real_cache_file') and patterns:
                 for p in patterns:
                     if p['pattern_type'] == 'none':
                         continue
