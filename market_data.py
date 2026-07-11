@@ -25,7 +25,7 @@ silently falling back to randomly generated prices.
 import json
 import os
 import time
-from typing import Dict, List
+from typing import Dict, List, Tuple
 
 import requests
 
@@ -37,6 +37,11 @@ class MarketDataError(Exception):
 
 
 def _fetch_from_cache_file(symbol: str, lookback_days: int) -> List[float]:
+    dates, closes = _fetch_from_cache_file_with_dates(symbol, lookback_days)
+    return closes
+
+
+def _fetch_from_cache_file_with_dates(symbol: str, lookback_days: int) -> "Tuple[List[str], List[float]]":
     cache_path = os.environ.get("MOMENTUM_PRICE_CACHE_FILE", DEFAULT_CACHE_FILE)
     if not os.path.isfile(cache_path):
         raise MarketDataError(f"Cache file not found: {cache_path}")
@@ -55,10 +60,21 @@ def _fetch_from_cache_file(symbol: str, lookback_days: int) -> List[float]:
     if len(closes) < 30:
         raise MarketDataError(f"Cache file has only {len(closes)} days for {symbol} (need >= 30)")
 
-    return closes[-lookback_days:] if len(closes) > lookback_days else closes
+    raw_dates = entry.get("dates")
+    if not raw_dates or len(raw_dates) != len(closes):
+        raise MarketDataError(f"Cache file for {symbol} is missing a 'dates' array aligned to 'closes'")
+
+    if len(closes) > lookback_days:
+        return raw_dates[-lookback_days:], closes[-lookback_days:]
+    return raw_dates, closes
 
 
 def _fetch_alpha_vantage(symbol: str, api_key: str, lookback_days: int) -> List[float]:
+    dates, closes = _fetch_alpha_vantage_with_dates(symbol, api_key, lookback_days)
+    return closes
+
+
+def _fetch_alpha_vantage_with_dates(symbol: str, api_key: str, lookback_days: int) -> Tuple[List[str], List[float]]:
     url = "https://www.alphavantage.co/query"
     params = {
         "function": "TIME_SERIES_DAILY",
@@ -80,10 +96,17 @@ def _fetch_alpha_vantage(symbol: str, api_key: str, lookback_days: int) -> List[
 
     dates_sorted = sorted(series.keys())
     closes = [float(series[d]["4. close"]) for d in dates_sorted]
-    return closes[-lookback_days:] if len(closes) > lookback_days else closes
+    if len(closes) > lookback_days:
+        return dates_sorted[-lookback_days:], closes[-lookback_days:]
+    return dates_sorted, closes
 
 
 def _fetch_yfinance(symbol: str, lookback_days: int) -> List[float]:
+    dates, closes = _fetch_yfinance_with_dates(symbol, lookback_days)
+    return closes
+
+
+def _fetch_yfinance_with_dates(symbol: str, lookback_days: int) -> Tuple[List[str], List[float]]:
     try:
         import yfinance as yf
     except ImportError as e:
@@ -97,7 +120,10 @@ def _fetch_yfinance(symbol: str, lookback_days: int) -> List[float]:
     if hist is None or hist.empty or "Close" not in hist:
         raise MarketDataError(f"yfinance returned no data for {symbol}")
 
-    return hist["Close"].dropna().tolist()
+    hist = hist["Close"].dropna()
+    dates = [ts.strftime("%Y-%m-%d") for ts in hist.index]
+    closes = hist.tolist()
+    return dates, closes
 
 
 def fetch_price_history(symbol: str, lookback_days: int = 180) -> List[float]:
@@ -169,6 +195,77 @@ def fetch_sp500_universe(
     if errors:
         raise MarketDataError(
             "Failed to fetch real market data for one or more symbols:\n"
+            + "\n".join(f"  - {sym}: {msg}" for sym, msg in errors.items())
+        )
+
+    return data
+
+
+def fetch_price_history_with_dates(symbol: str, lookback_days: int = 180) -> Tuple[List[str], List[float]]:
+    """Same source-fallback chain as fetch_price_history, but also returns
+    the calendar date (YYYY-MM-DD) for each close, parallel-indexed.
+
+    Needed to align daily backtest bars with real intraday (5-min)
+    engulfing pattern data, which is keyed by calendar date, not by a
+    bare trading-day index. Never fabricates dates: each source's real
+    date field is threaded straight through instead of being synthesized
+    from lookback_days (which would drift across weekends/holidays).
+    """
+    errors = []
+
+    try:
+        return _fetch_from_cache_file_with_dates(symbol, lookback_days)
+    except MarketDataError as e:
+        errors.append(str(e))
+
+    api_key = os.environ.get("ALPHA_VANTAGE_API_KEY")
+    if api_key:
+        try:
+            dates, closes = _fetch_alpha_vantage_with_dates(symbol, api_key, lookback_days)
+            if len(closes) >= 30:
+                return dates, closes
+            errors.append(f"Alpha Vantage returned only {len(closes)} days (need >= 30)")
+        except MarketDataError as e:
+            errors.append(str(e))
+    else:
+        errors.append("ALPHA_VANTAGE_API_KEY not set, skipped")
+
+    try:
+        dates, closes = _fetch_yfinance_with_dates(symbol, lookback_days)
+        if len(closes) >= 30:
+            return dates, closes
+        errors.append(f"yfinance returned only {len(closes)} days (need >= 30)")
+    except MarketDataError as e:
+        errors.append(str(e))
+
+    raise MarketDataError(
+        f"Could not fetch real market data (with dates) for {symbol} from any configured source. "
+        f"Attempts: {'; '.join(errors)}."
+    )
+
+
+def fetch_sp500_universe_with_dates(
+    symbols: List[str],
+    lookback_days: int = 180,
+    rate_limit_delay: float = 0.0,
+) -> Dict[str, Tuple[List[str], List[float]]]:
+    """Date-aware counterpart to fetch_sp500_universe. Returns
+    {symbol: (dates, closes)}. Fails loudly on any symbol, same as the
+    non-dated version."""
+    data: Dict[str, Tuple[List[str], List[float]]] = {}
+    errors: Dict[str, str] = {}
+
+    for symbol in symbols:
+        try:
+            data[symbol] = fetch_price_history_with_dates(symbol, lookback_days)
+        except MarketDataError as e:
+            errors[symbol] = str(e)
+        if rate_limit_delay:
+            time.sleep(rate_limit_delay)
+
+    if errors:
+        raise MarketDataError(
+            "Failed to fetch real market data (with dates) for one or more symbols:\n"
             + "\n".join(f"  - {sym}: {msg}" for sym, msg in errors.items())
         )
 

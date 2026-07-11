@@ -10,7 +10,12 @@ from typing import Dict, List, Any, Tuple
 from datetime import datetime
 import numpy as np
 
-from market_data import fetch_sp500_universe, fetch_price_history, MarketDataError
+from market_data import (
+    fetch_sp500_universe,
+    fetch_price_history,
+    fetch_sp500_universe_with_dates,
+    MarketDataError,
+)
 from data_clients.equity_quotes import get_level1_quote
 from data_clients.ohlcv_multi_timeframe import get_multi_timeframe_ohlcv
 from data_clients.extended_hours import get_overnight_gap
@@ -910,7 +915,16 @@ class MomentumBacktester:
         # Raises MarketDataError with the specific cause if anything fails —
         # this is intentional. Do not wrap this in a try/except that falls
         # back to fabricated prices.
-        self.price_history = fetch_sp500_universe(self.symbols, lookback_days=self.lookback_days)
+        if entry_mode == 'engulfing':
+            # Engulfing mode needs real calendar dates per bar (not just a
+            # bare day_idx) to align each backtest day with that day's real
+            # 5-min pattern scan — see fetch_price_history_with_dates.
+            dated = fetch_sp500_universe_with_dates(self.symbols, lookback_days=self.lookback_days)
+            self.price_dates = {sym: dates for sym, (dates, _closes) in dated.items()}
+            self.price_history = {sym: closes for sym, (_dates, closes) in dated.items()}
+        else:
+            self.price_dates = {}
+            self.price_history = fetch_sp500_universe(self.symbols, lookback_days=self.lookback_days)
 
         min_len = min(len(v) for v in self.price_history.values())
         required = self.INDICATOR_LOOKBACK + num_backtests * self.window_days
@@ -923,26 +937,95 @@ class MomentumBacktester:
             )
         print(f"✓ Real market data loaded: {min_len} trading days per symbol")
 
-        # Pattern cache (loaded on-demand per symbol)
-        self.engulfing_patterns = {}
+        # engulfing_patterns_by_date[symbol][date_str] = best pattern dict for that
+        # calendar date, precomputed once here (never mid-loop) from real 5-min
+        # bars. Populated by _precompute_engulfing_patterns(), called only in
+        # engulfing mode — degrades per-symbol to {} (never fabricated) if the
+        # 5-min bar feed is unreachable, exactly like every other data client here.
+        self.engulfing_patterns_by_date: Dict[str, Dict[str, Dict[str, Any]]] = {}
+        if entry_mode == 'engulfing':
+            self._precompute_engulfing_patterns()
 
-    def evaluate_symbol(self, symbol: str, trailing_prices: List[float], current_price: float) -> Dict[str, Any]:
+    @staticmethod
+    def _day_key(date_str: str) -> str:
+        """Normalizes any of this system's real date formats (bare
+        'YYYY-MM-DD' from Alpha Vantage/yfinance, or full ISO timestamps
+        like '2026-07-06T13:30:00Z' from the local IBKR-built cache file)
+        down to a bare 'YYYY-MM-DD' key, so engulfing-pattern lookups
+        align regardless of which real price source populated price_dates."""
+        return date_str[:10] if date_str else date_str
+
+    def _precompute_engulfing_patterns(self):
+        """Fetch 5-min bars once per symbol over the whole lookback window and
+        index the resulting engulfing patterns by calendar date, so the daily
+        backtest loop below never makes a live API call mid-simulation —
+        matches this system's existing precompute-once-at-setup convention
+        (see risk_monitor / price_history above).
+
+        Each backtest day is daily-close-indexed (the loop fills at that
+        day's real close, since that's the only execution price this
+        backtest has), so multiple 5-min patterns on the same date collapse
+        to the single highest-confidence pattern of each type for that date
+        — the gate is "did a confirmed engulfing pattern occur today",
+        not a sub-day event queue.
+        """
+        oldest_date = min(self.price_dates[s][0] for s in self.symbols if self.price_dates.get(s))
+        newest_date = max(self.price_dates[s][-1] for s in self.symbols if self.price_dates.get(s))
+
+        print(f"Pre-loading 5-minute engulfing patterns ({oldest_date} to {newest_date})...")
+        for symbol in self.symbols:
+            patterns, source, reason = get_engulfing_patterns_for_period(
+                symbol=symbol,
+                start_date=oldest_date,
+                end_date=newest_date,
+                body_ratio_threshold=1.0,
+                volume_multiplier=1.2,
+            )
+            by_date: Dict[str, Dict[str, Any]] = {}
+            if source in ('real', 'cached_real') and patterns:
+                for p in patterns:
+                    if p['pattern_type'] == 'none':
+                        continue
+                    # Normalized to bare YYYY-MM-DD (first 10 chars) so this
+                    # aligns regardless of whether price_dates came from the
+                    # local cache file (full ISO timestamps, e.g.
+                    # "2026-07-06T13:30:00Z"), Alpha Vantage, or yfinance
+                    # (both bare "YYYY-MM-DD") — see _day_key() below.
+                    date_str = self._day_key(datetime.fromtimestamp(p['timestamp'] / 1000).strftime('%Y-%m-%d'))
+                    existing = by_date.get(date_str)
+                    if existing is None or p['confidence'] > existing['confidence']:
+                        by_date[date_str] = {
+                            'pattern_type': p['pattern_type'],
+                            'confidence': p['confidence'],
+                            'data_source': source,
+                        }
+                print(f"  ✓ {symbol}: {len(by_date)} day(s) with a confirmed engulfing pattern")
+            else:
+                print(f"  ⚠ {symbol}: patterns degraded ({reason})")
+            self.engulfing_patterns_by_date[symbol] = by_date
+
+    def evaluate_symbol(self, symbol: str, trailing_prices: List[float], current_price: float,
+                         current_date: str = None) -> Dict[str, Any]:
         """Run all 9 agents for one symbol on one trading day.
 
-        In engulfing mode, the Technical Analyst evaluates 5-minute patterns;
-        in indicator mode, it evaluates RSI/MACD indicators. Both modes
-        feed into the same 9-agent weighted aggregation pipeline.
+        In engulfing mode, the Technical Analyst evaluates that day's
+        precomputed 5-min pattern (looked up by `current_date`); in
+        indicator mode, it evaluates RSI/MACD indicators. Both modes feed
+        into the same 9-agent weighted aggregation pipeline.
         """
 
         price_data = {'prices': trailing_prices, 'current_price': current_price}
 
-        # Engulfing mode: inject a neutral pattern (no pattern available from daily backtest)
-        # In production, this would be populated from intraday 5-min data; for backtesting,
-        # the engulfing pattern detection would need to be integrated separately via historical 5-min bars.
         if self.entry_mode == 'engulfing':
-            price_data['pattern_type'] = 'none'
-            price_data['pattern_confidence'] = 0.0
-            price_data['pattern_data_source'] = 'daily_backtest_no_intraday_data'
+            pattern = self.engulfing_patterns_by_date.get(symbol, {}).get(self._day_key(current_date))
+            if pattern:
+                price_data['pattern_type'] = pattern['pattern_type']
+                price_data['pattern_confidence'] = pattern['confidence']
+                price_data['pattern_data_source'] = pattern['data_source']
+            else:
+                price_data['pattern_type'] = 'none'
+                price_data['pattern_confidence'] = 0.0
+                price_data['pattern_data_source'] = 'degraded' if not self.engulfing_patterns_by_date.get(symbol) else 'no_pattern_today'
 
         analyses = []
         for agent in self.agents[:-1]:  # All but portfolio manager
@@ -990,6 +1073,7 @@ class MomentumBacktester:
                 closes = self.price_history[symbol]
                 trailing_prices = closes[:day_idx]  # everything strictly before today — no lookahead
                 current_price = closes[day_idx]
+                current_date = self.price_dates[symbol][day_idx] if self.entry_mode == 'engulfing' else None
 
                 # FINAL PHASE FIX: the documented strategy (CLAUDE.md) has
                 # always specified a 2% stop-loss / 5% take-profit as exit
@@ -1013,6 +1097,17 @@ class MomentumBacktester:
                         exit_reason = 'stop_loss'
                     elif pct_change >= self.TAKE_PROFIT_PCT:
                         exit_reason = 'take_profit'
+                    elif self.entry_mode == 'engulfing':
+                        # pattern_reversal: a confirmed bearish engulfing print
+                        # against a held long is an independent exit signal,
+                        # checked after the price-based bands but before the
+                        # agent-ensemble SELL path — same priority order as
+                        # every other exit reason here (price bands first,
+                        # since they're the hard risk limits; pattern/agent
+                        # signals second).
+                        today_pattern = self.engulfing_patterns_by_date.get(symbol, {}).get(self._day_key(current_date))
+                        if today_pattern and today_pattern['pattern_type'] == 'bearish_engulfing':
+                            exit_reason = 'pattern_reversal'
 
                     if exit_reason:
                         exit_cost = pos['shares'] * current_price
@@ -1031,9 +1126,21 @@ class MomentumBacktester:
                         del positions[symbol]
                         continue  # already closed today — skip the agent-based decision below
 
-                portfolio_analysis = self.evaluate_symbol(symbol, trailing_prices, current_price)
+                portfolio_analysis = self.evaluate_symbol(symbol, trailing_prices, current_price,
+                                                           current_date=current_date)
                 decision = portfolio_analysis['decision']
                 position_size = portfolio_analysis['position_size']
+
+                if self.entry_mode == 'engulfing' and decision == 'BUY':
+                    # Entry gate: per spec, the engulfing pattern is what
+                    # triggers agent evaluation for a BUY in the first
+                    # place — a real bullish print must have occurred today
+                    # for this symbol, even if the weighted agent average
+                    # alone would have cleared the BUY threshold on other
+                    # agents' ratings.
+                    today_pattern = self.engulfing_patterns_by_date.get(symbol, {}).get(self._day_key(current_date))
+                    if not today_pattern or today_pattern['pattern_type'] != 'bullish_engulfing':
+                        decision = 'HOLD'
 
                 if decision == 'BUY' and position_size > 0 and symbol not in positions:
                     cost = capital * position_size
