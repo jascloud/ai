@@ -54,6 +54,7 @@
           "cost": 25.0
         }
       ],
+      "risk_blocked_trades": [],
       "daily_returns": [
         0.0,
         0.0,
@@ -73,15 +74,15 @@
     {
       "backtest_id": 2,
       "metrics": {
-        "total_return": 0.0,
-        "sharpe_ratio": 0.0,
-        "max_drawdown": 0.0,
+        "total_return": -0.0037444157065600623,
+        "sharpe_ratio": -7.937253933193772,
+        "max_drawdown": -0.0037444157065600336,
         "win_rate": 0.0,
         "profit_factor": 0.0,
-        "recovery_factor": 0.0,
+        "recovery_factor": -1.0000000000000075,
         "sortino_ratio": 0.0,
-        "calmar_ratio": 0.0,
-        "final_capital": 500.0,
+        "calmar_ratio": -252.00000000000193,
+        "final_capital": 498.12779214671997,
         "total_trades": 0,
         "winning_trades": 0
       },
@@ -89,17 +90,18 @@
         {
           "symbol": "TSLA",
           "action": "BUY",
-          "price": 393.45,
-          "quantity": 0.06354047528275511,
+          "price": 425.3,
+          "quantity": 0.0587820362097343,
           "cost": 25.0
         }
       ],
+      "risk_blocked_trades": [],
       "daily_returns": [
         0.0,
         0.0,
         0.0,
         0.0,
-        0.0
+        -0.0037444157065600623
       ],
       "daily_portfolio_values": [
         500.0,
@@ -107,7 +109,7 @@
         500.0,
         500.0,
         500.0,
-        500.0
+        498.12779214671997
       ]
     },
     {
@@ -126,6 +128,7 @@
         "winning_trades": 0
       },
       "trades": [],
+      "risk_blocked_trades": [],
       "daily_returns": [
         0.0,
         0.0,
@@ -158,6 +161,7 @@
         "winning_trades": 0
       },
       "trades": [],
+      "risk_blocked_trades": [],
       "daily_returns": [
         0.0,
         0.0,
@@ -205,6 +209,7 @@
           "cost": 23.75
         }
       ],
+      "risk_blocked_trades": [],
       "daily_returns": [
         0.0,
         -0.0018877595192112722,
@@ -223,19 +228,19 @@
     }
   ],
   "aggregate_metrics": {
-    "avg_total_return": -0.0011624863524484226,
-    "std_total_return": 0.0027155615780244933,
-    "avg_sharpe_ratio": -2.4145626946126137,
-    "std_sharpe_ratio": 10.310410322409972,
-    "avg_max_drawdown": -0.0013414342484754838,
-    "std_max_drawdown": 0.002611108481825604,
+    "avg_total_return": -0.0019113694937604353,
+    "std_total_return": 0.002806500607286667,
+    "avg_sharpe_ratio": -4.002013481251368,
+    "std_sharpe_ratio": 10.426819367312131,
+    "avg_max_drawdown": -0.0020903173897874904,
+    "std_max_drawdown": 0.002655567049333025,
     "avg_win_rate": 0.0,
     "std_win_rate": 0.0,
     "avg_profit_factor": 0.0,
     "std_profit_factor": 0.0,
-    "avg_recovery_factor": 0.8364822421090554,
+    "avg_recovery_factor": 0.636482242109054,
     "avg_sortino_ratio": -5.296562498229636,
-    "avg_calmar_ratio": 210.79352501148196,
+    "avg_calmar_ratio": 160.3935250114816,
     "total_trades_across_backtests": 0,
     "avg_trades_per_backtest": 0.0
   }

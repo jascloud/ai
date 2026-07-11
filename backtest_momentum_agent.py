@@ -11,6 +11,10 @@ import random
 import numpy as np
 
 from market_data import fetch_sp500_universe, fetch_price_history, MarketDataError
+from data_clients.equity_quotes import get_level1_quote
+from data_clients.ohlcv_multi_timeframe import get_multi_timeframe_ohlcv
+from data_clients.extended_hours import get_overnight_gap
+from data_clients.risk_monitor import PositionRiskMonitor, RiskLimits
 
 # NOTE ON DATA SOURCES:
 # TechnicalAnalyst runs on REAL historical closing prices (Alpha Vantage or
@@ -87,12 +91,48 @@ class TradingAgent:
 
 
 class TechnicalAnalyst(TradingAgent):
-    """Technical analysis agent focusing on momentum indicators"""
+    """Technical analysis agent focusing on momentum indicators.
+
+    PHASE 1: gained optional live enrichment (overnight gap, multi-
+    timeframe intraday confirmation) via `price_data['overnight_gap_pct']`
+    and `price_data['multi_timeframe']`. Both keys are OPTIONAL — if
+    absent (as in every historical backtest call, where fetching today's
+    live quote for a past day would be lookahead bias, not enrichment),
+    `analyze()` behaves exactly as it did before Phase 1. This keeps the
+    existing (symbol, price_data) -> dict interface unchanged; enrichment
+    only ever adjusts `confidence`, never the discrete rating scale
+    directly, so backtests without enrichment data are bit-for-bit
+    reproducible with pre-Phase-1 runs.
+
+    Use `TechnicalAnalyst.fetch_live_enrichment(symbol, prior_close)` to
+    populate those optional keys for a live/paper-trading rating — it is
+    NOT called anywhere in the historical backtest loop.
+    """
+
+    @staticmethod
+    def fetch_live_enrichment(symbol: str, prior_regular_close: float) -> Dict[str, Any]:
+        """Live-only helper: pulls overnight gap + multi-timeframe bars
+        via the Phase 1 clients. Every value degrades to None/'degraded'
+        independently if its feed is down — never crashes, never
+        fabricates a fake gap or bar set."""
+        gap_pct, gap_source, gap_reason = get_overnight_gap(symbol, prior_regular_close)
+        mtf = get_multi_timeframe_ohlcv(symbol, timeframes=("1min", "5min"))
+        quote, quote_source, quote_reason = get_level1_quote(symbol)
+
+        return {
+            'overnight_gap_pct': gap_pct,
+            'overnight_gap_data_source': gap_source,
+            'overnight_gap_error': gap_reason,
+            'multi_timeframe': mtf,
+            'live_quote': quote,
+            'live_quote_data_source': quote_source,
+            'live_quote_error': quote_reason,
+        }
 
     def analyze(self, symbol: str, price_data: Dict[str, Any]) -> Dict[str, Any]:
         prices = price_data.get('prices', [])
         if not prices:
-            return {'rating': 3, 'action': 'HOLD', 'confidence': 0.0}
+            return {'rating': 3, 'action': 'HOLD', 'confidence': 0.0, 'data_source': 'real_market_data', 'agent_role': 'technical'}
 
         rsi = MomentumIndicators.calculate_rsi(prices)
         macd, signal, histogram = MomentumIndicators.calculate_macd(prices)
@@ -116,6 +156,34 @@ class TechnicalAnalyst(TradingAgent):
             rating = 1
             action = 'SELL'
 
+        confidence = abs((rsi - 50) / 50)
+        data_source = 'real_market_data'
+        enrichment_notes = []
+
+        # Optional PHASE 1 live enrichment — only ever nudges confidence,
+        # never the discrete rating, and only applies when explicitly
+        # supplied (never during the historical backtest loop).
+        overnight_gap_pct = price_data.get('overnight_gap_pct')
+        if overnight_gap_pct is not None:
+            gap_agrees = (overnight_gap_pct > 0 and action == 'BUY') or (overnight_gap_pct < 0 and action == 'SELL')
+            if abs(overnight_gap_pct) > 0.01:  # >1% overnight gap is material
+                confidence = min(1.0, confidence * 1.15) if gap_agrees else max(0.0, confidence * 0.85)
+                enrichment_notes.append(f"overnight_gap={overnight_gap_pct*100:.2f}% ({'confirms' if gap_agrees else 'contradicts'} signal)")
+                data_source = 'real_market_data+live_enrichment'
+
+        multi_timeframe = price_data.get('multi_timeframe')
+        if multi_timeframe:
+            five_min = multi_timeframe.get('5min', {})
+            if five_min.get('data_source') in ('real', 'cached_real') and five_min.get('data'):
+                bars = five_min['data'].get('bars', [])
+                closes_5min = [b['c'] for b in bars]
+                if len(closes_5min) >= 15:
+                    short_rsi = MomentumIndicators.calculate_rsi(closes_5min)
+                    short_agrees = (short_rsi > 55 and action == 'BUY') or (short_rsi < 45 and action == 'SELL')
+                    confidence = min(1.0, confidence * 1.1) if short_agrees else max(0.0, confidence * 0.9)
+                    enrichment_notes.append(f"5min_rsi={short_rsi:.1f} ({'confirms' if short_agrees else 'contradicts'} signal)")
+                    data_source = 'real_market_data+live_enrichment'
+
         return {
             'rating': rating,
             'action': action,
@@ -125,8 +193,9 @@ class TechnicalAnalyst(TradingAgent):
             'histogram': float(histogram),
             'sma': float(sma),
             'momentum': float(momentum),
-            'confidence': abs((rsi - 50) / 50),
-            'data_source': 'real_market_data',
+            'confidence': float(confidence),
+            'enrichment_notes': enrichment_notes,
+            'data_source': data_source,
             'agent_role': 'technical'
         }
 
@@ -419,6 +488,16 @@ class MomentumBacktester:
             PortfolioManager("Portfolio Manager", "risk_control")
         ]
 
+        # PHASE 1: hard-stop gate checked before every BUY fill, in both
+        # backtest and (eventually) live paths. Blocked trades are logged
+        # per-backtest in the result's `risk_blocked_trades`, not silently
+        # dropped.
+        self.risk_monitor = PositionRiskMonitor(RiskLimits(
+            max_position_pct=0.05,
+            max_total_exposure_pct=0.60,
+            max_positions=10,
+        ))
+
         print(f"Fetching real market data for {len(self.symbols)} symbols "
               f"({self.lookback_days} calendar days lookback)...")
         # Raises MarketDataError with the specific cause if anything fails —
@@ -477,6 +556,7 @@ class MomentumBacktester:
         capital = self.initial_capital
         positions = {}
         trades = []
+        risk_blocked_trades = []
         daily_returns = []
         daily_portfolio_values = [capital]
 
@@ -494,17 +574,33 @@ class MomentumBacktester:
 
                 if decision == 'BUY' and position_size > 0 and symbol not in positions:
                     cost = capital * position_size
-                    shares = cost / current_price
-                    positions[symbol] = {'shares': shares, 'entry_price': current_price, 'cost': cost}
-                    capital -= cost
 
-                    day_trades.append({
-                        'symbol': symbol,
-                        'action': 'BUY',
-                        'price': float(current_price),
-                        'quantity': float(shares),
-                        'cost': float(cost)
-                    })
+                    allowed, risk_reason = self.risk_monitor.check_trade(
+                        proposed_cost=cost,
+                        capital_before_trade=capital,
+                        open_positions=positions,
+                        total_capital=self.initial_capital,
+                    )
+
+                    if not allowed:
+                        risk_blocked_trades.append({
+                            'symbol': symbol,
+                            'action': 'BUY_BLOCKED',
+                            'proposed_cost': float(cost),
+                            'reason': risk_reason,
+                        })
+                    else:
+                        shares = cost / current_price
+                        positions[symbol] = {'shares': shares, 'entry_price': current_price, 'cost': cost}
+                        capital -= cost
+
+                        day_trades.append({
+                            'symbol': symbol,
+                            'action': 'BUY',
+                            'price': float(current_price),
+                            'quantity': float(shares),
+                            'cost': float(cost)
+                        })
 
                 elif decision == 'SELL' and symbol in positions:
                     pos = positions[symbol]
@@ -597,6 +693,7 @@ class MomentumBacktester:
             'backtest_id': backtest_id,
             'metrics': metrics,
             'trades': trades,
+            'risk_blocked_trades': risk_blocked_trades,
             'daily_returns': [float(r) for r in daily_returns],
             'daily_portfolio_values': [float(v) for v in daily_portfolio_values]
         }

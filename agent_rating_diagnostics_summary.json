@@ -77,6 +77,84 @@
           }
         }
       }
+    },
+    {
+      "phase": "phase_1_core_price_execution",
+      "timestamp": "2026-07-11T13:28:19.939165+00:00",
+      "note": "Added Polygon/IEX Level1 quotes, multi-timeframe OHLCV, SPX/SPY options chain+Greeks, position/exposure risk monitor (hard-stop gate wired into BUY execution), and pre/post-market gap client. Technical Analyst gained optional live-enrichment hooks (overnight gap, 5min RSI confirmation) that only ever nudge confidence, never the discrete rating, and are never populated during the historical backtest loop (would be lookahead bias) -- so this phase's aggregation behavior should be identical to Phase 0's, confirming the new clients didn't regress anything even though they all run in degraded mode in this session (every tested host -- Polygon, IEX -- returns 403 from this session's egress policy).",
+      "diagnostic": {
+        "n_trials_per_rating_level": 3000,
+        "agents_in_test": [
+          "Technical Analyst",
+          "Fundamental Analyst",
+          "Sentiment Analyst",
+          "News Analyst",
+          "Bull Researcher",
+          "Bear Researcher"
+        ],
+        "by_technical_rating": {
+          "1": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.025333333333333333,
+            "legacy_hold_rate": 0.9746666666666667,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 0.9976666666666667,
+            "current_hold_rate": 0.0023333333333333335,
+            "avg_weighted_rating": 1.9903666666666668,
+            "avg_flat_rating": 2.650611111111111
+          },
+          "2": {
+            "legacy_buy_rate": 0.0,
+            "legacy_sell_rate": 0.005,
+            "legacy_hold_rate": 0.995,
+            "current_buy_rate": 0.0,
+            "current_sell_rate": 0.6386666666666667,
+            "current_hold_rate": 0.36133333333333334,
+            "avg_weighted_rating": 2.4896000000000003,
+            "avg_flat_rating": 2.816
+          },
+          "3": {
+            "legacy_buy_rate": 0.0026666666666666666,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 0.9973333333333333,
+            "current_buy_rate": 0.006,
+            "current_sell_rate": 0.005333333333333333,
+            "current_hold_rate": 0.9886666666666667,
+            "avg_weighted_rating": 2.9839,
+            "avg_flat_rating": 2.9731666666666667
+          },
+          "4": {
+            "legacy_buy_rate": 0.005333333333333333,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 0.9946666666666667,
+            "current_buy_rate": 0.559,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 0.441,
+            "avg_weighted_rating": 3.482566666666666,
+            "avg_flat_rating": 3.137611111111111
+          },
+          "5": {
+            "legacy_buy_rate": 0.030666666666666665,
+            "legacy_sell_rate": 0.0,
+            "legacy_hold_rate": 0.9693333333333334,
+            "current_buy_rate": 1.0,
+            "current_sell_rate": 0.0,
+            "current_hold_rate": 0.0,
+            "avg_weighted_rating": 3.989333333333333,
+            "avg_flat_rating": 3.315555555555555
+          }
+        },
+        "headline": {
+          "buy_clearance_at_technical_5": {
+            "legacy_flat_mean_4.0_threshold": 0.030666666666666665,
+            "weighted_mean_3.5_threshold": 1.0
+          },
+          "sell_clearance_at_technical_1": {
+            "legacy_flat_mean_2.0_threshold": 0.025333333333333333,
+            "weighted_mean_2.5_threshold": 0.9976666666666667
+          }
+        }
+      }
     }
   ]
 }
