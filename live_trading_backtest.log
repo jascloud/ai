@@ -1,0 +1,362 @@
+================================================================================
+MEAN REVERSION STRATEGY (RSI-Based)
+Commodity: XAUUSD (Gold)
+Timeframe: 1-hour bars
+Entry: RSI < 30 (BUY) or RSI > 70 (SELL)
+Exit: Mean reversion, Take profit, or Stop loss
+Target Win Rate: 20-40%
+================================================================================
+
+✓ Loaded 1485 real 1-hour bars for XAUUSD
+
+================================================================================
+BACKTEST RESULTS
+================================================================================
+
+Symbol: XAUUSD
+Strategy: Mean Reversion (RSI-based)
+Period: 1435 1-hour bars (~59 days)
+
+💰 CAPITAL PERFORMANCE:
+  Initial: $10,000.00
+  Final:   $9,517.19
+  Return:  -4.83%
+
+📊 TRADE STATISTICS:
+  Total Trades: 76
+  Buy (Oversold):  48
+  Sell (Overbought): 28
+  Wins:   45
+  Losses: 31
+  Win Rate: 59.2% [⚠️  OUTSIDE TARGET]
+
+💵 TRADE SIZING:
+  Avg Win:  $+31.99
+  Avg Loss: $-52.14
+  P/F Ratio: 0.89x (target: > 1.5x)
+
+📉 RISK:
+  Max Drawdown: 12.66%
+
+================================================================================
+ALL TRADES (76 total)
+================================================================================
+
+ 1. SELL | Entry: 2026-04-15T03:00 @ $ 4824.11 (RSI  71.6)
+    Exit: 2026-04-15T08:00 @ $ 4818.55 (RSI  39.6)
+    P&L: $    5.56 ( +0.12%) [✓] | Hold: 5h | mean_reversion_complete
+
+ 2. BUY  | Entry: 2026-04-15T10:00 @ $ 4800.24 (RSI  25.8)
+    Exit: 2026-04-15T23:00 @ $ 4823.51 (RSI  51.7)
+    P&L: $   23.27 ( +0.48%) [✓] | Hold: 12h | mean_reversion_complete
+
+ 3. BUY  | Entry: 2026-04-16T14:00 @ $ 4788.84 (RSI  28.3)
+    Exit: 2026-04-17T04:00 @ $ 4803.17 (RSI  54.4)
+    P&L: $   14.33 ( +0.30%) [✓] | Hold: 13h | mean_reversion_complete
+
+ 4. SELL | Entry: 2026-04-17T13:00 @ $ 4880.35 (RSI  77.1)
+    Exit: 2026-04-19T22:00 @ $ 4779.32 (RSI  48.8)
+    P&L: $  101.03 ( +2.07%) [✓] | Hold: 8h | take_profit
+
+ 5. BUY  | Entry: 2026-04-20T04:00 @ $ 4789.13 (RSI  26.8)
+    Exit: 2026-04-20T12:00 @ $ 4803.48 (RSI  58.4)
+    P&L: $   14.35 ( +0.30%) [✓] | Hold: 8h | mean_reversion_complete
+
+ 6. SELL | Entry: 2026-04-20T13:00 @ $ 4818.01 (RSI  73.2)
+    Exit: 2026-04-20T15:00 @ $ 4799.97 (RSI  46.1)
+    P&L: $   18.04 ( +0.37%) [✓] | Hold: 2h | mean_reversion_complete
+
+ 7. BUY  | Entry: 2026-04-21T12:00 @ $ 4778.99 (RSI  22.7)
+    Exit: 2026-04-21T16:00 @ $ 4711.13 (RSI  15.3)
+    P&L: $  -67.86 ( -1.42%) [✗] | Hold: 4h | stop_loss
+
+ 8. BUY  | Entry: 2026-04-21T17:00 @ $ 4711.13 (RSI  16.4)
+    Exit: 2026-04-22T05:00 @ $ 4767.79 (RSI  58.8)
+    P&L: $   56.66 ( +1.20%) [✓] | Hold: 11h | mean_reversion_complete
+
+ 9. SELL | Entry: 2026-04-22T10:00 @ $ 4759.28 (RSI  85.2)
+    Exit: 2026-04-22T14:00 @ $ 4736.19 (RSI  48.0)
+    P&L: $   23.09 ( +0.49%) [✓] | Hold: 4h | mean_reversion_complete
+
+10. BUY  | Entry: 2026-04-24T03:00 @ $ 4672.17 (RSI  25.4)
+    Exit: 2026-04-24T11:00 @ $ 4706.97 (RSI  53.1)
+    P&L: $   34.80 ( +0.74%) [✓] | Hold: 8h | mean_reversion_complete
+
+11. BUY  | Entry: 2026-04-27T16:00 @ $ 4676.75 (RSI  25.7)
+    Exit: 2026-04-28T05:00 @ $ 4632.20 (RSI  26.1)
+    P&L: $  -44.55 ( -0.95%) [✗] | Hold: 12h | stop_loss
+
+12. BUY  | Entry: 2026-04-28T06:00 @ $ 4629.08 (RSI  27.6)
+    Exit: 2026-04-28T11:00 @ $ 4562.51 (RSI   9.9)
+    P&L: $  -66.57 ( -1.44%) [✗] | Hold: 5h | stop_loss
+
+13. BUY  | Entry: 2026-04-28T12:00 @ $ 4593.85 (RSI  23.4)
+    Exit: 2026-04-29T02:00 @ $ 4593.90 (RSI  64.9)
+    P&L: $    0.05 ( +0.00%) [✓] | Hold: 13h | mean_reversion_complete
+
+14. BUY  | Entry: 2026-04-29T13:00 @ $ 4521.93 (RSI  27.2)
+    Exit: 2026-04-30T00:00 @ $ 4570.06 (RSI  55.3)
+    P&L: $   48.13 ( +1.06%) [✓] | Hold: 10h | mean_reversion_complete
+
+15. SELL | Entry: 2026-04-30T08:00 @ $ 4616.42 (RSI  71.1)
+    Exit: 2026-05-01T00:00 @ $ 4620.00 (RSI  47.9)
+    P&L: $   -3.58 ( -0.08%) [✗] | Hold: 15h | mean_reversion_complete
+
+16. BUY  | Entry: 2026-05-01T08:00 @ $ 4569.19 (RSI  26.8)
+    Exit: 2026-05-01T13:00 @ $ 4625.82 (RSI  49.7)
+    P&L: $   56.63 ( +1.24%) [✓] | Hold: 5h | take_profit
+
+17. BUY  | Entry: 2026-05-04T06:00 @ $ 4588.68 (RSI  19.5)
+    Exit: 2026-05-04T15:00 @ $ 4521.68 (RSI  13.7)
+    P&L: $  -67.00 ( -1.46%) [✗] | Hold: 9h | stop_loss
+
+18. BUY  | Entry: 2026-05-04T16:00 @ $ 4510.81 (RSI  13.3)
+    Exit: 2026-05-05T06:00 @ $ 4548.10 (RSI  65.3)
+    P&L: $   37.29 ( +0.83%) [✓] | Hold: 13h | mean_reversion_complete
+
+19. SELL | Entry: 2026-05-05T07:00 @ $ 4545.69 (RSI  72.4)
+    Exit: 2026-05-05T23:00 @ $ 4594.12 (RSI  64.5)
+    P&L: $  -48.43 ( -1.07%) [✗] | Hold: 15h | stop_loss
+
+20. SELL | Entry: 2026-05-06T00:00 @ $ 4618.86 (RSI  71.6)
+    Exit: 2026-05-06T06:00 @ $ 4669.38 (RSI  88.5)
+    P&L: $  -50.52 ( -1.09%) [✗] | Hold: 6h | stop_loss
+
+21. SELL | Entry: 2026-05-06T07:00 @ $ 4681.45 (RSI  94.5)
+    Exit: 2026-05-06T23:00 @ $ 4699.02 (RSI  49.4)
+    P&L: $  -17.57 ( -0.38%) [✗] | Hold: 15h | mean_reversion_complete
+
+22. SELL | Entry: 2026-05-07T06:00 @ $ 4739.20 (RSI  71.4)
+    Exit: 2026-05-07T20:00 @ $ 4686.34 (RSI  30.5)
+    P&L: $   52.86 ( +1.12%) [✓] | Hold: 14h | take_profit
+
+23. BUY  | Entry: 2026-05-07T22:00 @ $ 4686.16 (RSI  28.3)
+    Exit: 2026-05-08T08:00 @ $ 4715.91 (RSI  51.6)
+    P&L: $   29.75 ( +0.63%) [✓] | Hold: 10h | mean_reversion_complete
+
+24. BUY  | Entry: 2026-05-11T04:00 @ $ 4672.10 (RSI  16.8)
+    Exit: 2026-05-11T12:00 @ $ 4700.09 (RSI  53.0)
+    P&L: $   27.99 ( +0.60%) [✓] | Hold: 8h | mean_reversion_complete
+
+25. SELL | Entry: 2026-05-11T19:00 @ $ 4733.69 (RSI  73.0)
+    Exit: 2026-05-12T04:00 @ $ 4714.34 (RSI  42.4)
+    P&L: $   19.35 ( +0.41%) [✓] | Hold: 8h | mean_reversion_complete
+
+26. BUY  | Entry: 2026-05-12T13:00 @ $ 4679.32 (RSI  16.5)
+    Exit: 2026-05-12T19:00 @ $ 4715.84 (RSI  50.5)
+    P&L: $   36.52 ( +0.78%) [✓] | Hold: 6h | mean_reversion_complete
+
+27. BUY  | Entry: 2026-05-13T10:00 @ $ 4694.24 (RSI  29.4)
+    Exit: 2026-05-13T16:00 @ $ 4695.78 (RSI  53.0)
+    P&L: $    1.54 ( +0.03%) [✓] | Hold: 6h | mean_reversion_complete
+
+28. BUY  | Entry: 2026-05-14T20:00 @ $ 4651.20 (RSI  24.4)
+    Exit: 2026-05-15T04:00 @ $ 4606.42 (RSI  18.5)
+    P&L: $  -44.78 ( -0.96%) [✗] | Hold: 7h | stop_loss
+
+29. BUY  | Entry: 2026-05-15T05:00 @ $ 4558.89 (RSI  13.2)
+    Exit: 2026-05-18T04:00 @ $ 4540.78 (RSI  52.5)
+    P&L: $  -18.11 ( -0.40%) [✗] | Hold: 22h | mean_reversion_complete
+
+30. BUY  | Entry: 2026-05-19T13:00 @ $ 4504.33 (RSI  20.1)
+    Exit: 2026-05-20T10:00 @ $ 4494.78 (RSI  55.8)
+    P&L: $   -9.55 ( -0.21%) [✗] | Hold: 20h | mean_reversion_complete
+
+31. SELL | Entry: 2026-05-20T16:00 @ $ 4534.61 (RSI  80.8)
+    Exit: 2026-05-21T05:00 @ $ 4528.01 (RSI  48.5)
+    P&L: $    6.60 ( +0.15%) [✓] | Hold: 12h | mean_reversion_complete
+
+32. SELL | Entry: 2026-05-25T05:00 @ $ 4553.58 (RSI  70.8)
+    Exit: 2026-05-25T13:00 @ $ 4563.26 (RSI  47.1)
+    P&L: $   -9.68 ( -0.21%) [✗] | Hold: 8h | mean_reversion_complete
+
+33. BUY  | Entry: 2026-05-26T02:00 @ $ 4532.39 (RSI  27.8)
+    Exit: 2026-05-26T17:00 @ $ 4491.05 (RSI  30.0)
+    P&L: $  -41.34 ( -0.91%) [✗] | Hold: 15h | stop_loss
+
+34. BUY  | Entry: 2026-05-27T10:00 @ $ 4446.02 (RSI  27.8)
+    Exit: 2026-05-28T02:00 @ $ 4394.54 (RSI  38.1)
+    P&L: $  -51.48 ( -1.16%) [✗] | Hold: 15h | stop_loss
+
+35. BUY  | Entry: 2026-05-28T03:00 @ $ 4374.91 (RSI  28.9)
+    Exit: 2026-05-28T12:00 @ $ 4432.24 (RSI  43.5)
+    P&L: $   57.33 ( +1.31%) [✓] | Hold: 9h | take_profit
+
+36. SELL | Entry: 2026-05-28T15:00 @ $ 4482.30 (RSI  70.0)
+    Exit: 2026-05-29T14:00 @ $ 4564.26 (RSI  76.3)
+    P&L: $  -81.96 ( -1.83%) [✗] | Hold: 22h | stop_loss
+
+37. SELL | Entry: 2026-05-29T15:00 @ $ 4571.34 (RSI  75.7)
+    Exit: 2026-06-01T01:00 @ $ 4525.68 (RSI  44.6)
+    P&L: $   45.66 ( +1.00%) [✓] | Hold: 9h | mean_reversion_complete
+
+38. BUY  | Entry: 2026-06-01T05:00 @ $ 4518.25 (RSI  20.5)
+    Exit: 2026-06-01T13:00 @ $ 4450.33 (RSI  13.2)
+    P&L: $  -67.92 ( -1.50%) [✗] | Hold: 8h | stop_loss
+
+39. BUY  | Entry: 2026-06-01T14:00 @ $ 4458.82 (RSI  18.2)
+    Exit: 2026-06-02T04:00 @ $ 4517.52 (RSI  82.6)
+    P&L: $   58.70 ( +1.32%) [✓] | Hold: 13h | take_profit
+
+40. SELL | Entry: 2026-06-02T05:00 @ $ 4517.23 (RSI  80.8)
+    Exit: 2026-06-02T17:00 @ $ 4484.73 (RSI  42.9)
+    P&L: $   32.50 ( +0.72%) [✓] | Hold: 12h | mean_reversion_complete
+
+41. BUY  | Entry: 2026-06-02T20:00 @ $ 4490.05 (RSI  18.3)
+    Exit: 2026-06-03T07:00 @ $ 4453.51 (RSI  31.1)
+    P&L: $  -36.54 ( -0.81%) [✗] | Hold: 10h | stop_loss
+
+42. BUY  | Entry: 2026-06-03T09:00 @ $ 4443.23 (RSI  28.3)
+    Exit: 2026-06-03T23:00 @ $ 4457.39 (RSI  56.6)
+    P&L: $   14.16 ( +0.32%) [✓] | Hold: 13h | mean_reversion_complete
+
+43. SELL | Entry: 2026-06-04T11:00 @ $ 4511.64 (RSI  74.8)
+    Exit: 2026-06-04T18:00 @ $ 4478.24 (RSI  49.0)
+    P&L: $   33.40 ( +0.74%) [✓] | Hold: 7h | mean_reversion_complete
+
+44. BUY  | Entry: 2026-06-05T02:00 @ $ 4440.74 (RSI  17.7)
+    Exit: 2026-06-05T13:00 @ $ 4365.81 (RSI  21.0)
+    P&L: $  -74.93 ( -1.69%) [✗] | Hold: 11h | stop_loss
+
+45. BUY  | Entry: 2026-06-05T14:00 @ $ 4369.78 (RSI  23.1)
+    Exit: 2026-06-08T02:00 @ $ 4310.69 (RSI  19.7)
+    P&L: $  -59.09 ( -1.35%) [✗] | Hold: 11h | stop_loss
+
+46. BUY  | Entry: 2026-06-08T03:00 @ $ 4317.03 (RSI  28.3)
+    Exit: 2026-06-08T11:00 @ $ 4331.38 (RSI  50.1)
+    P&L: $   14.35 ( +0.33%) [✓] | Hold: 8h | mean_reversion_complete
+
+47. BUY  | Entry: 2026-06-09T15:00 @ $ 4272.54 (RSI  22.7)
+    Exit: 2026-06-10T01:00 @ $ 4188.85 (RSI  11.5)
+    P&L: $  -83.69 ( -1.96%) [✗] | Hold: 9h | stop_loss
+
+48. BUY  | Entry: 2026-06-10T02:00 @ $ 4174.13 (RSI  10.4)
+    Exit: 2026-06-10T17:00 @ $ 4111.81 (RSI  33.2)
+    P&L: $  -62.32 ( -1.49%) [✗] | Hold: 15h | stop_loss
+
+49. BUY  | Entry: 2026-06-10T19:00 @ $ 4082.79 (RSI  20.3)
+    Exit: 2026-06-11T10:00 @ $ 4090.05 (RSI  51.9)
+    P&L: $    7.26 ( +0.18%) [✓] | Hold: 14h | mean_reversion_complete
+
+50. SELL | Entry: 2026-06-11T17:00 @ $ 4151.99 (RSI  72.1)
+    Exit: 2026-06-11T22:00 @ $ 4243.49 (RSI  79.0)
+    P&L: $  -91.50 ( -2.20%) [✗] | Hold: 4h | stop_loss
+
+51. SELL | Entry: 2026-06-11T23:00 @ $ 4219.92 (RSI  78.0)
+    Exit: 2026-06-12T11:00 @ $ 4206.95 (RSI  48.4)
+    P&L: $   12.97 ( +0.31%) [✓] | Hold: 12h | mean_reversion_complete
+
+52. SELL | Entry: 2026-06-14T22:00 @ $ 4285.80 (RSI  74.8)
+    Exit: 2026-06-15T17:00 @ $ 4325.00 (RSI  50.0)
+    P&L: $  -39.20 ( -0.91%) [✗] | Hold: 19h | mean_reversion_complete
+
+53. BUY  | Entry: 2026-06-16T05:00 @ $ 4316.07 (RSI  28.6)
+    Exit: 2026-06-16T08:00 @ $ 4346.94 (RSI  61.7)
+    P&L: $   30.87 ( +0.72%) [✓] | Hold: 3h | mean_reversion_complete
+
+54. SELL | Entry: 2026-06-16T12:00 @ $ 4354.72 (RSI  70.9)
+    Exit: 2026-06-16T23:00 @ $ 4331.07 (RSI  41.3)
+    P&L: $   23.65 ( +0.54%) [✓] | Hold: 10h | mean_reversion_complete
+
+55. SELL | Entry: 2026-06-17T17:00 @ $ 4379.65 (RSI  74.4)
+    Exit: 2026-06-17T18:00 @ $ 4286.41 (RSI  39.1)
+    P&L: $   93.24 ( +2.13%) [✓] | Hold: 1h | take_profit
+
+56. BUY  | Entry: 2026-06-18T14:00 @ $ 4252.64 (RSI  27.6)
+    Exit: 2026-06-18T23:00 @ $ 4188.41 (RSI  20.5)
+    P&L: $  -64.23 ( -1.51%) [✗] | Hold: 8h | stop_loss
+
+57. BUY  | Entry: 2026-06-19T00:00 @ $ 4190.43 (RSI  20.7)
+    Exit: 2026-06-19T04:00 @ $ 4125.95 (RSI   8.3)
+    P&L: $  -64.48 ( -1.54%) [✗] | Hold: 4h | stop_loss
+
+58. BUY  | Entry: 2026-06-19T05:00 @ $ 4139.78 (RSI  16.1)
+    Exit: 2026-06-21T22:00 @ $ 4156.51 (RSI  50.9)
+    P&L: $   16.73 ( +0.40%) [✓] | Hold: 12h | mean_reversion_complete
+
+59. BUY  | Entry: 2026-06-23T01:00 @ $ 4161.36 (RSI  29.4)
+    Exit: 2026-06-23T06:00 @ $ 4114.43 (RSI  21.0)
+    P&L: $  -46.93 ( -1.13%) [✗] | Hold: 5h | stop_loss
+
+60. BUY  | Entry: 2026-06-23T07:00 @ $ 4098.99 (RSI  14.0)
+    Exit: 2026-06-23T22:00 @ $ 4104.44 (RSI  52.4)
+    P&L: $    5.45 ( +0.13%) [✓] | Hold: 14h | mean_reversion_complete
+
+61. BUY  | Entry: 2026-06-24T02:00 @ $ 4061.22 (RSI  25.5)
+    Exit: 2026-06-24T12:00 @ $ 3987.97 (RSI  16.0)
+    P&L: $  -73.25 ( -1.80%) [✗] | Hold: 10h | stop_loss
+
+62. SELL | Entry: 2026-06-25T15:00 @ $ 4041.43 (RSI  73.0)
+    Exit: 2026-06-26T03:00 @ $ 4004.36 (RSI  47.0)
+    P&L: $   37.07 ( +0.92%) [✓] | Hold: 11h | mean_reversion_complete
+
+63. SELL | Entry: 2026-06-26T13:00 @ $ 4073.64 (RSI  70.1)
+    Exit: 2026-06-29T04:00 @ $ 4052.28 (RSI  41.3)
+    P&L: $   21.36 ( +0.52%) [✓] | Hold: 14h | mean_reversion_complete
+
+64. BUY  | Entry: 2026-06-29T11:00 @ $ 4039.39 (RSI  28.7)
+    Exit: 2026-06-30T00:00 @ $ 3987.32 (RSI  21.5)
+    P&L: $  -52.07 ( -1.29%) [✗] | Hold: 12h | stop_loss
+
+65. BUY  | Entry: 2026-06-30T01:00 @ $ 3969.56 (RSI  12.7)
+    Exit: 2026-06-30T06:00 @ $ 4029.56 (RSI  50.8)
+    P&L: $   60.00 ( +1.51%) [✓] | Hold: 5h | take_profit
+
+66. BUY  | Entry: 2026-07-01T02:00 @ $ 3979.34 (RSI  29.4)
+    Exit: 2026-07-01T11:00 @ $ 4030.45 (RSI  60.0)
+    P&L: $   51.11 ( +1.28%) [✓] | Hold: 9h | take_profit
+
+67. SELL | Entry: 2026-07-01T13:00 @ $ 4089.56 (RSI  73.9)
+    Exit: 2026-07-01T20:00 @ $ 4031.36 (RSI  64.7)
+    P&L: $   58.20 ( +1.42%) [✓] | Hold: 7h | take_profit
+
+68. SELL | Entry: 2026-07-02T12:00 @ $ 4117.67 (RSI  73.3)
+    Exit: 2026-07-03T01:00 @ $ 4182.48 (RSI  82.1)
+    P&L: $  -64.81 ( -1.57%) [✗] | Hold: 12h | stop_loss
+
+69. SELL | Entry: 2026-07-03T02:00 @ $ 4183.58 (RSI  82.7)
+    Exit: 2026-07-03T15:00 @ $ 4165.02 (RSI  38.0)
+    P&L: $   18.56 ( +0.44%) [✓] | Hold: 13h | mean_reversion_complete
+
+70. BUY  | Entry: 2026-07-06T12:00 @ $ 4139.77 (RSI  29.5)
+    Exit: 2026-07-06T18:00 @ $ 4163.93 (RSI  52.0)
+    P&L: $   24.16 ( +0.58%) [✓] | Hold: 6h | mean_reversion_complete
+
+71. BUY  | Entry: 2026-07-07T07:00 @ $ 4124.89 (RSI  25.9)
+    Exit: 2026-07-07T12:00 @ $ 4172.33 (RSI  53.9)
+    P&L: $   47.44 ( +1.15%) [✓] | Hold: 5h | take_profit
+
+72. BUY  | Entry: 2026-07-08T03:00 @ $ 4123.60 (RSI  28.1)
+    Exit: 2026-07-08T08:00 @ $ 4056.95 (RSI  20.1)
+    P&L: $  -66.65 ( -1.62%) [✗] | Hold: 5h | stop_loss
+
+73. BUY  | Entry: 2026-07-08T09:00 @ $ 4043.48 (RSI  20.7)
+    Exit: 2026-07-08T23:00 @ $ 4076.34 (RSI  56.9)
+    P&L: $   32.86 ( +0.81%) [✓] | Hold: 13h | mean_reversion_complete
+
+74. SELL | Entry: 2026-07-09T05:00 @ $ 4082.07 (RSI  71.2)
+    Exit: 2026-07-09T14:00 @ $ 4127.81 (RSI  78.8)
+    P&L: $  -45.74 ( -1.12%) [✗] | Hold: 9h | stop_loss
+
+75. SELL | Entry: 2026-07-09T15:00 @ $ 4126.91 (RSI  78.9)
+    Exit: 2026-07-10T04:00 @ $ 4115.38 (RSI  45.3)
+    P&L: $   11.53 ( +0.28%) [✓] | Hold: 12h | mean_reversion_complete
+
+76. BUY  | Entry: 2026-07-10T08:00 @ $ 4098.01 (RSI  24.3)
+    Exit: 2026-07-10T20:00 @ $ 4121.05 (RSI  55.4)
+    P&L: $   23.04 ( +0.56%) [✓] | Hold: 12h | mean_reversion_complete
+
+================================================================================
+PERFORMANCE SUMMARY
+================================================================================
+
+Best Trade:  mean_reversion_sell   |  +2.07% | $  101.03
+Worst Trade: mean_reversion_sell   |  -2.20% | $  -91.50
+
+Avg Hold Time: 10.0 hours
+Min Hold Time: 1 hours
+Max Hold Time: 22 hours
+
+Longest Win Streak: 6 trades
+
+✓ Results saved to mean_reversion_results.json
