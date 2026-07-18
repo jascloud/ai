@@ -5,4 +5,5 @@ momentum_backtest_report_*.md
 # Agent output files
 prediction_arbitrage_results_*.json
 prediction_backtest_results_*.json
+ibkr_prediction_execution_*.json
 .paper_trading_logs/
